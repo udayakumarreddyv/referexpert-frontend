@@ -1,0 +1,36 @@
+body {
+    margin: 0 auto;
+    font-family: 'roboto';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.logoText {
+    font-weight: 400;
+    color: #1261a0;
+}
+
+.primaryTextColor {
+    color: #222222;
+}
+
+.secondaryTextColor {
+    color: #333333;
+}
+
+.primaryBackgroundColor {
+    background-color: #1261a0;
+}
+
+.link {
+    color: #2A7FBA;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.errorMessage {
+    width: 100%;
+    color: #ff6961;
+    text-align: center;
+    font-size: 15px;
+}

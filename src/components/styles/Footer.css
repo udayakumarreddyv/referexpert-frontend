@@ -1,0 +1,31 @@
+#footerBody {
+    margin: 0 auto;
+    padding: 10px 20px 5px 60px;
+    display: flex;
+    justify-content: flex-start;
+    font-size: 12px;
+}
+
+#footerLogoContainer {
+    margin-right: 5px;
+    border-radius: 5px;
+}
+
+#footerLogo {
+    font-size: 14px;
+    color: #333333;
+    text-decoration: none;
+}
+
+#footerLinksContainer {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.footerLink {
+    margin-left: 10px;
+    padding: 2px;
+    font-size: 11px;
+    font-weight: 500;
+}

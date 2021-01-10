@@ -1,0 +1,17 @@
+#headerContainer {
+    width: 100%;
+    z-index: 100;
+    border-bottom: 4px solid;
+    border-color: #1261a0;
+}
+
+#bodyContainer {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+#footerContainer {
+    max-width: 1400px;
+    margin: 0 auto;
+    margin: 20px 0 20px 0;
+}

@@ -1,0 +1,9 @@
+#loginpage-headerText {
+    text-align: center;
+}
+
+#loginpage-forgotPasswordLink {
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 13px;
+}

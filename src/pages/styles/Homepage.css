@@ -1,0 +1,53 @@
+#homepage-splashImage {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+
+/* Landing card section */
+#homepage-landingCard {
+    padding: 0 10px 0 10px;
+    text-align: center;
+}
+
+#homepage-headerText {
+    margin-bottom: 10px;
+    font-size: 33px;
+    font-weight: 600;
+}
+
+#homepage-subText {
+    margin: 0;
+    padding-bottom: 20px;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+
+/* Explaination card section */
+#homepage-explanationCard {
+    margin-top: 100px;
+    padding: 20px;
+    background-color: #1261a0;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.homepage-explanationTitle {
+    margin: 0;
+    padding-bottom: 10px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.homepage-explanationText {
+    font-size: 15px;
+}
+
+/* Mobile screens */
+@media only screen and (max-width: 400px) {
+
+}

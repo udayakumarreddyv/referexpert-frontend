@@ -1,0 +1,30 @@
+#headerBody {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 15px 10px 15px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+}
+
+#headerLogo {
+    margin-right: 5px;
+    border-radius: 5px;
+    font-size: 19px;
+    text-decoration: none;
+    color: #1261a0;
+}
+
+#headerLinksContainer {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.headerLink {
+    text-decoration: none;
+}
+
+/* Mobile screens */
+@media only screen and (max-width: 400px) {}
