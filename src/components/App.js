@@ -7,6 +7,7 @@ import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 import Homepage from '../pages/Homepage';
 import Registerpage from '../pages/Registerpage';
 import Loginpage from '../pages/Loginpage';
+import Adminpage from '../pages/Adminpage';
 
 // Components
 import Header from './Header';
@@ -51,6 +52,12 @@ function App() {
 
                 <div id='bodyContainer'>
                     <Switch>
+
+                        {/* Admin page */}
+                        <Route path='/admin'>
+                            <Adminpage classes={classes} />
+                        </Route>
+
                         {/* Login page */}
                         <Route path='/signIn'>
                             <Loginpage classes={classes} />

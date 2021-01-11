@@ -1,0 +1,66 @@
+#adminpage-body {
+    padding: 20px 10px 0 10px;
+}
+
+/* Container when loading spinner is shown */
+#adminpage-loadingContainer {
+    margin: 100px 0 100px 0;
+    text-align: center;
+}
+
+/* Stats container */
+#adminpage-statsContainer {
+    margin-bottom: 40px;
+    display: flex;
+}
+
+.adminpage-statsItem {
+    margin-right: 40px;
+    text-align: center;
+}
+
+.adminpage-statsTitle {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.adminpage-statsNumber {
+    font-size: 35px;
+}
+
+/* Search container */
+#adminpage-searchContainer {
+    margin: 20px 0 20px 0;
+}
+
+#adminpage-searchHeader {
+    margin: 0;
+    padding-bottom: 5px;
+    font-weight: 400;
+    flex-basis: 100%;
+}
+
+/* Status circles with provided colors */
+.statusCircle {
+    display: inline-block;
+    border-radius: 50%;
+    border-style: solid;
+    border-width: 0.5px;
+    height: 5px;
+    width: 5px;
+}
+
+.activeCircle {
+    background-color: #77dd77;
+    border-color: #77dd77;
+}
+
+.pendingCircle {
+    background-color: #fdfd96;
+    border-color: #fdfd96;
+}
+
+.disabledCircle {
+    background-color: #ff6961;
+    border-color: #ff6961;
+}
