@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import './styles/Loginpage.css';
 
+// Components
+import LoginCard from '../components/LoginCard';
+import ForgotPasswordCard from '../components/ForgotPasswordCard';
+
 // Material UI
-import {
-    Button,
-    Card,
-    CircularProgress,
-    TextField,
-} from '@material-ui/core';
+import { Card } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Custom Material UI styles for this page
@@ -21,16 +20,15 @@ const useStyles = makeStyles((theme) => ({
             boxSizing: 'border-box'
         },
     },
-    loginButton: {
-        width: '100px',
-        marginTop: '10px',
-        float: 'right'
-    },
 }));
 
 function Loginpage({ classes }) {
     const loginpageClasses = useStyles();
     const [loading, updateLoading] = useState(false);
+
+    // Password reset states
+    const [showForgotPasswordCard, updateShowForgotPasswordCard] = useState(false);
+    const [passwordResetSuccess, updatePasswordResetSuccess] = useState(false);
 
     // Input states
     const [email, updateEmail] = useState('');
@@ -42,9 +40,12 @@ function Loginpage({ classes }) {
     const [submitError, updateSubmitError] = useState({ hasError: false, errorMessage: '' });
 
     // Handle login attempt
-    const handleSubmit = async () => {
+    const handleLogin = async () => {
+    
         // Clear submit error
-        updateSubmitError({ hasError: true, errorMessage: '' });
+        updateValidateEmail({ hasError: false, errorMessage: '' });
+        updateValidatePassword({ hasError: false, errorMessage: '' });
+        updateSubmitError({ hasError: false, errorMessage: '' });
 
         // Validate inputs
         let hasError = false;
@@ -86,50 +87,113 @@ function Loginpage({ classes }) {
         };
     };
 
+    // Handle password reset request
+    const handlePasswordReset = async () => {
+
+        // Clear errors
+        updateValidateEmail({ hasError: false, errorMessage: '' });
+        updateSubmitError({ hasError: false, errorMessage: '' });
+
+        // Catch validation errors
+        if (email.trim() === '') {
+            updateValidateEmail({ hasError: true, errorMessage: '' });
+            updateSubmitError({ hasError: true, errorMessage: 'Please fill out field' });
+            return;
+        };
+
+        try {
+            // Show loading spinner, disable button
+            updateLoading(true);
+
+            // Send api request
+            const url = '';
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const results = response.json();
+            console.log(results);
+
+            // TODO: Handle successful password reset
+            updatePasswordResetSuccess(true);
+            updateLoading(false);
+        } catch (err) {
+            console.log(err);
+
+            // TODO: Handle failed attempts here
+        }
+    };
+
+    // Handle forgot password card view change
+    const handleForgotPasswordViewChange = (view) => {
+        
+        // Clear input and validation states
+        updateEmail('');
+        updatePassword('');
+        updateValidateEmail({ hasError: false, errorMessage: '' });
+        updateValidatePassword({ hasError: false, errorMessage: '' });
+        updateSubmitError({ hasError: false, errorMessage: '' });
+
+        // Show/hide forgot password card
+        updateShowForgotPasswordCard(view);
+    };
+
+    // Show forgot password card if user clicked forgot password link
+    if (showForgotPasswordCard) {
+        return (
+            <section id='loginpage-body'>
+                <h1 id='loginpage-headerText'>Reset your password</h1>
+
+                <Card elevation={3} classes={{ root: loginpageClasses.loginCard }} justify='space-between'>
+                    
+                    {/* Forgot password card */}
+                    <ForgotPasswordCard
+                        classes={classes}
+
+                        // Input states
+                        updateEmail={updateEmail}
+
+                        // Forgot password view
+                        passwordResetSuccess={passwordResetSuccess}
+                        handleForgotPasswordViewChange={handleForgotPasswordViewChange}
+
+                        // Validation & loading states
+                        validateEmail={validateEmail}
+                        handleSubmit={handlePasswordReset}
+                        submitError={submitError}
+                        loading={loading}
+                    />
+                </Card>
+            </section>
+        );
+    };
+
+    // Show login card on default view
     return (
         <section id='loginpage-body'>
             <h1 id='loginpage-headerText'>Sign in to <span className='logoText'>ReferExpert</span></h1>
 
             <Card elevation={3} classes={{ root: loginpageClasses.loginCard }} justify='space-between'>
                 
-                {/* Email */}
-                <TextField
-                    id='email'
-                    label='Email'
-                    variant='outlined'
-                    classes={{ root: classes.textfield }}
-                    onChange={(e) => updateEmail(e.target.value)}
-                    error={validateEmail.hasError}
-                    helperText={validateEmail.errorMessage}
-                    fullWidth
+                {/* Login card */}
+                <LoginCard
+                    classes={classes}
+
+                    // Input states
+                    updateEmail={updateEmail}
+                    updatePassword={updatePassword}
+
+                    // Forgot password
+                    handleForgotPasswordViewChange={handleForgotPasswordViewChange}
+
+                    // Validation & loading states
+                    validateEmail={validateEmail}
+                    validatePassword={validatePassword}
+                    handleSubmit={handleLogin}
+                    submitError={submitError}
+                    loading={loading}
                 />
-
-                {/* Password */}
-                <TextField
-                    id='password'
-                    label='Password'
-                    variant='outlined'
-                    type='password'
-                    classes={{ root: classes.textfield }}
-                    onChange={(e) => updatePassword(e.target.value)}
-                    error={validatePassword.hasError}
-                    helperText={validatePassword.errorMessage}
-                    fullWidth
-                />
-
-                {/* Forgot password */}
-                <span id='loginpage-forgotPasswordLink' className='link'>Forgot password?</span>
-
-                {/* Submit error message */}
-                <div className='errorMessage'>{ submitError.errorMessage }</div>
-
-                <Button
-                    classes={{ root: `${ classes.primaryButton } ${ loginpageClasses.loginButton }` }}
-                    onClick={handleSubmit}
-                    disabled={loading}
-                >
-                    { loading ? <CircularProgress size={20} color='primary' /> : 'Sign in' }
-                </Button>
             </Card>
         </section>
     );
