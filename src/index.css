@@ -10,6 +10,10 @@ body {
     color: #1261a0;
 }
 
+.primaryColor {
+    color: #1261a0;
+}
+
 .primaryTextColor {
     color: #222222;
 }
@@ -20,6 +24,12 @@ body {
 
 .primaryBackgroundColor {
     background-color: #1261a0;
+}
+
+.pageTitle {
+    color: #232323;
+    font-size: 22px;
+    font-weight: 500;
 }
 
 .link {
