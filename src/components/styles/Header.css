@@ -26,5 +26,17 @@
     text-decoration: none;
 }
 
+/* Drawer */
+.drawerItem {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.drawerItemText {
+    margin-left: 10px;
+}
+
 /* Mobile screens */
 @media only screen and (max-width: 400px) {}
