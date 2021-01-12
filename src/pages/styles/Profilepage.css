@@ -1,0 +1,9 @@
+#profilepage-body {
+    padding: 20px 10px 0 10px;
+}
+
+#profilepage-changePasswordContainer {
+    width: 300px;
+    margin-top: 40px;
+    display: inline-block;
+}
