@@ -1,0 +1,11 @@
+#userpage-body {
+    padding: 20px 10px 0 10px;
+}
+
+#userpage-topBar {
+    text-align: right;
+}
+
+#userpage-currentAppointmentsContainer {
+    margin-bottom: 40px;
+}

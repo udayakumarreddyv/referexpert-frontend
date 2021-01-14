@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import './styles/App.css';
 
 // Routing
-import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
 
 // Pages
 import Homepage from '../pages/Homepage';
 import Registerpage from '../pages/Registerpage';
 import Loginpage from '../pages/Loginpage';
+import Userpage from '../pages/Userpage';
 import Adminpage from '../pages/Adminpage';
+import ProfilePage from '../pages/Profilepage';
 
 // Components
 import Header from './Header';
@@ -43,39 +46,45 @@ const useStyles = makeStyles((theme) => ({
 function App() {
     const classes = useStyles();
 
+    // User states
+    const [isUserLoggedIn, updateIsUserLoggedIn] = useState(true);
+    const [accountType, updateAccountType] = useState('user');
+
     return (
         <div className="App">
             <Router>
                 <div id='headerContainer'>
-                    <Header classes={classes} />
+                    <Header classes={classes} isUserLoggedIn={isUserLoggedIn} />
                 </div>
 
                 <div id='bodyContainer'>
                     <Switch>
 
-                        {/* Admin page */}
-                        <Route path='/admin'>
-                            <Adminpage classes={classes} />
+                        {/* Profile page */}
+                        <Route path='/profile'>
+                            { isUserLoggedIn ? <ProfilePage classes={classes} /> : <Redirect to='/' /> }
                         </Route>
 
                         {/* Login page */}
                         <Route path='/signIn'>
-                            <Loginpage classes={classes} />
+                            { isUserLoggedIn ? <Redirect to='/' /> : <Loginpage classes={classes} /> }
                         </Route>
 
                         {/* Sign up page */}
                         <Route path='/signUp'>
-                            <Registerpage classes={classes} />
-                        </Route>
-
-                        {/* Profile page */}
-                        <Route path='/profile'>
-
+                            { isUserLoggedIn ? <Redirect to='/' /> : <Registerpage classes={classes} /> }
                         </Route>
 
                         {/* Home page */}
                         <Route path='/'>
-                            <Homepage classes={classes} />
+                            {/* User is not logged in */}
+                            { !isUserLoggedIn ? <Homepage classes={classes} /> : null }
+                            
+                            {/* User is logged in and admin */}
+                            { isUserLoggedIn && accountType === 'admin' ? <Adminpage classes={classes} /> : null }
+                            
+                            {/* User is logged in and user */}
+                            { isUserLoggedIn && accountType === 'user' ? <Userpage classes={classes} /> : null }
                         </Route>
 
                     </Switch>
