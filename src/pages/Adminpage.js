@@ -107,11 +107,10 @@ function Adminpage({ classes }) {
             // Show success alert
             updateAlertDetails({ type: 'success', message: 'User status has been updated!' });
             updateAlertOpen(true);
-            // console.log(results);
         } catch(err) {
             
             // Show failed alert
-            updateAlertDetails({ alert: 'error', message: 'Failed to update user status' })
+            updateAlertDetails({ type: 'error', message: 'Failed to update user status' })
             updateAlertOpen(true);
             console.log(err);
         };
