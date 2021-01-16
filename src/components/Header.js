@@ -12,7 +12,7 @@ import {
     ListItem,
     ListItemText,
 } from '@material-ui/core';
-import { AccountCircle, ExitToApp, Home } from '@material-ui/icons';
+import { AccountCircle, ExitToApp, Home, Send } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Material UI styles
@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: '5px',
     },
     listContainer: {
-        width: '150px',
+        width: '170px',
         padding: '10px',
     },
     listItem: {
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Header({ classes, isUserLoggedIn }) {
+function Header({ classes, isUserLoggedIn, accountType }) {
     const headerClasses = useStyles();
 
     // Menu states
@@ -111,6 +111,25 @@ function Header({ classes, isUserLoggedIn }) {
                             </ListItemText>
                         </Link>
                     </ListItem>
+
+                    {/* Refer patient */}
+                    {
+                        accountType === 'user'
+                        ? <ListItem classes={{ root: headerClasses.listItem }}>
+                            <Link
+                                to='/refer'
+                                className='drawerItem headerLink primaryTextColor'
+                                onClick={handleDrawerClose}
+                            >
+                                <Send />
+
+                                <ListItemText classes={{ root: headerClasses.listItemText }}>
+                                    <div className='drawerItemText'>Refer patient</div>
+                                </ListItemText>
+                            </Link>
+                        </ListItem>
+                        : null
+                    }
 
                     {/* Profile */}
                     <ListItem classes={{ root: headerClasses.listItem }}>

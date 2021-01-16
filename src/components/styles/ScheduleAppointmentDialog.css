@@ -1,0 +1,9 @@
+.scheduleAppointmentDialog-doctorDetail {
+    padding-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#scheduleAppointmentDialog-appointmentDetailsContainer {
+    margin: 20px 0 20px 0;
+}
