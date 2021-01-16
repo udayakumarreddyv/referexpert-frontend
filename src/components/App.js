@@ -11,6 +11,7 @@ import Loginpage from '../pages/Loginpage';
 import Userpage from '../pages/Userpage';
 import Adminpage from '../pages/Adminpage';
 import ProfilePage from '../pages/Profilepage';
+import ReferPatientpage from '../pages/ReferPatientpage';
 
 // Components
 import Header from './Header';
@@ -54,11 +55,16 @@ function App() {
         <div className="App">
             <Router>
                 <div id='headerContainer'>
-                    <Header classes={classes} isUserLoggedIn={isUserLoggedIn} />
+                    <Header classes={classes} isUserLoggedIn={isUserLoggedIn} accountType={accountType} />
                 </div>
 
                 <div id='bodyContainer'>
                     <Switch>
+
+                        {/* Refer patient page */}
+                        <Route path='/refer'>
+                            { isUserLoggedIn ? <ReferPatientpage classes={classes} /> : <Redirect to='/' /> }
+                        </Route>
 
                         {/* Profile page */}
                         <Route path='/profile'>
