@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import './styles/Userpage.css';
 
 // Components
-import ReferPatient from '../components/ReferPatient';
 import PendingAppointments from '../components/PendingAppointments';
 import OpenAppointments from '../components/OpenAppointments';
 
