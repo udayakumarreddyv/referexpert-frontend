@@ -3,6 +3,7 @@ import './styles/ScheduleAppointmentDialog.css';
 // Material UI
 import {
     Button,
+    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
@@ -25,10 +26,12 @@ const useStyles = makeStyles((theme) => ({
 // Pop up dialog for when user wants to schedule a referral
 function ScheduleAppointmentDialog(props) {
     const scheduleAppointmentDialogClasses = useStyles();
-
     const {
         // Styles
         classes,
+
+        // Loading state
+        loadingScheduleAppointment,
 
         // View states
         showScheduleView,
@@ -44,6 +47,11 @@ function ScheduleAppointmentDialog(props) {
         updatePatientName,
         updateReason,
         handleScheduleAppointment,
+
+        // Validation states
+        validatePatientName,
+        validateReason,
+        validateAppointmentDate
     } = props;
 
     return (
@@ -86,6 +94,7 @@ function ScheduleAppointmentDialog(props) {
                         variant='outlined'
                         classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
                         onChange={(event) => updatePatientName(event.target.value)}
+                        error={validatePatientName.hasError}
                         fullWidth
                     />
 
@@ -98,6 +107,7 @@ function ScheduleAppointmentDialog(props) {
                         onChange={(event) => updateReason(event.target.value)}
                         multiline
                         rows={3}
+                        error={validateReason.hasError}
                         fullWidth
                     />
 
@@ -107,6 +117,7 @@ function ScheduleAppointmentDialog(props) {
                         label='Appointment date'
                         type='datetime-local'
                         // defaultValue={}
+                        error={validateAppointmentDate.hasError}
                         fullWidth
                     />
                 </section>
@@ -119,9 +130,10 @@ function ScheduleAppointmentDialog(props) {
                 {/* Schedule button */}
                 <Button
                     classes={{ root: classes.primaryButton }}
-                    // onClick={}
+                    onClick={handleScheduleAppointment}
+                    disabled={loadingScheduleAppointment}
                 >
-                    Schedule
+                    { loadingScheduleAppointment ? <CircularProgress size={20} /> : 'Schedule' }
                 </Button>
             </DialogActions>
         </Dialog>

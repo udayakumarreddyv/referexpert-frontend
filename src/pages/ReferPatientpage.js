@@ -49,9 +49,12 @@ function ReferPatientpage({ classes }) {
     const [searchValueError, updateSearchValueError] = useState({ hasError: false, errorMessage: '' });
     const [searchZipCodeError, updateSearchZipCodeError] = useState({ hasError: false, errorMessage: '' });
 
+    // Loading states
+    const [loadingDoctorsData, updateLoadingDoctorsData] = useState(false);
+    const [loadingScheduleAppointment, updateLoadingScheduleAppointment] = useState(false);
+
     // Doctor table states
     const [doctorsData, updateDoctorsData] = useState(null);
-    const [loadingDoctorsData, updateLoadingDoctorsData] = useState(false);
 
     // Schedule appointment states
     // Doctor details
@@ -64,6 +67,11 @@ function ReferPatientpage({ classes }) {
     const [reason, updateReason] = useState('');
     const [appointmentTime, updateAppointmentTime] = useState('');
     const [appointmentDate, updateAppointmentDate] = useState('');
+    // Validate states
+    const [validatePatientName, updateValidatePatientName] = useState({ hasError: false, errorMessage: '' });
+    const [validateReason, updateValidateReason] = useState({ hasError: false, errorMessage: '' });
+    const [validateAppointmentDate, updateValidateAppointmentDate] = useState({ hasError: false, errorMessage: '' });
+
 
     // View states
     const [showScheduleView, updateShowScheduleView] = useState(false);
@@ -98,6 +106,7 @@ function ReferPatientpage({ classes }) {
             // Show loading spinner inside doctors table
             updateLoadingDoctorsData(true);
 
+            // Send request to api
             // const url = '';
             // const response = fetch(url, {
             //     method: 'POST',
@@ -106,6 +115,7 @@ function ReferPatientpage({ classes }) {
             // });
             // const results = await response.json();
 
+            // Test data, remove once api is hooked up
             const results = [
                 { id: 1, name: 'John smith', type: 'Family doctor', city: 'Memphis', zipcode: '38111' },
                 { id: 2, name: 'Sally brown', type: 'Dermatologist', city: 'Memphis', zipcode: '38017' },
@@ -118,6 +128,63 @@ function ReferPatientpage({ classes }) {
             updateLoadingDoctorsData(false);
         } catch (err) {
             updateLoadingDoctorsData(false);
+            console.log(err);
+        };
+    };
+
+    // Handle scheduling a new appointment
+    const handleScheduleAppointment = async () => {
+        let validateError = false;
+
+        // Validate patient name input
+        if (patientName.trim() === '') {
+            updateValidatePatientName({ hasError: true, errorMessage: '' });
+            validateError = true;
+        };
+        
+        // Validate reason input
+        if (reason.trim() === '') {
+            updateValidateReason({ hasError: true, errorMessage: '' });
+            validateError = true;
+        };
+
+        // Validate appointment time input
+        // if (!appointmentTime) {
+        //     validateError = true;
+        // };
+
+        // Validate appointment date input
+        // if (!appointmentDate) {
+        //     validateError = true;
+        // };
+
+        // Kill request if validation error
+        if (validateError) return;
+
+        try {
+            // Show loading spinner in schedule dialog popup
+            updateLoadingScheduleAppointment(true);
+
+            // Send request to api
+            // const url = '';
+            // const response = await fetch(url, {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         patientName,
+            //         reason,
+            //         appointmentDate,
+            //         appointmentTime,
+            //     })
+            // });
+            // const results = await response.json();
+
+            // Hide loading spinner in schedule dialog popup
+            updateLoadingScheduleAppointment(false);
+        } catch (err) {
+
+            // Hide loading spinner in schedule dialog popup
+            updateLoadingScheduleAppointment(false);
             console.log(err);
         };
     };
@@ -142,17 +209,20 @@ function ReferPatientpage({ classes }) {
         updateDoctorCity('');
         updateDoctorZipCode('');
 
-        // Clear appointment states
+        // Clear appointment input states
         updatePatientName('');
         updateReason('');
         updateAppointmentTime('');
         updateAppointmentDate('');
 
+        // Clear appointment input validation states
+        updateValidatePatientName({ hasError: false, errorMessage: '' });
+        updateValidateReason({ hasError: false, errorMessage: '' });
+        updateValidateAppointmentDate({ hasError: false, errorMessage: '' });
+        
         // Hide dialog
         updateShowScheduleView(false);
     };
-
-    console.log(doctorsData)
     
     return (
         <section id='referpatientpage-body'>
@@ -229,6 +299,9 @@ function ReferPatientpage({ classes }) {
                 classes={classes}
                 referpatientpageClasses={referpatientpageClasses}
 
+                // Loading state
+                loadingScheduleAppointment={loadingScheduleAppointment}
+
                 // View states
                 showScheduleView={showScheduleView}
                 handleCloseScheduleDialog={handleCloseScheduleDialog}
@@ -242,7 +315,12 @@ function ReferPatientpage({ classes }) {
                 // Input states
                 updatePatientName={updatePatientName}
                 updateReason={updateReason}
-                // handleScheduleAppointment={}
+                handleScheduleAppointment={handleScheduleAppointment}
+
+                // Validation states
+                validatePatientName={validatePatientName}
+                validateReason={validateReason}
+                validateAppointmentDate={validateAppointmentDate}
             />
         </section>
     );
