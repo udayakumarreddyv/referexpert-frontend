@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Loginpage({ classes }) {
+function Loginpage({ classes, updateIsUserLoggedIn }) {
     const loginpageClasses = useStyles();
     const [loading, updateLoading] = useState(false);
 
@@ -68,22 +68,39 @@ function Loginpage({ classes }) {
             // Show loading spinner, disable button
             updateLoading(true);
 
-            const url = '';
+            const url = '/referexpert/validateuser';
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Authorization': `Basic ${btoa('user:password')}`,
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ email, password }),
             });
             const results = await response.json();
-            console.log(results)
+            
+            // Make sure we got a success response
+            if ('message' in results) {
+                
+                // Validate if login was successful or not
+                if (results.message === 'Invalid Username/Password') {
+                    updateSubmitError({ hasError: true, errorMessage: 'Invalid username & password combination' });
+                } else if (results.message === 'User Exists') {
 
-            // TODO: Handle successful login
-            updateLoading(false);
+                    // Login user on frontend
+                    updateIsUserLoggedIn(true);
+                };
+
+                // Hide loading spinner
+                updateLoading(false);
+            } else {
+                // Got a response that we didn't expect
+                throw results;
+            };
         } catch (err) {
             console.log(err);
             updateLoading(false);
-
-            // TODO: Put error handling for a failed login attempt
+            updateSubmitError({ hasError: true, errorMessage: 'There was an error while logging in with our server, please try again in a moment' });
         };
     };
 
