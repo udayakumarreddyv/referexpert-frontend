@@ -5,6 +5,9 @@ import './styles/Loginpage.css';
 import LoginCard from '../components/LoginCard';
 import ForgotPasswordCard from '../components/ForgotPasswordCard';
 
+// Utils
+import createBasicAuth from '../utils/basicAuth';
+
 // Material UI
 import { Card } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -72,7 +75,7 @@ function Loginpage({ classes, updateIsUserLoggedIn }) {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Basic ${btoa('user:password')}`,
+                    'Authorization': createBasicAuth(),
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, password }),
