@@ -7,6 +7,13 @@ const Reducer = (state, action) => {
                 userEmail: action.payload.userEmail,
                 userType: action.payload.userType,
             };
+        case 'LOGOUT_USER':
+            return {
+                ...state,
+                loggedIn: false,
+                userEmail: null,
+                userType: null,
+            };
         default:
             return state;
     };
