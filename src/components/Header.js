@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import './styles/Header.css'
+
+// Global store
+import { Context } from '../store/GlobalStore';
 
 // Routing
 import { Link } from 'react-router-dom';
@@ -31,6 +34,8 @@ const useStyles = makeStyles((theme) => ({
 
 function Header({ classes, isUserLoggedIn, accountType }) {
     const headerClasses = useStyles();
+    const [state, dispatch] = useContext(Context);
+    const logoRoute = state.userType === 'admin' ? '/admin' : '/home';
 
     // Menu states
     const [drawerOpen, updateDrawerOpen] = useState(false);
@@ -47,7 +52,11 @@ function Header({ classes, isUserLoggedIn, accountType }) {
 
     // Handle logout click
     const handleLogout = () => {
-        // TODO: Logic to log out user
+        // close drawer
+        updateDrawerOpen(false);
+    
+        // Logout user in state
+        dispatch({ type: 'LOGOUT_USER', payload: null });
     };
 
     // View when user is not logged in
@@ -100,7 +109,7 @@ function Header({ classes, isUserLoggedIn, accountType }) {
                     {/* Home */}
                     <ListItem classes={{ root: headerClasses.listItem }}>
                         <Link
-                            to='/'
+                            to={logoRoute}
                             className='drawerItem headerLink primaryTextColor'
                             onClick={handleDrawerClose}
                         >
@@ -163,16 +172,16 @@ function Header({ classes, isUserLoggedIn, accountType }) {
             </Drawer>
         </div>
     );
-
+    
     return (
         <section id='headerBody'>
             {/* Logo */}
             <div id='headerLogoContainer'>
-                <Link to='/' id='headerLogo'>ReferExpert</Link>
+                <Link to={logoRoute} id='headerLogo'>ReferExpert</Link>
             </div>
             
             {/* Show view based on if user is logged in or not */}
-            { isUserLoggedIn ? loggedInView : notLoggedInView }
+            { state.loggedIn ? loggedInView : notLoggedInView }
         </section>
     );
 };
