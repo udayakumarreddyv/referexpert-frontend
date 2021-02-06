@@ -6,7 +6,7 @@ import Reducer from './Reducer';
 const initialState = {
     loggedIn: false,
     userEmail: null,
-    accountType: null,
+    userType: null,
 };
 
 // Checks if user is logged in using a access cookies

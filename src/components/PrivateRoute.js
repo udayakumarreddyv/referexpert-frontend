@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { Context } from '../store/GlobalStore';
 
-const PrivateRoute = ({ component: Component, ...rest }) => {
+const PrivateRoute = ({ component: Component, classes, ...rest }) => {
     const [state, dispatch] = useContext(Context);
 
     // Redirect if user not logged in
@@ -14,7 +14,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
     return (
         <Route
             {...rest}
-            render={(props) => <Component {...props} />}
+            render={(props) => <Component classes={classes} {...props} />}
         />
     );
 };
