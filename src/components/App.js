@@ -3,6 +3,10 @@ import './styles/App.css';
 
 // Routing
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
+import PrivateRoute from '../components/PrivateRoute';
+
+// Global store
+import Store from '../store/GlobalStore';
 
 // Pages
 import Homepage from '../pages/Homepage';
@@ -19,6 +23,7 @@ import Footer from './Footer';
 
 // Material UI
 import { makeStyles } from '@material-ui/core/styles';
+import { Home } from '@material-ui/icons';
 
 // Font family
 require('typeface-roboto');
@@ -48,58 +53,82 @@ function App() {
     const classes = useStyles();
 
     // User states
-    const [isUserLoggedIn, updateIsUserLoggedIn] = useState(true);
+    const [isUserLoggedIn, updateIsUserLoggedIn] = useState(false);
     const [accountType, updateAccountType] = useState('user');
 
     return (
         <div className="App">
-            <Router>
-                <div id='headerContainer'>
-                    <Header classes={classes} isUserLoggedIn={isUserLoggedIn} accountType={accountType} />
-                </div>
+            <Store>
+                <Router>
+                    <div id='headerContainer'>
+                        <Header classes={classes} isUserLoggedIn={isUserLoggedIn} accountType={accountType} />
+                    </div>
 
-                <div id='bodyContainer'>
-                    <Switch>
+                    <div id='bodyContainer'>
+                        <Switch>
 
-                        {/* Refer patient page */}
-                        <Route path='/refer'>
-                            { isUserLoggedIn ? <ReferPatientpage classes={classes} /> : <Redirect to='/' /> }
-                        </Route>
+                            {/* Refer patient page */}
+                            <PrivateRoute
+                                path='/refer'
+                                component={
+                                    <ReferPatientpage classes={classes} />
+                                }
+                            />
 
-                        {/* Profile page */}
-                        <Route path='/profile'>
-                            { isUserLoggedIn ? <ProfilePage classes={classes} /> : <Redirect to='/' /> }
-                        </Route>
-
-                        {/* Login page */}
-                        <Route path='/signIn'>
-                            { isUserLoggedIn ? <Redirect to='/' /> : <Loginpage classes={classes} /> }
-                        </Route>
-
-                        {/* Sign up page */}
-                        <Route path='/signUp'>
-                            { isUserLoggedIn ? <Redirect to='/' /> : <Registerpage classes={classes} /> }
-                        </Route>
-
-                        {/* Home page */}
-                        <Route path='/'>
-                            {/* User is not logged in */}
-                            { !isUserLoggedIn ? <Homepage classes={classes} /> : null }
+                            {/* Profile page */}
+                            <PrivateRoute
+                                path='/profile'
+                                component={
+                                    <ProfilePage classes={classes} />
+                                }
+                            />
                             
-                            {/* User is logged in and admin */}
-                            { isUserLoggedIn && accountType === 'admin' ? <Adminpage classes={classes} /> : null }
-                            
-                            {/* User is logged in and user */}
-                            { isUserLoggedIn && accountType === 'user' ? <Userpage classes={classes} /> : null }
-                        </Route>
+                            {/* Login page */}
+                            <Route path='/signIn'>
+                                {
+                                    isUserLoggedIn
+                                    ? <Redirect to='/' />
+                                    : <Loginpage classes={classes} updateIsUserLoggedIn={updateIsUserLoggedIn} />
+                                }
+                            </Route>
 
-                    </Switch>
-                </div>
+                            {/* Sign up page */}
+                            <Route path='/signUp'>
+                                {
+                                    isUserLoggedIn
+                                    ? <Redirect to='/' />
+                                    : <Registerpage classes={classes} updateIsUserLoggedIn={updateIsUserLoggedIn} />
+                                }
+                            </Route>
 
-                <div id='footerContainer'>
-                    <Footer />
-                </div>
-            </Router>
+                            {/* User page */}
+                            <PrivateRoute
+                                path='/home'
+                                component={
+                                    <Userpage classes={classes} />
+                                }
+                            />
+
+                            {/* Admim page */}
+                            <PrivateRoute
+                                path='/admin'
+                                component={
+                                    <Adminpage classes={classes} />
+                                }
+                            />
+
+                            {/* Homepage, not logged in */}
+                            <Route to='/'>
+                                <Homepage classes={classes} />
+                            </Route>
+                        </Switch>
+                    </div>
+
+                    <div id='footerContainer'>
+                        <Footer />
+                    </div>
+                </Router>
+            </Store>
         </div>
     );
 };
