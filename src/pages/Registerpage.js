@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import './styles/Registrationpage.css';
+
+// Global store
+import { Context } from '../store/GlobalStore';
+import { Redirect } from 'react-router-dom';
 
 // Email validation
 import * as EmailValidator from 'email-validator';
+
+// Basic auth creation
+import createBasicAuth from '../utils/basicAuth';
 
 // Material UI
 import {
@@ -49,6 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Registerpage({ classes }) {
     const registerpageClasses = useStyles();
+    const [state, dispatch] = useContext(Context);
     const [loading, updateLoading] = useState(false);
 
     // Input states
@@ -59,6 +67,7 @@ function Registerpage({ classes }) {
     const [confirmPassword, updateConfirmPassword] = useState('');
     const [address, updateAddress] = useState('');
     const [phone, updatePhone] = useState('');
+    const [fax, updateFax] = useState('');
     const [degree, updateDegree] = useState('');
     const [type, updateType] = useState('');
     const [terms, updateTerms] = useState(false);
@@ -72,6 +81,7 @@ function Registerpage({ classes }) {
     const [validateConfirmPassword, updateValidateConfirmPassword] = useState({ hasError: false, errorMessage: '' });
     const [validateAddress, updateValidateAddress] = useState({ hasError: false, errorMessage: '' });
     const [validatePhone, updateValidatePhone] = useState({ hasError: false, errorMessage: '' });
+    const [validateFax, updateValidateFax] = useState({ hasError: false, errorMessage: '' });
     const [validateDegree, updateValidateDegree] = useState({ hasError: false, errorMessage: '' });
     const [validateType, updateValidateType] = useState({ hasError: false, errorMessage: '' });
     const [validateTerms, updateValidateTerms] = useState({ hasError: false, errorMessage: '' });
@@ -89,6 +99,7 @@ function Registerpage({ classes }) {
         let tempConfirmPassword = { hasError: false, errorMessage: '' };
         let tempAddress = { hasError: false, errorMessage: '' };
         let tempPhone = { hasError: false, errorMessage: '' };
+        let tempFax = { hasError: false, errorMessage: '' };
         let tempDegree = { hasError: false, errorMessage: '' };
         let tempType = { hasError: false, errorMessage: '' };
         let tempTerms = { hasError: false, errorMessage: '' };
@@ -139,10 +150,19 @@ function Registerpage({ classes }) {
         // Phone
         if (phone.trim() === '') {
             tempPhone = { hasError: true, errorMessage: '' };
-        } else if (!phone.replace('-', '').match(/^[0-9]+$/)) {
+        } else if (!phone.match(/^[0-9]+$/)) {
             tempPhone = { hasError: true, errorMessage: 'Must contain only numbers' };
         } else if (phone.length !== 10) {
             tempPhone = { hasError: true, errorMessage: 'Must be a 10 digit phone number' };
+        };
+
+        // Fax
+        if (fax.trim() === '') {
+            tempFax = { hasError: true, errorMessage: '' };
+        } else if (!fax.match(/^[0-9]+$/)) {
+            tempFax = { hasError: true, errorMessage: 'Must contain only numbers' };
+        } else if (fax.length !== 10) {
+            tempFax = { hasError: true, errorMessage: 'Must be a 10 digit phone number' };
         };
 
         // Degree
@@ -168,8 +188,8 @@ function Registerpage({ classes }) {
         return {
             tempFirstName, tempLastName, tempEmail,
             tempPassword, tempConfirmPassword, tempAddress,
-            tempPhone, tempDegree, tempType,
-            tempTerms, tempReferralCode
+            tempPhone, tempFax, tempDegree,
+            tempType, tempTerms, tempReferralCode
         };
     };
 
@@ -177,8 +197,8 @@ function Registerpage({ classes }) {
     const handleErrorStates = (
         tempFirstName, tempLastName, tempEmail,
         tempPassword, tempConfirmPassword, tempAddress,
-        tempPhone, tempDegree, tempType,
-        tempTerms, tempReferralCode
+        tempPhone, tempFax, tempDegree,
+        tempType, tempTerms, tempReferralCode
     ) => {
         updateValidateFirstName(tempFirstName);
         updateValidateLastName(tempLastName);
@@ -187,6 +207,7 @@ function Registerpage({ classes }) {
         updateValidateConfirmPassword(tempConfirmPassword);
         updateValidateAddress(tempAddress);
         updateValidatePhone(tempPhone);
+        updateValidateFax(tempFax);
         updateValidateDegree(tempDegree);
         updateValidateType(tempType);
         updateValidateTerms(tempTerms);
@@ -206,16 +227,16 @@ function Registerpage({ classes }) {
             const {
                 tempFirstName,tempLastName, tempEmail,
                 tempPassword, tempConfirmPassword, tempAddress,
-                tempPhone, tempDegree, tempType,
-                tempTerms, tempReferralCode
+                tempPhone, tempFax, tempDegree,
+                tempType, tempTerms, tempReferralCode
             } = validateInputs();
 
             // Update error states
             handleErrorStates(
                 tempFirstName, tempLastName, tempEmail,
                 tempPassword, tempConfirmPassword, tempAddress,
-                tempPhone, tempDegree, tempType,
-                tempTerms, tempReferralCode
+                tempPhone, tempFax, tempDegree,
+                tempType, tempTerms, tempReferralCode
             );
 
             // Kill request if we found an error
@@ -227,6 +248,7 @@ function Registerpage({ classes }) {
                 || tempConfirmPassword.hasError
                 || tempAddress.hasError
                 || tempPhone.hasError
+                || tempFax.hasError
                 || tempDegree.hasError
                 || tempType.hasError
                 || tempReferralCode.hasError
@@ -243,24 +265,74 @@ function Registerpage({ classes }) {
             };
 
             // Send request to api
+            const url = `/referexpert/registeruser?referralid=${referralCode}`;
             const postBody = {
-                firstName, lastName, email,
-                password, confirmPassword, address,
-                phone, degree, type,
-                terms, referralCode
+                firstName,
+                lastName,
+                email,
+                password,
+                address,
+                phone,
+                fax,
+                degree,
+                userType: type,
+                userSpeciality: 'PHYSICIAN1',
+                // terms
             };
-            const url = '';
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Authorization': createBasicAuth(),
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(postBody)
             });
             const results = await response.json();
 
-            // TODO: Checks if api rejected or failed
+            // Catch bad response
+            if (!('message' in results)) {
+                throw results;
+            } else {
+                const message = results.message;
+                
+                // Catch errors
+                if (message === 'The link is invalid or broken!') {
+                    updateSubmitError({ hasError: true, errorMessage: 'The referral code is either invalid or expired' });
+                    updateLoading(false);
+                    return;
+                } else if (message === 'User Already Exists') {
+                    updateSubmitError({ hasError: true, errorMessage: 'An account with this email already exists' });
+                    updateLoading(false);
+                    return;
+                };
 
+                // Success message, log in user
+                if (message === 'Registration Successful') {
+                    // Login user on frontend
+                    // TODO: Change payload to response
+                    const payload = { userEmail: email, userType: 'user' };
+                    dispatch({ type: 'LOGIN_USER', payload });
+
+                    updateLoading(false);
+                    return;
+                };
+
+                // Throw any unhandled error messages
+                throw message;
+            };
         } catch (err) {
             console.log(err);
+            updateSubmitError({ hasError: true, errorMessage: 'There was an error was registering your account, please try again in a few moments'})
+            updateLoading(false);
+        };
+    };
+
+    // Check if user is logged in, redirect to appropriate page
+    if (state.loggedIn) {
+        if (state.userType === 'admin') {
+            return <Redirect to='/admin' />
+        } else {
+            return <Redirect to='/home' />
         };
     };
 
@@ -356,6 +428,19 @@ function Registerpage({ classes }) {
                     fullWidth
                 />
 
+                {/* Fax */}
+                <TextField
+                    id='fax'
+                    label='Fax'
+                    variant='outlined'
+                    type='tel'
+                    classes={{ root: classes.textfield }}
+                    onChange={(e) => updateFax(e.target.value)}
+                    error={validateFax.hasError}
+                    helperText={validateFax.errorMessage}
+                    fullWidth
+                />
+
                 {/* Degree */}
                 <FormControl classes={{ root: registerpageClasses.select }}>
                     <InputLabel>Degree</InputLabel>
@@ -382,8 +467,8 @@ function Registerpage({ classes }) {
                         error={validateType.hasError}
                         helperText={validateType.errorMessage}
                     >
-                        <MenuItem value='physician'>Physician</MenuItem>
-                        <MenuItem value='specialist'>Specialist</MenuItem>
+                        <MenuItem value='PHYSICIAN'>Physician</MenuItem>
+                        <MenuItem value='SPECIALIST'>Specialist</MenuItem>
                     </Select>
                 </FormControl>
 
