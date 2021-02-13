@@ -1,5 +1,9 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './styles/Loginpage.css';
+
+// Global store
+import { Context } from '../store/GlobalStore';
+import { Redirect } from 'react-router-dom';
 
 // Components
 import LoginCard from '../components/LoginCard';
@@ -25,8 +29,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Loginpage({ classes, updateIsUserLoggedIn }) {
+function Loginpage({ classes }) {
     const loginpageClasses = useStyles();
+    const [state, dispatch] = useContext(Context);
+
     const [loading, updateLoading] = useState(false);
 
     // Password reset states
@@ -91,7 +97,9 @@ function Loginpage({ classes, updateIsUserLoggedIn }) {
                 } else if (results.message === 'User Exists') {
 
                     // Login user on frontend
-                    updateIsUserLoggedIn(true);
+                    // TODO: Change payload to response
+                    const payload = { userEmail: email, userType: 'admin' };
+                    dispatch({ type: 'LOGIN_USER', payload });
                 };
 
                 // Hide loading spinner
@@ -158,7 +166,7 @@ function Loginpage({ classes, updateIsUserLoggedIn }) {
         // Show/hide forgot password card
         updateShowForgotPasswordCard(view);
     };
-
+    
     // Show forgot password card if user clicked forgot password link
     if (showForgotPasswordCard) {
         return (
@@ -187,6 +195,15 @@ function Loginpage({ classes, updateIsUserLoggedIn }) {
                 </Card>
             </section>
         );
+    };
+
+    // Check if user is logged in, redirect to appropriate page
+    if (state.loggedIn) {
+        if (state.userType === 'admin') {
+            return <Redirect to='/admin' />
+        } else {
+            return <Redirect to='/home' />
+        };
     };
 
     // Show login card on default view
