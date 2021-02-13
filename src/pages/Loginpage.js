@@ -94,16 +94,16 @@ function Loginpage({ classes }) {
                 // Validate if login was successful or not
                 if (results.message === 'Invalid Username/Password') {
                     updateSubmitError({ hasError: true, errorMessage: 'Invalid username & password combination' });
+                    
+                    // Hide loading spinner
+                    updateLoading(false);
                 } else if (results.message === 'User Exists') {
 
                     // Login user on frontend
                     // TODO: Change payload to response
-                    const payload = { userEmail: email, userType: 'admin' };
+                    const payload = { userEmail: email, userType: 'user' };
                     dispatch({ type: 'LOGIN_USER', payload });
                 };
-
-                // Hide loading spinner
-                updateLoading(false);
             } else {
                 // Got a response that we didn't expect
                 throw results;
