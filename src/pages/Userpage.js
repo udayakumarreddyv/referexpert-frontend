@@ -8,6 +8,9 @@ import { Context } from '../store/GlobalStore';
 import PendingAppointments from '../components/PendingAppointments';
 import OpenAppointments from '../components/OpenAppointments';
 
+// Utils
+import createBasicAuth from '../utils/basicAuth';
+
 // Page navigation
 import { Link } from 'react-router-dom';
 
@@ -68,7 +71,7 @@ function Userpage({ classes }) {
 
             // Fetch from api
             const url = `/referexpert/myappointments/${state.userEmail}`;
-            const response = await fetch(url);
+            const response = await fetch(url, { headers: { 'Authorization': createBasicAuth(), }});
             const results = await response.json();
 
             // Separate appointments
@@ -87,23 +90,48 @@ function Userpage({ classes }) {
         // actions can be: accept or reject
 
         try {
+            // Url changes depending on accept or reject
+            let url;
+            if (action === 'accept') {
+                url = 'referexpert/acceptappointment';
+            } else if (action === 'reject') {
+                url = 'referexpert/rejectappointment';
+            } else {
+                throw 'Invalid action';
+            };
+
             // Send api request
-            // const url = '';
-            // const response = await fetch(url, {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ appointmentId, action })
-            // });
-            // const results = await response.json();
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': createBasicAuth(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ appointmentId })
+            });
+            const results = await response.json();
 
-            // Remove appointment from pending list if successful
-            const newPendingAppointmentsData = pendingAppointments.filter((appointment) => appointment.id !== appointmentId);
-            updatePendingAppointments(newPendingAppointmentsData);
+            // Response is what we expect, throw err
+            if (!('message' in results)) {
+                throw results;
+            };
 
-            // Show success alert
-            const actionText = action === 'accept' ? 'accepted' : 'rejected';
-            updateAlertDetails({ type: 'info', message: `Appointment has been ${actionText}` });
-            updateAlertOpen(true);
+            // Success message
+            if (results.message === 'Updated Successfully') {
+            
+                // Remove appointment from pending list if successful
+                const newPendingAppointmentsData = pendingAppointments.filter((appointment) => appointment.appointmentId !== appointmentId);
+                updatePendingAppointments(newPendingAppointmentsData);
+
+                // Show success alert
+                const actionText = action === 'accept' ? 'accepted' : 'rejected';
+                updateAlertDetails({ type: 'info', message: `Appointment has been ${actionText}` });
+                updateAlertOpen(true);
+            } else if (results.message === 'Issue while updating refer expert') {
+                throw 'Invalid appointmentId';
+            } else {
+                throw 'Unhandled response message';
+            };
         } catch(err) {
 
             // Show failed alert

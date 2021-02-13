@@ -57,38 +57,58 @@ function PendingAppointments(props) {
         updatePage(0);
     };
 
-    // Create pending appointment table rows
-    const tableRows = appointmentsData.map((appointment) => {
-        const { id, patient, appointmentTimestamp, referredBy, status } = appointment;
-        const date = moment(appointmentTimestamp).format('MM/DD/YYYY');
-        const time = moment(appointmentTimestamp).format('h:mm a');
+    // Create table rows
+    const createTableRows = (appointmentsData) => {
 
-        // Format 
-        return (
-            <TableRow key={patient}>
-                <TableCell>{ patient }</TableCell>
-                <TableCell>{ referredBy }</TableCell>
-                <TableCell>{ date }</TableCell>
-                <TableCell>{ time }</TableCell>
-                <TableCell>
-                    <Button
-                        classes={{ root: `${ classes.primaryButton } ${ pendingAppointmentClasses.acceptButton }` }}
-                        onClick={() => handlePendingAppointmentUpdate(id, 'accept')}
-                    >
-                        Accept
-                    </Button>
-                </TableCell>
-                <TableCell>
-                    <Button
-                        classes={{ root: pendingAppointmentClasses.rejectButton }}
-                        onClick={() => handlePendingAppointmentUpdate(id, 'reject')}
-                    >
-                        Reject
-                    </Button>
-                </TableCell>
-            </TableRow>
-        );
-    });
+        // No appointments, show no appointments message
+        if (appointmentsData.length === 0) {
+            return (
+                <TableRow>
+                    <TableCell colSpan={4}>You have no pending appointments at this time</TableCell>
+                </TableRow>
+            );
+        };
+
+        return appointmentsData.map((appointment) => {
+            const { appointmentId, appointmentFrom, appointmentTo, dateTimeString, isAccepted, isServed } = appointment;
+            const date = moment(dateTimeString).format('MM/DD/YYYY');
+            const time = moment(dateTimeString).format('h:mm a');
+
+            // Format 
+            return (
+                <TableRow key={appointmentId}>
+                    {/* <TableCell>{ patient }</TableCell> */}
+                    <TableCell>{ appointmentFrom }</TableCell>
+                    <TableCell>{ date }</TableCell>
+                    <TableCell>{ time }</TableCell>
+                    <TableCell>
+                        <Button
+                            classes={{ root: `${ classes.primaryButton } ${ pendingAppointmentClasses.acceptButton }` }}
+                            onClick={() => handlePendingAppointmentUpdate(appointmentId, 'accept')}
+                        >
+                            Accept
+                        </Button>
+                    </TableCell>
+                    <TableCell>
+                        <Button
+                            classes={{ root: pendingAppointmentClasses.rejectButton }}
+                            onClick={() => handlePendingAppointmentUpdate(appointmentId, 'reject')}
+                        >
+                            Reject
+                        </Button>
+                    </TableCell>
+                </TableRow>
+            );
+        });
+    };
+
+    // Appointments data has not loaded yet
+    if (!appointmentsData) {
+        return <CircularProgress size={40} />;
+    };
+
+    // Create pending appointment table rows
+    const tableRows = createTableRows(appointmentsData);
 
     return (
         <TableContainer component={Paper}>
@@ -97,7 +117,7 @@ function PendingAppointments(props) {
                 {/* Table header */}
                 <TableHead>
                     <TableRow>
-                        <TableCell>Patient</TableCell>
+                        {/* <TableCell>Patient</TableCell> */}
                         <TableCell>Referred by</TableCell>
                         <TableCell>Appointment Date</TableCell>
                         <TableCell>Appointment Time</TableCell>
