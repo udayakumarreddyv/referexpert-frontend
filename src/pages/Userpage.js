@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import './styles/Userpage.css';
+
+// Global store
+import { Context } from '../store/GlobalStore';
 
 // Components
 import PendingAppointments from '../components/PendingAppointments';
@@ -21,42 +24,61 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+// Separate open, pending, and closed appointments
+const separateAppointments = (appointmentsList) => {
+    const pendingList = [];
+    const openList = [];
+    const completedList = [];
+
+    // Loop through each appointment in list, separate into buckets
+    appointmentsList.forEach((appointment) => {
+        console.log(appointment);
+        
+        // Pending appointment, open appointment, completed appointment
+        if (appointment.isAccepted === 'P') {
+            pendingList.push(appointment);
+        } else if (appointment.isServed === 'N') {
+            openList.push(appointment);
+        } else if (appointment.isServed === 'Y') {
+            completedList.push(appointment);
+        } else {
+            console.log('Invalid appointment!');
+        };
+    });
+
+    return { pendingList, openList, completedList };
+};
+
+// Page component
 function Userpage({ classes }) {
     const userpageClasses = useStyles();
+    const [state, dispatch] = useContext(Context);
 
     // Alert states
     const [alertOpen, updateAlertOpen] = useState(false);
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
-    // Pending appointments states
-    const [pendingAppointmentsData, updatePendingAppointmentsData] = useState([
-        { id: 1, patient: 'Billy joel', appointmentTimestamp: '2021-01-11T18:00:00', referredBy: 'James quick', status: 'pending' },
-        { id: 2, patient: 'James charles', appointmentTimestamp: '2021-01-13T22:00:00', referredBy: 'Dr. Drew', status: 'pending' },
-        { id: 3, patient: 'Steven atkins', appointmentTimestamp: '2021-01-14T18:00:00', referredBy: 'Bill Gates', status: 'pending' },
-        { id: 4, patient: 'Elon Musk', appointmentTimestamp: '2021-01-12T10:00:00', referredBy: 'Timmy Turner', status: 'pending' },
-        { id: 5, patient: 'Steven atkins', appointmentTimestamp: '2021-01-18T08:00:00', referredBy: 'Sammy sosa', status: 'pending' },
-    ]);
+    // Appointment states
+    const [pendingAppointments, updatePendingAppointments] = useState();
+    const [openAppointments, updateOpenAppointments] = useState([]);
 
-    // Open appointments
-    const [openAppointments, updateOpenAppointments] = useState([
-        { id: 1, patient: 'Billy joel', appointmentTimestamp: '2021-01-11T18:00:00', referredBy: 'James quick', status: 'pending' },
-        { id: 2, patient: 'James charles', appointmentTimestamp: '2021-01-13T22:00:00', referredBy: 'Dr. Drew', status: 'pending' },
-        { id: 3, patient: 'Steven atkins', appointmentTimestamp: '2021-01-14T18:00:00', referredBy: 'Bill Gates', status: 'pending' },
-        { id: 4, patient: 'Elon Musk', appointmentTimestamp: '2021-01-12T10:00:00', referredBy: 'Timmy Turner', status: 'pending' },
-        { id: 5, patient: 'Steven atkins', appointmentTimestamp: '2021-01-18T08:00:00', referredBy: 'Sammy sosa', status: 'pending' },
-    ]);
-
-    // Fetch pending appointments
-    const fetchPendingAppointments = async () => {
+    // Fetch all appointments for user: open, pending
+    const fetchAppointments = async () => {
         try {
-            const url = '';
-            const response = await fetch(url);
-            const results = response.json();
 
-            updatePendingAppointmentsData(results);
+            // Fetch from api
+            const url = `/referexpert/myappointments/${state.userEmail}`;
+            const response = await fetch(url);
+            const results = await response.json();
+
+            // Separate appointments
+            const { pendingList, openList, completedList } = separateAppointments(results);
+
+            // Update appointments states
+            updatePendingAppointments(pendingList);
+            updateOpenAppointments(openList);
         } catch (err) {
             console.log(err);
-            // TODO: Handle failed fetch call
         };
     };
 
@@ -75,8 +97,8 @@ function Userpage({ classes }) {
             // const results = await response.json();
 
             // Remove appointment from pending list if successful
-            const newPendingAppointmentsData = pendingAppointmentsData.filter((appointment) => appointment.id !== appointmentId);
-            updatePendingAppointmentsData(newPendingAppointmentsData);
+            const newPendingAppointmentsData = pendingAppointments.filter((appointment) => appointment.id !== appointmentId);
+            updatePendingAppointments(newPendingAppointmentsData);
 
             // Show success alert
             const actionText = action === 'accept' ? 'accepted' : 'rejected';
@@ -91,6 +113,11 @@ function Userpage({ classes }) {
             console.log(err);
         };
     };
+
+    // Launch fetch appointments on load
+    useEffect(() => {
+        fetchAppointments();
+    }, []);
 
     return (
         <section id='userpage-body'>
@@ -144,7 +171,7 @@ function Userpage({ classes }) {
             <section id='userpage-pendingAppointmentsContainer'>
                 <PendingAppointments
                     classes={classes}
-                    appointmentsData={pendingAppointmentsData}
+                    appointmentsData={pendingAppointments}
                     handlePendingAppointmentUpdate={handlePendingAppointmentUpdate}
                 />
             </section>
