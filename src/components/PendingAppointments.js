@@ -38,7 +38,7 @@ function PendingAppointments(props) {
     const {
         classes,
         appointmentsData,
-        handlePendingAppointmentUpdate,
+        handlePendingDialogOpen,
     } = props;
     const pendingAppointmentClasses = useStyles();
 
@@ -84,7 +84,7 @@ function PendingAppointments(props) {
                     <TableCell>
                         <Button
                             classes={{ root: `${ classes.primaryButton } ${ pendingAppointmentClasses.acceptButton }` }}
-                            onClick={() => handlePendingAppointmentUpdate(appointmentId, 'accept')}
+                            onClick={() => handlePendingDialogOpen(appointmentId, 'accept')}
                         >
                             Accept
                         </Button>
@@ -92,7 +92,7 @@ function PendingAppointments(props) {
                     <TableCell>
                         <Button
                             classes={{ root: pendingAppointmentClasses.rejectButton }}
-                            onClick={() => handlePendingAppointmentUpdate(appointmentId, 'reject')}
+                            onClick={() => handlePendingDialogOpen(appointmentId, 'reject')}
                         >
                             Reject
                         </Button>

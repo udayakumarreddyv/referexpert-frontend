@@ -17,9 +17,18 @@ import {
     TablePagination,
     Paper,
 } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+// Custom Material UI styles for this page
+const useStyles = makeStyles((theme) => ({
+    completeButton: {
+        fontSize: '12px',
+    },
+}));
 
 // Table for appointments that have been accepted and have not been completed
-function OpenAppointments({ classes, appointmentsData }) {
+function OpenAppointments({ classes, appointmentsData, handleCompleteDialogOpen }) {
+    const openAppointmentsClasses = useStyles();
 
     // Pagination states
     const [page, updatePage] = useState(0);
@@ -37,21 +46,51 @@ function OpenAppointments({ classes, appointmentsData }) {
     };
 
     // Create pending appointment table rows
-    const tableRows = appointmentsData.map((appointment) => {
-        const { id, patient, appointmentTimestamp, referredBy, status } = appointment;
-        const date = moment(appointmentTimestamp).format('MM/DD/YYYY');
-        const time = moment(appointmentTimestamp).format('h:mm a');
-        
-        // Format 
-        return (
-            <TableRow key={patient}>
-                <TableCell>{ patient }</TableCell>
-                <TableCell>{ referredBy }</TableCell>
-                <TableCell>{ date }</TableCell>
-                <TableCell>{ time }</TableCell>
-            </TableRow>
-        );
-    });
+    const createTableRows = (appointmentsData) => {
+
+        // No appointments, show message
+        if (appointmentsData.length === 0) {
+            return (
+                <TableRow>
+                    <TableCell colSpan={3}>
+                        You have no open appointments at this time
+                    </TableCell>
+                </TableRow>
+            );
+        };
+
+        return appointmentsData.map((appointment) => {
+            const { appointmentId, appointmentFrom, appointmentTo, dateTimeString, isAccepted, isServed } = appointment;
+            const date = moment(dateTimeString).format('MM/DD/YYYY');
+            const time = moment(dateTimeString).format('h:mm a');
+            
+            // Format 
+            return (
+                <TableRow key={appointmentId}>
+                    {/* <TableCell>{ patient }</TableCell> */}
+                    <TableCell>{ appointmentFrom }</TableCell>
+                    <TableCell>{ date }</TableCell>
+                    <TableCell>{ time }</TableCell>
+                    <TableCell>
+                        <Button
+                            classes={{ root: `${ classes.primaryButton } ${ openAppointmentsClasses.completeButton }` }}
+                            onClick={() => handleCompleteDialogOpen(appointmentId)}
+                        >
+                            Complete
+                        </Button>
+                    </TableCell>
+                </TableRow>
+            );
+        });
+    };
+
+    // Appointments data has not loaded yet
+    if (!appointmentsData) {
+        return <CircularProgress size={40} />;
+    };
+
+    // Create pending appointment table rows
+    const tableRows = createTableRows(appointmentsData);
 
     return (
         <TableContainer component={Paper}>
@@ -60,10 +99,11 @@ function OpenAppointments({ classes, appointmentsData }) {
                 {/* Table header */}
                 <TableHead>
                     <TableRow>
-                        <TableCell>Patient</TableCell>
+                        {/* <TableCell>Patient</TableCell> */}
                         <TableCell>Referred by</TableCell>
                         <TableCell>Appointment Date</TableCell>
                         <TableCell>Appointment Time</TableCell>
+                        <TableCell>Complete</TableCell>
                     </TableRow>
                 </TableHead>
 
@@ -76,7 +116,7 @@ function OpenAppointments({ classes, appointmentsData }) {
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
                             colSpan={4}
-                            count={tableRows.length}
+                            count={appointmentsData.length}
                             rowsPerPage={rowsPerPage}
                             page={page}
                             onChangePage={handleChangePage}

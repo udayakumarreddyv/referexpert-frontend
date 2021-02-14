@@ -15,7 +15,13 @@ import createBasicAuth from '../utils/basicAuth';
 import { Link } from 'react-router-dom';
 
 // Material UI
-import { Button, Snackbar } from '@material-ui/core';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogTitle,
+    Snackbar,
+} from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { Schedule, Today } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
@@ -24,7 +30,14 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles((theme) => ({
     titleIcon: {
         marginRight: '5px',
-    }
+    },
+    rejectButton: {
+        color: '#ffffff',
+        backgroundColor: '#ff6961',
+        '&:hover': {
+            backgroundColor: '#ff5148',
+        }
+    },
 }));
 
 // Separate open, pending, and closed appointments
@@ -35,8 +48,7 @@ const separateAppointments = (appointmentsList) => {
 
     // Loop through each appointment in list, separate into buckets
     appointmentsList.forEach((appointment) => {
-        console.log(appointment);
-        
+                
         // Pending appointment, open appointment, completed appointment
         if (appointment.isAccepted === 'P') {
             pendingList.push(appointment);
@@ -61,9 +73,42 @@ function Userpage({ classes }) {
     const [alertOpen, updateAlertOpen] = useState(false);
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
+    // Dialog states
+    const [dialogCompleteOpen, updateCompleteDialogOpen] = useState(false);
+    const [dialogPendingAcceptOpen, updateDialogPendingAcceptOpen] = useState(false);
+    const [dialogPendingRejectOpen, updateDialogPendingRejectOpen] = useState(false);
+    const [dialogAppointmentId, updateDialogAppointmentId] = useState(null);
+
     // Appointment states
     const [pendingAppointments, updatePendingAppointments] = useState();
     const [openAppointments, updateOpenAppointments] = useState([]);
+
+    // Open complete appointment dialog
+    const handleCompleteDialogOpen = (appointmentId) => {
+        updateDialogAppointmentId(appointmentId);
+        updateCompleteDialogOpen(true);
+    };
+
+    // Open pending appointment dialog
+    const handlePendingDialogOpen = (appointmentId, type) => {
+        updateDialogAppointmentId(appointmentId);
+
+        if (type === 'accept') {
+            updateDialogPendingAcceptOpen(true);    
+        } else if (type === 'reject') {
+            updateDialogPendingRejectOpen(true);
+        } else {
+            throw 'Invalid option for type parameter'
+        };
+    };
+
+    // Handle dialog close
+    const handleDialogClose = () => {
+        updateDialogAppointmentId(null);
+        updateCompleteDialogOpen(false);
+        updateDialogPendingAcceptOpen(false);
+        updateDialogPendingRejectOpen(false);
+    };
 
     // Fetch all appointments for user: open, pending
     const fetchAppointments = async () => {
@@ -118,15 +163,17 @@ function Userpage({ classes }) {
 
             // Success message
             if (results.message === 'Updated Successfully') {
-            
-                // Remove appointment from pending list if successful
-                const newPendingAppointmentsData = pendingAppointments.filter((appointment) => appointment.appointmentId !== appointmentId);
-                updatePendingAppointments(newPendingAppointmentsData);
 
                 // Show success alert
                 const actionText = action === 'accept' ? 'accepted' : 'rejected';
                 updateAlertDetails({ type: 'info', message: `Appointment has been ${actionText}` });
                 updateAlertOpen(true);
+
+                // Close dialog
+                handleDialogClose();
+
+                // Refresh appointments list from api
+                fetchAppointments();
             } else if (results.message === 'Issue while updating refer expert') {
                 throw 'Invalid appointmentId';
             } else {
@@ -136,6 +183,54 @@ function Userpage({ classes }) {
 
             // Show failed alert
             updateAlertDetails({ type: 'error', message: 'Failed to update appointment' });
+            updateAlertOpen(true);
+
+            console.log(err);
+        };
+    };
+
+    // Handle completion of current appointment
+    const handleCompleteAppointmentUpdate = async (appointmentId) => {
+        try {
+            const url = `referexpert/finalizeappointment`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': createBasicAuth(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ appointmentId })
+            });
+            const results = await response.json();
+            
+            // Ensure message in response. catch erros elsewise
+            if (!('message' in results)) {
+                throw results;
+            };
+
+            // Success message
+            if (results.message === 'Updated Successfully') {
+    
+                // Show success alert
+                updateAlertDetails({ type: 'info', message: `Appointment has been marked as completed!` });
+                updateAlertOpen(true);
+
+                // Close confirmation dialog
+                handleDialogClose();
+            } else if (results.message === 'Issue while updating refer expert') {
+
+                // Bad appointmentId
+                throw 'Bad appointmentId';
+            } else {
+
+                // Throw unhandled errors
+                throw results;
+            };
+
+            // TODO: Handle response for good & bad; show alert popup
+        } catch (err) {
+            // Show failed alert
+            updateAlertDetails({ type: 'error', message: 'Failed to complete appointment' });
             updateAlertOpen(true);
 
             console.log(err);
@@ -188,6 +283,7 @@ function Userpage({ classes }) {
                 <OpenAppointments
                     classes={classes}
                     appointmentsData={openAppointments}
+                    handleCompleteDialogOpen={handleCompleteDialogOpen}
                 />
             </section>
 
@@ -200,10 +296,81 @@ function Userpage({ classes }) {
                 <PendingAppointments
                     classes={classes}
                     appointmentsData={pendingAppointments}
-                    handlePendingAppointmentUpdate={handlePendingAppointmentUpdate}
+                    handlePendingDialogOpen={handlePendingDialogOpen}
                 />
             </section>
 
+
+
+
+
+
+
+            {/* DIALOG SECTION */}
+
+
+            {/* Accept appointment dialog */}
+            <Dialog
+                open={dialogPendingAcceptOpen}
+                onClose={handleDialogClose}
+                aria-labelledby="appointment-confirmation"
+                aria-describedby="Confirm to handle a appointment action"
+            >
+                <DialogTitle id="alert-dialog-title">Are your sure your would like to accept this appointment?</DialogTitle>
+                
+                {/* Action buttons */}
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Cancel</Button>
+                    <Button
+                        classes={{ root: classes.primaryButton }}
+                        onClick={() => handlePendingAppointmentUpdate(dialogAppointmentId, 'accept')}
+                    >
+                        Accept
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Reject appointment dialog */}
+            <Dialog
+                open={dialogPendingRejectOpen}
+                onClose={handleDialogClose}
+                aria-labelledby="appointment-confirmation"
+                aria-describedby="Confirm to handle a appointment action"
+            >
+                <DialogTitle id="alert-dialog-title">Are your sure your would like to reject this appointment?</DialogTitle>
+                
+                {/* Action buttons */}
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Cancel</Button>
+                    <Button
+                        classes={{ root: userpageClasses.rejectButton }}
+                        onClick={() => handlePendingAppointmentUpdate(dialogAppointmentId, 'reject')}
+                    >
+                        Reject
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Complete appointment dialog */}
+            <Dialog
+                open={dialogCompleteOpen}
+                onClose={handleDialogClose}
+                aria-labelledby="appointment-confirmation"
+                aria-describedby="Confirm to handle a appointment action"
+            >
+                <DialogTitle id="alert-dialog-title">Are your sure your would like to complete this appointment?</DialogTitle>
+                
+                {/* Action buttons */}
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Cancel</Button>
+                    <Button
+                        classes={{ root: classes.primaryButton }}
+                        onClick={() => handleCompleteAppointmentUpdate(dialogAppointmentId)}
+                    >
+                        Complete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </section>
     );
 };
