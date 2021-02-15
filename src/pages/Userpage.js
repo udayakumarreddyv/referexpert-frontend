@@ -1,6 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
 import './styles/Userpage.css';
 
+// Time parsing
+import * as moment from 'moment';
+
 // Global store
 import { Context } from '../store/GlobalStore';
 
@@ -42,11 +45,18 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+// Sort appointments by date newest to furthest
+const sortAppointments = (appointmentsList) => {
+    return appointmentsList.sort((first, second) => {
+        return moment(second.dateAndTimeString) - moment(first.dateAndTimeString);
+    });
+};
+
 // Separate open, pending, and closed appointments
 const separateAppointments = (appointmentsList) => {
-    const pendingList = [];
-    const openList = [];
-    const completedList = [];
+    let pendingList = [];
+    let openList = [];
+    let completedList = [];
 
     // Loop through each appointment in list, separate into buckets
     appointmentsList.forEach((appointment) => {
@@ -62,6 +72,11 @@ const separateAppointments = (appointmentsList) => {
             console.log('Invalid appointment!');
         };
     });
+
+    // Sort appointments by dates
+    pendingList = sortAppointments(pendingList);
+    openList = sortAppointments(openList);
+    completedList = sortAppointments(completedList);
 
     return { pendingList, openList, completedList };
 };
