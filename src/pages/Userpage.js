@@ -232,6 +232,9 @@ function Userpage({ classes }) {
                 updateAlertDetails({ type: 'info', message: `Appointment has been marked as completed!` });
                 updateAlertOpen(true);
 
+                // Refresh appointments list from api
+                fetchAppointments();
+
                 // Close confirmation dialog
                 handleDialogClose();
             } else if (results.message === 'Issue while updating refer expert') {
@@ -243,8 +246,6 @@ function Userpage({ classes }) {
                 // Throw unhandled errors
                 throw results;
             };
-
-            // TODO: Handle response for good & bad; show alert popup
         } catch (err) {
             // Show failed alert
             updateAlertDetails({ type: 'error', message: 'Failed to complete appointment' });
