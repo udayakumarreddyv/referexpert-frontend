@@ -1,5 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './styles/Adminpage.css';
+
+// Utils
+import createBasicAuth from '../utils/basicAuth';
+
+// Debounce search input
+import debounce from 'lodash.debounce';
 
 // Material UI
 import {
@@ -43,17 +49,23 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function Adminpage({ classes }) {
+function Adminpage() {
     const adminpageClasses = useStyles();
+
+    // Loading states
+    const [pageLoading, updatePageLoading] = useState(true);
+    const [searchLoading, updateSearchLoading] = useState(false);
 
     // Data
     const [userData, updateUserData] = useState([]);
-    const [userCounts, updateUserCounts] = useState(null);
+    const [userCounts, updateUserCounts] = useState({ total: 0, active: 0, pending: 0, disabled: 0 });
 
     // Search states
-    const [searchValue, updateSearchValue] = useState('');
-    const [searchType, updateSearchType] = useState('all');
+    const [searchType, updateSearchType] = useState('firstname');
     const [searchStatus, updateSearchStatus] = useState('all');
+    const [searchInput, updateSearchInput] = useState('');
+
+    // Page states
     const [page, updatePage] = useState(0);
     const [rowsPerPage, updateRowsPerPage] = useState(10);
 
@@ -62,28 +74,33 @@ function Adminpage({ classes }) {
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
     // Fetch user data
-    const fetchUserData = async () => {
+    const fetchUserData = async (type, query, pageLoad = false) => {
         try {
-            
-            // Send request to api
-            // const url = '';
-            // const response = await fetch(url);
-            // const results = await response.json();
-            
-            const results = [
-                { firstName: 'Andrew', lastName: 'Elick', email: 'andy.elick@gmail.com', status: 'active' },
-                { firstName: 'James', lastName: 'Smith', email: 'james_smith@yahoo.com', status: 'pending' },
-                { firstName: 'Rhonda', lastName: 'Brown', email: 'rhonda23@outlook.com', status: 'disabled' },
-                { firstName: 'Sally', lastName: 'Silver', email: 'silvaSalls@gmail.com', status: 'active' },
-                { firstName: 'Ashish', lastName: 'Thakur', email: 'ashishT@icloud.com', status: 'active' },
-                { firstName: 'Satoshi', lastName: 'Moore', email: 'bigworm69@gmail.com', status: 'disabled' },
-            ];
 
-            // Update data state
-            updateUserData(results)
+            // Execute two search queries to get all users if page load
+            if (pageLoad) {
+                const adminUrl = 'referexpert/users/type/admin';
+                const userUrl = 'referexpert/users/type/p';
+
+                // Fetch results
+                const adminResponse = await fetch(adminUrl, { headers: { 'Authorization': createBasicAuth() }});
+                const userResponse = await fetch(userUrl, { headers: { 'Authorization': createBasicAuth() }});
+                const adminResults = await adminResponse.json();
+                const userResults = await userResponse.json();
+
+                // Join results
+                return adminResults.concat(userResults);
+            } else {
+
+                // Send request to api
+                const url = `referexpert/users/${type}/${query}`;
+                const response = await fetch(url);
+                return await response.json();
+            };
         } catch (err) {
-            // TODO: Catch loading errors
+            updateUserData('error');
             console.log(err);
+            return 'error';
         }
     };
 
@@ -127,44 +144,30 @@ function Adminpage({ classes }) {
         updatePage(0);
     };
 
-    // Filter rows based on search
-    const filterSearchResults = (user) => {
-                
-        // Filter out users with wrong status
-        if (searchStatus !== 'all' && searchStatus !== user.status) {
-            return;
+    // Handle a user search
+    const handleSearch = async () => {
+        let results;
+
+        // Show loading spinner
+        updateSearchLoading(true);
+
+        // No search input, get all results
+        if (searchInput.trim() === '') {
+            results = await fetchUserData(null, null, { pageLoad: true });
+        } else {
+            results = await fetchUserData(searchType, searchInput);
         };
 
-        // No search yet, skip filtering
-        if (searchValue.trim() === '') {
-            return user;
+        // Filter by user status if one is chosen
+        if (searchStatus !== 'all') {
+            const filteredResults = results.filter((user) => user.isActive === searchStatus);
+            updateUserData(filteredResults);
+        } else {
+            updateUserData(results);
         };
 
-        const firstName = user.firstName.toLowerCase();
-        const lastName = user.lastName.toLowerCase();
-        const email = user.email.toLowerCase();
-        const searchResult = searchValue.toLowerCase();
-                
-        switch (searchType) {
-            case 'firstName':
-                if (firstName.includes(searchResult)) return user;
-                break;
-            case 'lastName':
-                if (lastName.includes(searchResult)) return user;
-                break;
-            case 'email':
-                if (email.includes(searchResult)) return user;
-                break;
-            case 'all':
-                if (
-                    firstName.includes(searchResult)
-                    || lastName.includes(searchResult)
-                    || email.includes(searchResult)
-                ) return user;
-                break;
-            default:
-                return user;
-        };
+        // Hide loading spinner
+        updateSearchLoading(false);
     };
 
     // Create counts
@@ -178,14 +181,14 @@ function Adminpage({ classes }) {
             counts.total += 1;
 
             // Add to right bucket
-            switch(user.status) {
-                case 'active':
+            switch(user.isActive) {
+                case 'Y':
                     counts.active += 1;
                     break;
-                case 'pending':
+                case 'P':
                     counts.pending += 1;
                     break;
-                case 'disabled':
+                case 'N':
                     counts.disabled += 1;
                     break;
                 default:
@@ -197,44 +200,62 @@ function Adminpage({ classes }) {
         updateUserCounts(counts);
     };
 
-    // Filter data based on search
-    const cleanedUserResults = userData.filter((user) => filterSearchResults(user));
-     
     // Create table rows
-    const tableRows = cleanedUserResults.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-    .map((user) => {
-        const { firstName, lastName, email, status } = user;
-        
-        return (
-            <TableRow key={email}>
-                <TableCell>{ firstName }</TableCell>
-                <TableCell>{ lastName }</TableCell>
-                <TableCell>{ email }</TableCell>
-                <TableCell>
-                    <Select
-                        name='currentStatus'
-                        variant='outlined'
-                        value={status}
-                        classes={{ root: adminpageClasses.statusChangeSelect }}
-                        onChange={(event) => updateUserStatus(email, event.target.value)}
-                    >
-                        <MenuItem value='active'><span className='statusCircle activeCircle' /> Active</MenuItem>
-                        <MenuItem value='pending'><span className='statusCircle pendingCircle' /> Pending</MenuItem>
-                        <MenuItem value='disabled'><span className='statusCircle disabledCircle' /> Disabled</MenuItem>
-                    </Select>
-                </TableCell>
-            </TableRow>
-        );
-    });
+    const createTableRows = (userList) => {
+        return userList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+        .map((user) => {
+            const { userId, firstName, lastName, email, userType, isActive } = user;
+            
+            return (
+                <TableRow key={userId}>
+                    <TableCell>{ firstName } { lastName }</TableCell>
+                    <TableCell>{ userType }</TableCell>
+                    <TableCell>{ email }</TableCell>
+                    <TableCell>
+                        <Select
+                            name='currentStatus'
+                            variant='outlined'
+                            value={isActive}
+                            classes={{ root: adminpageClasses.statusChangeSelect }}
+                            onChange={(event) => updateUserStatus(email, event.target.value)}
+                        >
+                            <MenuItem value='Y'><span className='statusCircle activeCircle' /> Active</MenuItem>
+                            <MenuItem value='P'><span className='statusCircle pendingCircle' /> Pending</MenuItem>
+                            <MenuItem value='N'><span className='statusCircle disabledCircle' /> Disabled</MenuItem>
+                        </Select>
+                    </TableCell>
+                </TableRow>
+            );
+        });
+    };
 
-    // Create user counts
-    useEffect(() => {
-        if (userData.length === 0) fetchUserData();
-        if (userData.length !== 0 && !userCounts) createUserCounts(userData);
-    }, [userData, userCounts])
+    // Don't update searchInput until user is done typing, aka debouncing
+    const debouncedSearch = useCallback(
+        debounce((searchQuery) => updateSearchInput(searchQuery), 600)
+    ,[]);
+
+    // Query api when search has changed
+    useEffect(async () => {
+        handleSearch(searchType, searchInput);
+    }, [searchType, searchStatus, searchInput]);
+
+    // Fetch users and create counts
+    useEffect(async () => {
+        const userList = await fetchUserData(null, null, { pageLoad: true });
+        updateUserData(userList);
+
+        // Failed to fetch all users, make counts 0
+        if (userList === 'error') {
+            createUserCounts([]);
+        } else {
+            createUserCounts(userList);
+        };
+
+        updatePageLoading(false);
+    }, []);
 
     // Show loading if waiting on data
-    if (userData.length === 0 || !userCounts) {
+    if (pageLoading) {
         return (
             <section id='adminpage-body'>
                 <div id='adminpage-loadingContainer'>
@@ -242,6 +263,43 @@ function Adminpage({ classes }) {
                 </div>
             </section>  
         );
+    };
+
+    // No search results row
+    const noResults = (
+        <TableRow>
+            <TableCell colSpan={4}>
+                <div className='noResults'>No results to display</div>
+            </TableCell>
+        </TableRow>
+    );
+
+    // Search error
+    const errorResults = (
+        <TableRow key={0}>
+            <TableCell colSpan={5} >
+                <div className='noResults errorMessage'>Sorry, this request failed. Please try again later.</div>
+            </TableCell>
+        </TableRow>
+    );
+
+    // Loading row
+    const loadingRow = (
+        <TableRow>
+            <TableCell colSpan={5} style={{ textAlign: 'center' }}>
+                <CircularProgress className='noResults' size={25} />
+            </TableCell>
+        </TableRow>
+    );
+
+    // Determine what to show in table
+    let tableRows;
+    if (userData.length === 0) {
+        tableRows = noResults;
+    } else if (userData === 'error') {
+        tableRows = errorResults;
+    } else {
+        tableRows = createTableRows(userData);
     };
     
     // Default page view
@@ -299,21 +357,20 @@ function Adminpage({ classes }) {
 
                 {/* Search types */}
                 <FormControl variant='outlined' classes={{ root: adminpageClasses.inputMargin }}>
-                    <InputLabel>Type</InputLabel>
+                    <InputLabel>Search type</InputLabel>
                     <Select
-                        name='Type'
-                        label='Type'
+                        name='Search type'
+                        label='Search type'
                         value={searchType}
                         onChange={(event) => updateSearchType(event.target.value)}
                     >
-                        <MenuItem value='all'>All</MenuItem>
-                        <MenuItem value='firstName'>First Name</MenuItem>
-                        <MenuItem value='lastName'>Last Name</MenuItem>
-                        <MenuItem value='email'>Email</MenuItem>
+                        <MenuItem value='firstname'>First Name</MenuItem>
+                        <MenuItem value='lastname'>Last Name</MenuItem>
+                        <MenuItem value='type'>User type</MenuItem>
                     </Select>
                 </FormControl>
 
-                {/* Status */}
+                {/* User status */}
                 <FormControl variant='outlined' classes={{ root: adminpageClasses.inputMargin }}>
                     <InputLabel>Status</InputLabel>
                     <Select
@@ -323,9 +380,9 @@ function Adminpage({ classes }) {
                         onChange={(event) => updateSearchStatus(event.target.value)}
                     >
                         <MenuItem value='all'>All</MenuItem>
-                        <MenuItem value='active'>Active</MenuItem>
-                        <MenuItem value='pending'>Pending</MenuItem>
-                        <MenuItem value='disabled'>Disabled</MenuItem>
+                        <MenuItem value='Y'>Active</MenuItem>
+                        <MenuItem value='P'>Pending</MenuItem>
+                        <MenuItem value='N'>Disabled</MenuItem>
                     </Select>
                 </FormControl>
 
@@ -340,7 +397,7 @@ function Adminpage({ classes }) {
                     }
                     variant='outlined'
                     classes={{ root: `${ adminpageClasses.searchInput } ${ adminpageClasses.inputMargin }` }}
-                    onChange={(event) => updateSearchValue(event.target.value)}
+                    onChange={(event) => debouncedSearch(event.target.value)}
                 />
             </section>
 
@@ -351,15 +408,15 @@ function Adminpage({ classes }) {
                     {/* Table header */}
                     <TableHead>
                         <TableRow>
-                            <TableCell>First name</TableCell>
-                            <TableCell>Last name</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Type</TableCell>
                             <TableCell>Email</TableCell>
                             <TableCell>Status</TableCell>
                         </TableRow>
                     </TableHead>
 
                     {/* Table body */}
-                    <TableBody>{ tableRows }</TableBody>
+                    <TableBody>{ !searchLoading ? tableRows : loadingRow }</TableBody>
 
                     {/* Table footer */}
                     <TableFooter>
@@ -367,7 +424,7 @@ function Adminpage({ classes }) {
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 50]}
                                 colSpan={4}
-                                count={cleanedUserResults.length}
+                                count={userData.length}
                                 rowsPerPage={rowsPerPage}
                                 page={page}
                                 onChangePage={handleChangePage}
