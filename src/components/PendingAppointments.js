@@ -70,9 +70,9 @@ function PendingAppointments(props) {
         };
 
         return appointmentsData.map((appointment) => {
-            const { appointmentId, appointmentFrom, appointmentTo, dateTimeString, isAccepted, isServed } = appointment;
-            const date = moment(dateTimeString).format('MM/DD/YYYY');
-            const time = moment(dateTimeString).format('h:mm a');
+            const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, isAccepted, isServed } = appointment;
+            const date = moment(dateAndTimeString).format('MM/DD/YYYY');
+            const time = moment(dateAndTimeString).format('h:mm a');
 
             // Format 
             return (
