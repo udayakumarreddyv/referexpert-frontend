@@ -160,8 +160,8 @@ function ReferPatientpage({ classes }) {
             // Send request to api
             const results = await searchQueryApi(searchType, searchValue);
             
-            // Filter out admin accounts
-            const filteredResults = results.filter((user) => user.userType !== 'ADMIN');
+            // Filter out current user and admin accounts
+            const filteredResults = results.filter((user) => user.userType !== 'ADMIN' && user.email !== state.userEmail);
 
             // Update doctors data state and hide loading spinner
             updateDoctorsData(filteredResults);
