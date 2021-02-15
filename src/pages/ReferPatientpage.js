@@ -1,5 +1,14 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import './styles/ReferPatientpage.css';
+
+// Global store
+import { Context } from '../store/GlobalStore';
+
+// Utils
+import createBasicAuth from '../utils/basicAuth';
+
+// Time parsing
+import * as moment from 'moment';
 
 // Components
 import DoctorsTable from "../components/DoctorsTable";
@@ -12,8 +21,10 @@ import {
     InputLabel,
     TextField,
     Select,
-    MenuItem, 
+    MenuItem,
+    Snackbar,
 } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Custom Material UI styles for this page
@@ -41,13 +52,18 @@ const useStyles = makeStyles((theme) => ({
 
 function ReferPatientpage({ classes }) {
     const referpatientpageClasses = useStyles();
+    const [state, dispatch] = useContext(Context);
+
+    // Alert states
+    const [alertOpen, updateAlertOpen] = useState(false);
+    const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
     // Search states
-    const [searchType, updateSearchType] = useState('name');
+    const [searchType, updateSearchType] = useState('firstName');
     const [searchValue, updateSearchValue] = useState('');
-    const [searchZipCode, updateSearchZipCode] = useState('');
+    // const [searchZipCode, updateSearchZipCode] = useState('');
     const [searchValueError, updateSearchValueError] = useState({ hasError: false, errorMessage: '' });
-    const [searchZipCodeError, updateSearchZipCodeError] = useState({ hasError: false, errorMessage: '' });
+    // const [searchZipCodeError, updateSearchZipCodeError] = useState({ hasError: false, errorMessage: '' });
 
     // Loading states
     const [loadingDoctorsData, updateLoadingDoctorsData] = useState(false);
@@ -58,23 +74,58 @@ function ReferPatientpage({ classes }) {
 
     // Schedule appointment states
     // Doctor details
-    const [doctorName, updateDoctorName] = useState('');
-    const [doctorType, updateDoctorType] = useState('');
-    const [doctorCity, updateDoctorCity] = useState('');
-    const [doctorZipCode, updateDoctorZipCode] = useState('');
+    const [doctorDetails, updateDoctorDetails] = useState({
+        id: null,
+        email: '',
+        name: '',
+        type: '',
+        specialty: '',
+        address: ''
+    });
+    
     // Input states
     const [patientName, updatePatientName] = useState('');
     const [reason, updateReason] = useState('');
-    const [appointmentTime, updateAppointmentTime] = useState('');
-    const [appointmentDate, updateAppointmentDate] = useState('');
+    const [appointmentTimestamp, updateAppointmentTimestamp] = useState(null);
+    
     // Validate states
     const [validatePatientName, updateValidatePatientName] = useState({ hasError: false, errorMessage: '' });
     const [validateReason, updateValidateReason] = useState({ hasError: false, errorMessage: '' });
-    const [validateAppointmentDate, updateValidateAppointmentDate] = useState({ hasError: false, errorMessage: '' });
-
+    const [validateAppointmentTimestamp, updateValidateAppointmentTimestamp] = useState({ hasError: false, errorMessage: '' });
 
     // View states
     const [showScheduleView, updateShowScheduleView] = useState(false);
+
+    // Fetch search results from api
+    const searchQueryApi = async (searchType, searchQuery) => {
+        try {
+            searchType = searchType.toLowerCase();
+            const url = `referexpert/users/${searchType}/${searchQuery}`;
+            const response = await fetch(url, { headers: { 'Authorization': createBasicAuth() }});
+            return await response.json();
+        } catch (err) {
+            throw err;
+        };
+    };
+
+    // Submit appointment to api
+    const submitAppointmentApi = async (appointmentFrom, appointmentTo, dateAndTimeString) => {        
+        try {
+            const url = 'referexpert/requestappointment';
+            const body = { appointmentFrom, appointmentTo, dateAndTimeString };
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': createBasicAuth(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+            return await response.json();
+        } catch (err) {
+            throw err;
+        };
+    };
 
     // Fetch doctors data on search
     const handleDoctorSearch = async () => {
@@ -89,15 +140,15 @@ function ReferPatientpage({ classes }) {
         };
         
         // Validate search zip code input
-        if (searchZipCode.trim() === '') {
-            updateSearchZipCodeError({ hasError: true, errorMessage: '' });
-            searchError = true;
-        } else if (isNaN(searchZipCode) || searchZipCode.length !== 5) {
-            updateSearchZipCodeError({ hasError: true, errorMessage: 'Invalid zip code' });
-            searchError = true;
-        } else {
-            updateSearchZipCodeError({ hasError: false, errorMessage: '' });
-        };
+        // if (searchZipCode.trim() === '') {
+        //     updateSearchZipCodeError({ hasError: true, errorMessage: '' });
+        //     searchError = true;
+        // } else if (isNaN(searchZipCode) || searchZipCode.length !== 5) {
+        //     updateSearchZipCodeError({ hasError: true, errorMessage: 'Invalid zip code' });
+        //     searchError = true;
+        // } else {
+        //     updateSearchZipCodeError({ hasError: false, errorMessage: '' });
+        // };
 
         // Kill request if search input error
         if (searchError) return;
@@ -107,26 +158,16 @@ function ReferPatientpage({ classes }) {
             updateLoadingDoctorsData(true);
 
             // Send request to api
-            // const url = '';
-            // const response = fetch(url, {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ searchValue, searchType, zipcode })
-            // });
-            // const results = await response.json();
-
-            // Test data, remove once api is hooked up
-            const results = [
-                { id: 1, name: 'John smith', type: 'Family doctor', city: 'Memphis', zipcode: '38111' },
-                { id: 2, name: 'Sally brown', type: 'Dermatologist', city: 'Memphis', zipcode: '38017' },
-                { id: 3, name: 'Alton marx', type: 'Cardiologist', city: 'Memphis', zipcode: '38112' },
-                { id: 4, name: 'Donna james', type: 'Gastroenterologist', city: 'Memphis', zipcode: '38118' },
-            ];
+            const results = await searchQueryApi(searchType, searchValue);
+            
+            // Filter out admin accounts
+            const filteredResults = results.filter((user) => user.userType !== 'ADMIN');
 
             // Update doctors data state and hide loading spinner
-            updateDoctorsData(results);
+            updateDoctorsData(filteredResults);
             updateLoadingDoctorsData(false);
         } catch (err) {
+            updateDoctorsData('error');
             updateLoadingDoctorsData(false);
             console.log(err);
         };
@@ -134,6 +175,11 @@ function ReferPatientpage({ classes }) {
 
     // Handle scheduling a new appointment
     const handleScheduleAppointment = async () => {
+
+        // Clear any previous validation errors
+        updateValidatePatientName({ hasError: false, errorMessage: '' });
+        updateValidateReason({ hasError: false, errorMessage: '' });
+        updateValidateAppointmentTimestamp({ hasError: false, errorMessage: '' });
         let validateError = false;
 
         // Validate patient name input
@@ -148,15 +194,14 @@ function ReferPatientpage({ classes }) {
             validateError = true;
         };
 
-        // Validate appointment time input
-        // if (!appointmentTime) {
-        //     validateError = true;
-        // };
-
-        // Validate appointment date input
-        // if (!appointmentDate) {
-        //     validateError = true;
-        // };
+        // Validate appointment timestamp
+        if (!appointmentTimestamp) {
+            updateValidateAppointmentTimestamp({ hasError: true, errorMessage: '' });
+            validateError = true;
+        } else if (!moment(appointmentTimestamp).isValid()) {
+            updateValidateAppointmentTimestamp({ hasError: true, errorMessage: 'Invalid timestamp' });
+            validateError = true;
+        };
 
         // Kill request if validation error
         if (validateError) return;
@@ -166,22 +211,33 @@ function ReferPatientpage({ classes }) {
             updateLoadingScheduleAppointment(true);
 
             // Send request to api
-            // const url = '';
-            // const response = await fetch(url, {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({
-            //         patientName,
-            //         reason,
-            //         appointmentDate,
-            //         appointmentTime,
-            //     })
-            // });
-            // const results = await response.json();
+            const results = await submitAppointmentApi(state.userEmail, doctorDetails.email, appointmentTimestamp);
+
+            // Caught an unexpected response
+            if (!('message' in results)) {
+                throw results;
+            };
+
+            // Appoinment has been booked
+            if (results.message === 'Appointment Request Successful') {
+
+                // Show success alert, hide dialog popup
+                updateAlertDetails({ type: 'info', message: `Appointment has been requested!` });
+                updateAlertOpen(true);
+                handleCloseScheduleDialog();
+            } else {
+
+                // Unhandled error message
+                throw results;
+            };
 
             // Hide loading spinner in schedule dialog popup
             updateLoadingScheduleAppointment(false);
         } catch (err) {
+
+            // Show failure alert
+            updateAlertDetails({ type: 'error', message: `Sorry, the request failed. Please try again later.` });
+            updateAlertOpen(true);
 
             // Hide loading spinner in schedule dialog popup
             updateLoadingScheduleAppointment(false);
@@ -190,35 +246,34 @@ function ReferPatientpage({ classes }) {
     };
 
     // Handle opening of scheduling dialog
-    const handleOpenScheduleDialog = (name, type, city, zipcode) => {
-        // Update doctor states
-        updateDoctorName(name);
-        updateDoctorType(type);
-        updateDoctorCity(city);
-        updateDoctorZipCode(zipcode);
-
-        // Open dialog
+    const handleOpenScheduleDialog = (id, email, name, type, specialty, address) => {
+        
+        // Update doctor states, open dialog
+        updateDoctorDetails({ id, email, name, type, specialty, address });
         updateShowScheduleView(true);
     };
 
     // Handle closing of scheduling dialog
     const handleCloseScheduleDialog = () => {
         // Clear doctor states
-        updateDoctorName('');
-        updateDoctorType('');
-        updateDoctorCity('');
-        updateDoctorZipCode('');
-
+        updateDoctorDetails({
+            id: null,
+            email: '',
+            name: '',
+            type: '',
+            specialty: '',
+            address: ''
+        });
+        
         // Clear appointment input states
         updatePatientName('');
         updateReason('');
-        updateAppointmentTime('');
-        updateAppointmentDate('');
+        updateAppointmentTimestamp(null);
 
         // Clear appointment input validation states
         updateValidatePatientName({ hasError: false, errorMessage: '' });
         updateValidateReason({ hasError: false, errorMessage: '' });
-        updateValidateAppointmentDate({ hasError: false, errorMessage: '' });
+        updateValidateAppointmentTimestamp({ hasError: false, errorMessage: '' });
         
         // Hide dialog
         updateShowScheduleView(false);
@@ -240,7 +295,8 @@ function ReferPatientpage({ classes }) {
                         value={searchType}
                         onChange={(event) => updateSearchType(event.target.value)}
                     >
-                        <MenuItem value='name'>Name</MenuItem>
+                        <MenuItem value='firstName'>First name</MenuItem>
+                        <MenuItem value='lastName'>Last name</MenuItem>
                         <MenuItem value='type'>Type</MenuItem>
                     </Select>
                 </FormControl>
@@ -256,7 +312,7 @@ function ReferPatientpage({ classes }) {
                 />
 
                 {/* Location */}
-                <TextField
+                {/* <TextField
                     name='zipcode'
                     label='Zipcode'
                     variant='outlined'
@@ -265,7 +321,7 @@ function ReferPatientpage({ classes }) {
                     error={searchZipCodeError.hasError}
                     helperText={searchZipCodeError.errorMessage}
 
-                />
+                /> */}
 
                 {/* Button */}
                 <Button
@@ -307,21 +363,35 @@ function ReferPatientpage({ classes }) {
                 handleCloseScheduleDialog={handleCloseScheduleDialog}
 
                 // Doctor info
-                doctorName={doctorName}
-                doctorType={doctorType}
-                doctorCity={doctorCity}
-                doctorZipCode={doctorZipCode}
+                doctorDetails={doctorDetails}
 
                 // Input states
                 updatePatientName={updatePatientName}
                 updateReason={updateReason}
+                updateAppointmentTimestamp={updateAppointmentTimestamp}
                 handleScheduleAppointment={handleScheduleAppointment}
 
                 // Validation states
                 validatePatientName={validatePatientName}
                 validateReason={validateReason}
-                validateAppointmentDate={validateAppointmentDate}
+                validateAppointmentTimestamp={validateAppointmentTimestamp}
             />
+
+            {/* Alert popups, only shown when user status has been updated */}
+            <Snackbar
+                open={alertOpen}
+                autoHideDuration={3000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                onClose={() => updateAlertOpen(false)}
+            >
+                <Alert
+                    severity={alertDetails.type}
+                    variant='filled'
+                    elevation={2}
+                >
+                    { alertDetails.message }
+                </Alert>
+            </Snackbar>
         </section>
     );
 };

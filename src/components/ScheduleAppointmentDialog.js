@@ -38,20 +38,18 @@ function ScheduleAppointmentDialog(props) {
         handleCloseScheduleDialog,
 
         // Doctor info
-        doctorName,
-        doctorType,
-        doctorCity,
-        doctorZipCode,
+        doctorDetails,
 
         // Input states
         updatePatientName,
         updateReason,
+        updateAppointmentTimestamp,
         handleScheduleAppointment,
 
         // Validation states
         validatePatientName,
         validateReason,
-        validateAppointmentDate
+        validateAppointmentTimestamp
     } = props;
 
     return (
@@ -68,19 +66,19 @@ function ScheduleAppointmentDialog(props) {
                     {/* Doctor name */}
                     <div className='scheduleAppointmentDialog-doctorDetail'>
                         <Person classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
-                        { doctorName }
+                        { doctorDetails.name }
                     </div>
                     
                     {/* Doctor type */}
                     <div className='scheduleAppointmentDialog-doctorDetail'>
                         <LocalHospital classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
-                        { doctorType }
+                        { doctorDetails.type } { doctorDetails.specialty }
                     </div>
                     
                     {/* Doctor location */}
                     <div className='scheduleAppointmentDialog-doctorDetail'>
                         <Home classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
-                        { doctorCity }, { doctorZipCode }
+                        { doctorDetails.address }
                     </div>
                 </section>
                 
@@ -117,7 +115,9 @@ function ScheduleAppointmentDialog(props) {
                         label='Appointment date'
                         type='datetime-local'
                         // defaultValue={}
-                        error={validateAppointmentDate.hasError}
+                        onChange={(event) => updateAppointmentTimestamp(event.target.value)}
+                        error={validateAppointmentTimestamp.hasError}
+                        helperText={validateAppointmentTimestamp.errorMessage}
                         fullWidth
                     />
                 </section>
