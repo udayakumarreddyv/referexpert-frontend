@@ -159,7 +159,6 @@ function ReferPatientpage({ classes }) {
 
             // Send request to api
             const results = await searchQueryApi(searchType, searchValue);
-            
             // Filter out current user and admin accounts
             const filteredResults = results.filter((user) => user.userType !== 'ADMIN' && user.email !== state.userEmail);
 
@@ -297,6 +296,7 @@ function ReferPatientpage({ classes }) {
                     >
                         <MenuItem value='firstName'>First name</MenuItem>
                         <MenuItem value='lastName'>Last name</MenuItem>
+                        <MenuItem value='speciality'>Specialty</MenuItem>
                         <MenuItem value='type'>Type</MenuItem>
                     </Select>
                 </FormControl>
