@@ -44,43 +44,22 @@ function DoctorsTable(props) {
         updatePage(0);
     };
 
-    // Decide whether to show search for results, no results, or actual table rows
-    let tableRows;
-    if (!doctorsData) {
-
-        // It's in an array so that counts of pagination doesn't raise error
-        tableRows = [
-            <TableRow key={0}>
-                <TableCell colSpan={5}>
-                    <span className='noResults'>Search for results</span>
-                </TableCell>
-            </TableRow>
-        ];
-    } else if (doctorsData.length === 0) {
-        tableRows = [
-            <TableRow key={0}>
-                <TableCell colSpan={5} >
-                    <div className='noResults'>No results to display</div>
-                </TableCell>
-            </TableRow>
-        ];
-    } else {
-
-        // Create table rows with doctors data
-        tableRows = doctorsData.map((doctor) => {
-            const { id, name, type, city, zipcode } = doctor;
+    // Create table rows
+    const createTableRows = (searchResults) => {
+        return doctorsData.map((doctor) => {
+            const { userId, email, firstName, lastName, userType, userSpeciality, address } = doctor;
     
             // Format 
             return (
-                <TableRow key={id}>
-                    <TableCell>{ name }</TableCell>
-                    <TableCell>{ type }</TableCell>
-                    <TableCell>{ city }</TableCell>
-                    <TableCell>{ zipcode }</TableCell>
+                <TableRow key={userId}>
+                    <TableCell>{ firstName } { lastName }</TableCell>
+                    <TableCell>{ userType }</TableCell>
+                    <TableCell>{ userSpeciality }</TableCell>
+                    <TableCell>{ address }</TableCell>
                     <TableCell>
                         <Button
                             classes={{ root: `${ classes.primaryButton } ${ referpatientpageClasses.scheduleButton }` }}
-                            onClick={() => handleOpenScheduleDialog(name, type, city, zipcode)}
+                            onClick={() => handleOpenScheduleDialog(userId, email, `${firstName} ${lastName}`, userType, userSpeciality, address)}
                         >
                             Schedule
                         </Button>
@@ -88,6 +67,44 @@ function DoctorsTable(props) {
                 </TableRow>
             );
         });
+    };
+
+    // Search for results row
+    const searchForResults = (
+        <TableRow key={0}>
+            <TableCell colSpan={5}>
+                <span className='noResults'>Search for results</span>
+            </TableCell>
+        </TableRow>
+    );
+
+    // No results row
+    const noResults = (
+        <TableRow key={0}>
+            <TableCell colSpan={5} >
+                <div className='noResults'>No results to display</div>
+            </TableCell>
+        </TableRow>
+    );
+
+    // Error row
+    const errorResults = (
+        <TableRow key={0}>
+            <TableCell colSpan={5} >
+                <div className='noResults errorMessage'>Sorry, this request failed. Please try again later.</div>
+            </TableCell>
+        </TableRow>
+    );
+
+    let tableRows;
+    if (!doctorsData) {
+        tableRows = searchForResults;
+    } else if (doctorsData === 'error') {
+        tableRows = errorResults;
+    } else if (doctorsData.length === 0) {
+        tableRows = noResults;
+    } else {
+        tableRows = createTableRows(doctorsData);
     };
 
     return (        
@@ -99,8 +116,8 @@ function DoctorsTable(props) {
                     <TableRow>
                         <TableCell>Name</TableCell>
                         <TableCell>Type</TableCell>
-                        <TableCell>City</TableCell>
-                        <TableCell>Zipcode</TableCell>
+                        <TableCell>Speciality</TableCell>
+                        <TableCell>Address</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                 </TableHead>
