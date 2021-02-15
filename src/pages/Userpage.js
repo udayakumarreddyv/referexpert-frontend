@@ -19,6 +19,8 @@ import {
     Button,
     Dialog,
     DialogActions,
+    DialogContent,
+    DialogContentText,
     DialogTitle,
     Snackbar,
 } from '@material-ui/core';
@@ -316,8 +318,16 @@ function Userpage({ classes }) {
                 aria-labelledby="appointment-confirmation"
                 aria-describedby="Confirm to handle a appointment action"
             >
-                <DialogTitle id="alert-dialog-title">Are your sure your would like to accept this appointment?</DialogTitle>
+                {/* Title */}
+                <DialogTitle id="alert-dialog-title">Are you sure your would like to accept this appointment?</DialogTitle>
                 
+                {/* Description */}
+                <DialogContent>
+                    <DialogContentText>
+                        Accepting will add this appointment to you upcoming appointments list.
+                    </DialogContentText>
+                </DialogContent>
+
                 {/* Action buttons */}
                 <DialogActions>
                     <Button onClick={handleDialogClose}>Cancel</Button>
@@ -337,8 +347,16 @@ function Userpage({ classes }) {
                 aria-labelledby="appointment-confirmation"
                 aria-describedby="Confirm to handle a appointment action"
             >
-                <DialogTitle id="alert-dialog-title">Are your sure your would like to reject this appointment?</DialogTitle>
+                {/* Title */}
+                <DialogTitle id="alert-dialog-title">Are you sure your would like to reject this appointment?</DialogTitle>
                 
+                {/* Description */}
+                <DialogContent>
+                    <DialogContentText>
+                        Rejecting this appointment will remove it from your pending approvals list.
+                    </DialogContentText>
+                </DialogContent>
+
                 {/* Action buttons */}
                 <DialogActions>
                     <Button onClick={handleDialogClose}>Cancel</Button>
@@ -358,8 +376,16 @@ function Userpage({ classes }) {
                 aria-labelledby="appointment-confirmation"
                 aria-describedby="Confirm to handle a appointment action"
             >
-                <DialogTitle id="alert-dialog-title">Are your sure your would like to complete this appointment?</DialogTitle>
+                {/* Title */}
+                <DialogTitle id="alert-dialog-title">Are you sure your would like to complete this appointment?</DialogTitle>
                 
+                {/* Description */}
+                <DialogContent>
+                    <DialogContentText>
+                        Completing this appointment will remove it from your upcoming appoinments list.
+                    </DialogContentText>
+                </DialogContent>
+
                 {/* Action buttons */}
                 <DialogActions>
                     <Button onClick={handleDialogClose}>Cancel</Button>
