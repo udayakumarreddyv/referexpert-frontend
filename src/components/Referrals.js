@@ -52,7 +52,7 @@ function Referrals ({ classes, referralsData }) {
 
     // Create referrals table rows
     const createTableRows = (referralsData) => {
-        return referralsData.map((referral) => {
+        return referralsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((referral) => {
             const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, isAccepted, isServed } = referral;
             const date = moment(dateAndTimeString).format('MM/DD/YYYY');
             const time = moment(dateAndTimeString).format('h:mm a');

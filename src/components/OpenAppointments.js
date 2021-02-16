@@ -59,7 +59,7 @@ function OpenAppointments({ classes, appointmentsData, handleCompleteDialogOpen 
             );
         };
 
-        return appointmentsData.map((appointment) => {
+        return appointmentsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((appointment) => {
             const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, isAccepted, isServed } = appointment;
             const date = moment(dateAndTimeString).format('MM/DD/YYYY');
             const time = moment(dateAndTimeString).format('h:mm a');
