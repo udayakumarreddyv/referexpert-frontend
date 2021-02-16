@@ -10,6 +10,7 @@ import { Context } from '../store/GlobalStore';
 // Components
 import PendingAppointments from '../components/PendingAppointments';
 import OpenAppointments from '../components/OpenAppointments';
+import Referrals from '../components/Referrals';
 
 // Utils
 import createBasicAuth from '../utils/basicAuth';
@@ -100,6 +101,9 @@ function Userpage({ classes }) {
     const [pendingAppointments, updatePendingAppointments] = useState();
     const [openAppointments, updateOpenAppointments] = useState([]);
 
+    // Referrals states
+    const [referralsData, updateReferralsData] = useState(null);
+
     // Open complete appointment dialog
     const handleCompleteDialogOpen = (appointmentId) => {
         updateDialogAppointmentId(appointmentId);
@@ -143,6 +147,23 @@ function Userpage({ classes }) {
             updatePendingAppointments(pendingList);
             updateOpenAppointments(openList);
         } catch (err) {
+            console.log(err);
+        };
+    };
+
+    // Fetch referrals user had made
+    const fetchReferrals = async () => {
+        try {
+
+            // Fetch referrals from api
+            const url = `referexpert/myreferrals/${state.userEmail}`;
+            const response = await fetch(url, { headers: { 'Authorization': createBasicAuth() }});
+            const results = sortAppointments(await response.json());
+            
+            // Update referrals state
+            updateReferralsData(results);
+        } catch (err) {
+            updateReferralsData('error');
             console.log(err);
         };
     };
@@ -260,6 +281,11 @@ function Userpage({ classes }) {
         fetchAppointments();
     }, []);
 
+    // Launch fetch referrals on page load
+    useEffect(() => {
+        fetchReferrals();
+    }, []);
+
     return (
         <section id='userpage-body'>
 
@@ -318,9 +344,17 @@ function Userpage({ classes }) {
                 />
             </section>
 
-
-
-
+            {/* Referrals */}
+            <h1 className='pageTitle hasIcon'>
+                <Schedule classes={{ root: userpageClasses.titleIcon }} />
+                My referrals
+            </h1>
+            <section id='userpage-referralsContainer'>
+                <Referrals
+                    classes={classes}
+                    referralsData={referralsData}
+                />
+            </section>
 
 
 
