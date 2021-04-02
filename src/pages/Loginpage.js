@@ -10,7 +10,7 @@ import LoginCard from '../components/LoginCard';
 import ForgotPasswordCard from '../components/ForgotPasswordCard';
 
 // Utils
-import createBasicAuth from '../utils/basicAuth';
+import CookieHelper from '../utils/cookieHelper';
 
 // Material UI
 import { Card } from '@material-ui/core';
@@ -122,7 +122,7 @@ function Loginpage({ classes }) {
             // We got the JWT
             if ('token' in results) {
 
-                // Get user details, login user on frontend
+                // Get user details
                 const userDetails = await getUserInfo(email, results.token);
                 const payload = {
                     token: results.token,
@@ -130,6 +130,9 @@ function Loginpage({ classes }) {
                     userType: userDetails.userType,
                     userDetails,
                 };
+
+                // Save cookie, update state to login user
+                CookieHelper.saveCookie('accessCookie', { email: userDetails.email, token: results.token });
                 dispatch({ type: 'LOGIN_USER', payload });
             };
         } catch (err) {

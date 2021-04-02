@@ -4,6 +4,9 @@ import './styles/Header.css'
 // Global store
 import { Context } from '../store/GlobalStore';
 
+// Utils
+import CookieHelper from '../utils/cookieHelper';
+
 // Routing
 import { Link } from 'react-router-dom';
 
@@ -54,6 +57,9 @@ function Header({ classes, isUserLoggedIn, accountType }) {
     const handleLogout = () => {
         // close drawer
         updateDrawerOpen(false);
+
+        // Delete cookie
+        CookieHelper.deleteCookie('accessCookie');
     
         // Logout user in state
         dispatch({ type: 'LOGOUT_USER', payload: null });
