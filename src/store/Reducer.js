@@ -4,8 +4,10 @@ const Reducer = (state, action) => {
             return {
                 ...state,
                 loggedIn: true,
+                token: action.payload.token,
                 userEmail: action.payload.userEmail,
                 userType: action.payload.userType,
+                userDetails: action.payload.userDetails,
             };
         case 'LOGOUT_USER':
             return {

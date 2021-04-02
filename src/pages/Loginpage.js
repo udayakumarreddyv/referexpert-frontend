@@ -48,6 +48,21 @@ function Loginpage({ classes }) {
     const [validatePassword, updateValidatePassword] = useState({ hasError: false, errorMessage: '' });
     const [submitError, updateSubmitError] = useState({ hasError: false, errorMessage: '' });
 
+    // Get user info
+    const getUserInfo = async (email, token) => {
+        try {
+            const url = `/referexpert/users/${email}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const results = await response.json();  
+            return results;
+        } catch (err) {
+            throw err;
+        };
+    };
+
     // Handle login attempt
     const handleLogin = async () => {
     
@@ -81,32 +96,41 @@ function Loginpage({ classes }) {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Authorization': createBasicAuth(),
+                    // 'Authorization': createBasicAuth(),
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, password }),
             });
             const results = await response.json();
             
-            // Make sure we got a success response
-            if ('message' in results) {
-                
-                // Validate if login was successful or not
-                if (results.message === 'Invalid Username/Password') {
+            // Catch any errors
+            if ('error' in results) {
+
+                // Invalid credentials
+                if (results.error === 'Unauthorized') {
                     updateSubmitError({ hasError: true, errorMessage: 'Invalid username & password combination' });
                     
                     // Hide loading spinner
                     updateLoading(false);
-                } else if (results.message === 'User Exists') {
+                } else {
 
-                    // Login user on frontend
-                    // TODO: Change payload to response
-                    const payload = { userEmail: email, userType: 'user' };
-                    dispatch({ type: 'LOGIN_USER', payload });
+                    // Unhandled error
+                    throw results.error;
                 };
-            } else {
-                // Got a response that we didn't expect
-                throw results;
+            };
+
+            // We got the JWT
+            if ('token' in results) {
+
+                // Get user details, login user on frontend
+                const userDetails = await getUserInfo(email, results.token);
+                const payload = {
+                    token: results.token,
+                    userEmail: userDetails.email,
+                    userType: userDetails.userType,
+                    userDetails,
+                };
+                dispatch({ type: 'LOGIN_USER', payload });
             };
         } catch (err) {
             console.log(err);
