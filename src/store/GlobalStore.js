@@ -12,9 +12,9 @@ const initialState = {
 const tokenCookieName = 'accessCookie';
 
 // Get user info
-const getUserInfo = async (email, token) => {
+const getUserInfo = async (token) => {
     try {
-        const url = `/referexpert/users/${email}`;
+        const url = `/referexpert/userdetails`;
         const response = await fetch(url, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
@@ -38,11 +38,11 @@ const Store = ({ children }) => {
     useEffect(async () => {
         
         // Check if access token cookie exists
-        const tokenCookie = CookieHelper.getCookie(tokenCookieName);
-        if (tokenCookie) {
+        const sessionCookie = CookieHelper.getCookie(tokenCookieName);
+        if (sessionCookie) {
 
             // Get user details
-            const userDetails = await getUserInfo(tokenCookie.email, 'tokenCookie.token');
+            const userDetails = await getUserInfo(sessionCookie.token);
             
             // Expired or invalid token, remove cookie
             if (userDetails === 'Invalid token') {
@@ -52,7 +52,6 @@ const Store = ({ children }) => {
 
             // Update state to login user
             const payload = {
-                token: tokenCookie.token,
                 userEmail: userDetails.email,
                 userType: userDetails.userType,
                 userDetails,

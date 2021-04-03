@@ -125,14 +125,13 @@ function Loginpage({ classes }) {
                 // Get user details
                 const userDetails = await getUserInfo(email, results.token);
                 const payload = {
-                    token: results.token,
                     userEmail: userDetails.email,
                     userType: userDetails.userType,
                     userDetails,
                 };
 
                 // Save cookie, update state to login user
-                CookieHelper.saveCookie('accessCookie', { email: userDetails.email, token: results.token });
+                CookieHelper.saveCookie('accessCookie', { token: results.token });
                 dispatch({ type: 'LOGIN_USER', payload });
             };
         } catch (err) {
