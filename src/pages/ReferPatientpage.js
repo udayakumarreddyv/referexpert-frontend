@@ -4,9 +4,6 @@ import './styles/ReferPatientpage.css';
 // Global store
 import { Context } from '../store/GlobalStore';
 
-// Utils
-import createBasicAuth from '../utils/basicAuth';
-
 // Time parsing
 import * as moment from 'moment';
 
@@ -101,7 +98,7 @@ function ReferPatientpage({ classes }) {
         try {
             searchType = searchType.toLowerCase();
             const url = `referexpert/users/${searchType}/${searchQuery}`;
-            const response = await fetch(url, { headers: { 'Authorization': createBasicAuth() }});
+            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
             return await response.json();
         } catch (err) {
             throw err;
@@ -116,7 +113,7 @@ function ReferPatientpage({ classes }) {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Authorization': createBasicAuth(),
+                    'Authorization': `Bearer ${state.token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(body)

@@ -12,9 +12,6 @@ import PendingAppointments from '../components/PendingAppointments';
 import OpenAppointments from '../components/OpenAppointments';
 import Referrals from '../components/Referrals';
 
-// Utils
-import createBasicAuth from '../utils/basicAuth';
-
 // Page navigation
 import { Link } from 'react-router-dom';
 
@@ -137,7 +134,7 @@ function Userpage({ classes }) {
 
             // Fetch from api
             const url = `/referexpert/myappointments/${state.userEmail}`;
-            const response = await fetch(url, { headers: { 'Authorization': createBasicAuth(), }});
+            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}`, }});
             const results = await response.json();
 
             // Separate appointments
@@ -157,7 +154,7 @@ function Userpage({ classes }) {
 
             // Fetch referrals from api
             const url = `referexpert/myreferrals/${state.userEmail}`;
-            const response = await fetch(url, { headers: { 'Authorization': createBasicAuth() }});
+            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
             const results = sortAppointments(await response.json());
             
             // Update referrals state
@@ -187,7 +184,7 @@ function Userpage({ classes }) {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Authorization': createBasicAuth(),
+                    'Authorization': `Bearer ${state.token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ appointmentId })
@@ -234,7 +231,7 @@ function Userpage({ classes }) {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Authorization': createBasicAuth(),
+                    'Authorization': `Bearer ${state.token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ appointmentId })
@@ -285,6 +282,8 @@ function Userpage({ classes }) {
     useEffect(() => {
         fetchReferrals();
     }, []);
+
+    console.log(state);
 
     return (
         <section id='userpage-body'>

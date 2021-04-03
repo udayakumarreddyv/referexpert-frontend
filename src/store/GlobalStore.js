@@ -5,6 +5,7 @@ import CookieHelper from '../utils/cookieHelper';
 // Initial global state
 const initialState = {
     loggedIn: false,
+    token: null,
     userEmail: null,
     userType: null,
     userDetails: {}
@@ -52,6 +53,7 @@ const Store = ({ children }) => {
 
             // Update state to login user
             const payload = {
+                token: sessionCookie.token,
                 userEmail: userDetails.email,
                 userType: userDetails.userType,
                 userDetails,

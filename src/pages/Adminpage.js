@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import './styles/Adminpage.css';
 
-// Utils
-import createBasicAuth from '../utils/basicAuth';
+// Global store
+import { Context } from '../store/GlobalStore';
 
 // Debounce search input
 import debounce from 'lodash.debounce';
@@ -50,6 +50,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Adminpage() {
+    const [state, dispatch] = useContext(Context);
     const adminpageClasses = useStyles();
 
     // Loading states
@@ -83,8 +84,8 @@ function Adminpage() {
                 const userUrl = 'referexpert/users/type/p';
 
                 // Fetch results
-                const adminResponse = await fetch(adminUrl, { headers: { 'Authorization': createBasicAuth() }});
-                const userResponse = await fetch(userUrl, { headers: { 'Authorization': createBasicAuth() }});
+                const adminResponse = await fetch(adminUrl, { headers: { 'Authorization': `Bearer ${state.token}` }});
+                const userResponse = await fetch(userUrl, { headers: { 'Authorization': `Bearer ${state.token}` }});
                 const adminResults = await adminResponse.json();
                 const userResults = await userResponse.json();
 

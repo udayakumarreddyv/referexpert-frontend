@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 // Utils
-import createBasicAuth from '../utils/basicAuth';
 import * as moment from 'moment';
 
 // Material UI

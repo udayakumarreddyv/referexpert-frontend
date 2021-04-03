@@ -95,10 +95,7 @@ function Loginpage({ classes }) {
             const url = '/referexpert/validateuser';
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    // 'Authorization': createBasicAuth(),
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
             const results = await response.json();
@@ -125,6 +122,7 @@ function Loginpage({ classes }) {
                 // Get user details
                 const userDetails = await getUserInfo(email, results.token);
                 const payload = {
+                    token: results.token,
                     userEmail: userDetails.email,
                     userType: userDetails.userType,
                     userDetails,
