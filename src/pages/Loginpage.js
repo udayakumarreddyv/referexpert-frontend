@@ -11,6 +11,7 @@ import ForgotPasswordCard from '../components/ForgotPasswordCard';
 
 // Utils
 import CookieHelper from '../utils/cookieHelper';
+import * as EmailValidator from 'email-validator';
 
 // Material UI
 import { Card } from '@material-ui/core';
@@ -49,9 +50,9 @@ function Loginpage({ classes }) {
     const [submitError, updateSubmitError] = useState({ hasError: false, errorMessage: '' });
 
     // Get user info
-    const getUserInfo = async (email, token) => {
+    const getUserInfo = async (token) => {
         try {
-            const url = `/referexpert/users/${email}`;
+            const url = `/referexpert/users`;
             const response = await fetch(url, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -76,6 +77,9 @@ function Loginpage({ classes }) {
         if (email.trim() === '') {
             hasError = true;
             updateValidateEmail({ hasError: true, errorMessage: '' });
+        } else if (!EmailValidator.validate(email)) {
+            hasError = true;
+            updateValidateEmail({ hasError: true, errorMessage: 'Please enter a valid email account' });
         };
         if (password.trim() === '') {
             hasError = true;
@@ -120,7 +124,7 @@ function Loginpage({ classes }) {
             if ('token' in results) {
 
                 // Get user details
-                const userDetails = await getUserInfo(email, results.token);
+                const userDetails = await getUserInfo(results.token);
                 const payload = {
                     token: results.token,
                     userEmail: userDetails.email,
@@ -148,8 +152,12 @@ function Loginpage({ classes }) {
 
         // Catch validation errors
         if (email.trim() === '') {
-            updateValidateEmail({ hasError: true, errorMessage: '' });
-            updateSubmitError({ hasError: true, errorMessage: 'Please fill out field' });
+            updateValidateEmail({ hasError: true, errorMessage: 'Please fill out field' });
+            updateSubmitError({ hasError: true, errorMessage: '' });
+            return;
+        } else if (!EmailValidator.validate(email)) {
+            updateValidateEmail({ hasError: true, errorMessage: 'Please enter a valid email account' });
+            updateSubmitError({ hasError: true, errorMessage: '' });
             return;
         };
 
@@ -158,23 +166,27 @@ function Loginpage({ classes }) {
             updateLoading(true);
 
             // Send api request
-            const url = '';
+            const url = '/referexpert/resetnotification';
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),
             });
-            const results = response.json();
-            console.log(results);
+            const results = await response.json();
+            
+            // Catch errors
+            if (!('message' in results) || results.message !== 'Email sent successful') {
+                throw results;
+            };
 
             // TODO: Handle successful password reset
             updatePasswordResetSuccess(true);
             updateLoading(false);
         } catch (err) {
             console.log(err);
-
-            // TODO: Handle failed attempts here
-        }
+            updateSubmitError({ hasError: true, errorMessage: 'There was an error while trying to reset your password, please wait a moment and try again later' });
+            updateLoading(false);
+        };
     };
 
     // Handle forgot password card view change
