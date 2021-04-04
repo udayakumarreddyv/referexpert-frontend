@@ -9,6 +9,11 @@ const Reducer = (state, action) => {
                 userType: action.payload.userType,
                 userDetails: action.payload.userDetails,
             };
+        case 'UPDATE_USER':
+            return {
+                ...state,
+                userDetails: action.payload,
+            };
         case 'LOGOUT_USER':
             return {
                 ...state,

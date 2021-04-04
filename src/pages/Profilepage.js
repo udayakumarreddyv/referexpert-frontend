@@ -1,5 +1,8 @@
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useContext, useEffect } from 'react';
 import './styles/Profilepage.css';
+
+// Global store
+import { Context } from '../store/GlobalStore';
 
 // Material UI
 import {
@@ -20,6 +23,7 @@ import {
     Home,
     LocalHospital,
     Phone,
+    Print,
     Work,
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
@@ -45,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Profilepage({ classes }) {
     const profilepageClasses = useStyles();
+    const [state, dispatch] = useContext(Context);
     const [loading, updateLoading] = useState(false);
 
     // Alert states
@@ -53,10 +58,13 @@ function Profilepage({ classes }) {
 
     // Edit states
     const [showEdit, updateShowEdit] = useState(false);
-    const [firstName, updateFirstName] = useState('Andrew');
-    const [lastName, updateLastName] = useState('Elick');
-    const [address, updateAddress] = useState('123 Main Street');
-    const [phone, updatePhone] = useState('901-606-5506');
+    const [firstName, updateFirstName] = useState(state.userDetails.firstName);
+    const [lastName, updateLastName] = useState(state.userDetails.lastName);
+    const [address, updateAddress] = useState(state.userDetails.address);
+    const [phone, updatePhone] = useState(state.userDetails.phone);
+    const [fax, updateFax] = useState(state.userDetails.fax);
+    const [userType, updateUserType] = useState(state.userDetails.userType);
+    const [userSpeciality, updateUserSpeciality] = useState(state.userDetails.userSpeciality);
 
     // Change password states
     const [currentPassword, updateCurrentPassword] = useState('');
@@ -78,18 +86,44 @@ function Profilepage({ classes }) {
             updateLoading(true);
 
             // Send request to api
-            // const url = '';
-            // const response = await fetch(url, {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ firstName, lastName, address, phone })
-            // });
-            // const results = await response.json();
-            // console.log(results);
+            const url = '/referexpert/userprofile';
+            const newUserDetails = {
+                firstName,
+                lastName,
+                userType,
+                userSpeciality,
+                address,
+                phone,
+                fax,
+                userId: state.userDetails.userId,
+                email: state.userDetails.email,
+                isActive: state.userDetails.isActive
+            };
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${state.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newUserDetails)
+            });
+            const results = await response.json();
+            
+            // Catch errors
+            if (
+                !('message' in results)
+                || results.message === 'Issue in updating user profile'
+                || results.message !== 'User profile updated Successfully'
+            ) {
+                throw results;
+            };
 
             // Hide edit field screen and hide loading spinner
             updateShowEdit(false);
             updateLoading(false);
+
+            // Update state to reflect immediate changes
+            dispatch({ type: 'UPDATE_USER', payload: newUserDetails });
 
             // Show success alert
             updateAlertDetails({ type: 'success', message: 'Your profile information has been updated!' });
@@ -156,15 +190,21 @@ function Profilepage({ classes }) {
         updateSubmitError({ hasError: false, errorMessage: '' });
 
         // Validate password fields
-        const [tempCurrentPassword, tempNewPassword, tempConfirmPassword] = validatePasswordFields();
+        const [
+            // tempCurrentPassword,
+            tempNewPassword, tempConfirmPassword
+        ] = validatePasswordFields();
 
         // Update validation states
-        updateCurrentPasswordValidation(tempCurrentPassword);
+        // updateCurrentPasswordValidation(tempCurrentPassword);
         updateNewPasswordValidation(tempNewPassword);
         updateConfirmPasswordValidation(tempConfirmPassword);
 
         // Kill request if error in validation
-        if (tempCurrentPassword.hasError || tempNewPassword.hasError || tempConfirmPassword.hasError) {
+        if (
+            // tempCurrentPassword.hasError ||
+            tempNewPassword.hasError || tempConfirmPassword.hasError
+        ) {
             updateSubmitError({ hasError: true, errorMessage: 'Please fill out all fields' });
             return;
         };
@@ -173,15 +213,26 @@ function Profilepage({ classes }) {
             // Show loading spinner
             updatePasswordLoading(true);
 
-            const url = '';
+            const url = '/referexpert/updatepassword';
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+                headers: {
+                    'Authorization': `Bearer ${state.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: state.userEmail,
+                    password: newPassword,
+                }),
             });
             const results = await response.json();
-
-            // TODO: Check if current password was correct
+            
+            // Check if password update failed
+            if (!('message' in results)) {
+                throw results;
+            } else if (results.message !== 'Password updated Successfully') {
+                throw results;
+            };
 
             // Show success alert
             updateAlertDetails({ type: 'success', message: 'Your password has been updated!' });
@@ -248,7 +299,7 @@ function Profilepage({ classes }) {
                         <ListItemIcon>
                             <Email className='primaryColor' />
                         </ListItemIcon>
-                        <ListItemText>andy.elick@gmail.com</ListItemText>
+                        <ListItemText>{state.userDetails.email}</ListItemText>
                     </ListItem>
 
                     {/* Name */}
@@ -277,7 +328,7 @@ function Profilepage({ classes }) {
                                         onChange={(event) => updateLastName(event.target.value)}
                                     />
                                 </Fragment>
-                                : 'Andrew Elick'
+                                : `${state.userDetails.firstName} ${state.userDetails.lastName}`
                             }
                         </ListItemText>
                     </ListItem>
@@ -297,7 +348,7 @@ function Profilepage({ classes }) {
                                     value={address}
                                     onChange={(event) => updateAddress(event.target.value)}
                                 />
-                                : '123 Main street'
+                                : state.userDetails.address
                             }
                         </ListItemText>
                     </ListItem>
@@ -317,7 +368,27 @@ function Profilepage({ classes }) {
                                     value={phone}
                                     onChange={(event) => updatePhone(event.target.value)}
                                 />
-                                : 'andy.elick@gmail.com'
+                                : state.userDetails.phone
+                            }
+                        </ListItemText>
+                    </ListItem>
+
+                    {/* Fax */}
+                    <ListItem>
+                        <ListItemIcon>
+                            <Print className='primaryColor' />
+                        </ListItemIcon>
+                        <ListItemText>
+                            {
+                                showEdit
+                                ? <TextField
+                                    name='fax'
+                                    label='Fax'
+                                    variant='outlined'
+                                    value={fax}
+                                    onChange={(event) => updateFax(event.target.value)}
+                                />
+                                : state.userDetails.fax
                             }
                         </ListItemText>
                     </ListItem>
@@ -327,7 +398,7 @@ function Profilepage({ classes }) {
                         <ListItemIcon>
                             <LocalHospital className='primaryColor' />
                         </ListItemIcon>
-                        <ListItemText>M.D</ListItemText>
+                        <ListItemText>{state.userDetails.userType}</ListItemText>
                     </ListItem>
 
                     {/* Type */}
@@ -335,7 +406,7 @@ function Profilepage({ classes }) {
                         <ListItemIcon>
                             <Work className='primaryColor' />
                         </ListItemIcon>
-                        <ListItemText>Physician</ListItemText>
+                        <ListItemText>{state.userDetails.userSpeciality}</ListItemText>
                     </ListItem>
                 </List>
 
@@ -344,7 +415,7 @@ function Profilepage({ classes }) {
                     <h3 className='pageSubTitle'>Change password</h3>
                     
                     {/* Current password */}
-                    <TextField
+                    {/* <TextField
                         name='currentPassword'
                         label='Current password'
                         type='password'
@@ -353,7 +424,7 @@ function Profilepage({ classes }) {
                         onChange={(event) => updateCurrentPassword(event.target.value)}
                         error={currentPasswordValidation.hasError}
                         fullWidth
-                    />
+                    /> */}
 
                     {/* New password */}
                     <TextField
