@@ -35,10 +35,19 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Header({ classes, isUserLoggedIn, accountType }) {
+function Header({ classes }) {
     const headerClasses = useStyles();
     const [state, dispatch] = useContext(Context);
-    const logoRoute = state.userType === 'admin' ? '/admin' : '/home';
+
+    // Decide path of logo url
+    let logoRoute;
+    if (!state.loggedIn) {
+        logoRoute = '/';
+    } else if (state.userType === 'admin') {
+        logoRoute = '/admin';
+    } else {
+        logoRoute = '/home';
+    };
 
     // Menu states
     const [drawerOpen, updateDrawerOpen] = useState(false);
@@ -96,7 +105,7 @@ function Header({ classes, isUserLoggedIn, accountType }) {
                 style={{ marginRight: '10px', fontSize: '12px', }}
                 onClick={handleDrawerOpen}
             >
-                Andrew <AccountCircle className='primaryColor' classes={{ root: headerClasses.accountIcon }} />
+                {state.userDetails.firstName} <AccountCircle className='primaryColor' classes={{ root: headerClasses.accountIcon }} />
             </Button>
 
             {/* Drawer */}
@@ -129,7 +138,7 @@ function Header({ classes, isUserLoggedIn, accountType }) {
 
                     {/* Refer patient */}
                     {
-                        accountType === 'user'
+                        state.userType !== 'admin'
                         ? <ListItem classes={{ root: headerClasses.listItem }}>
                             <Link
                                 to='/refer'
