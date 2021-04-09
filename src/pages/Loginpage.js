@@ -52,13 +52,18 @@ function Loginpage({ classes }) {
     // Get user info
     const getUserInfo = async (token) => {
         try {
-            const url = `/referexpert/users`;
+            const url = `/referexpert/userdetails`;
             const response = await fetch(url, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
-            const results = await response.json();  
-            return results;
+            
+            // Failed to get user details
+            if (response.status !== 200) {
+                return 'Invalid token';
+            };
+
+            return await response.json();
         } catch (err) {
             throw err;
         };
