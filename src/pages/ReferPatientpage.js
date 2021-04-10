@@ -305,6 +305,7 @@ function ReferPatientpage({ classes }) {
                     variant='outlined'
                     classes={{ root: `${ referpatientpageClasses.searchInput } ${ referpatientpageClasses.inputMarginRight }` }}
                     onChange={(event) => updateSearchValue(event.target.value)}
+                    onKeyDown={(event) => event.key === 'Enter' ? handleDoctorSearch() : null }
                     error={searchValueError.hasError}
                 />
 
