@@ -55,6 +55,7 @@ function LoginCard(props) {
                 type='password'
                 classes={{ root: classes.textfield }}
                 onChange={(e) => updatePassword(e.target.value)}
+                onKeyDown={(event) => event.key === 'Enter' ? handleSubmit() : null }
                 error={validatePassword.hasError}
                 helperText={validatePassword.errorMessage}
                 fullWidth
