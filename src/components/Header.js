@@ -43,7 +43,7 @@ function Header({ classes }) {
     let logoRoute;
     if (!state.loggedIn) {
         logoRoute = '/';
-    } else if (state.userType === 'admin') {
+    } else if (state.userType === 'ADMIN') {
         logoRoute = '/admin';
     } else {
         logoRoute = '/home';
@@ -138,7 +138,7 @@ function Header({ classes }) {
 
                     {/* Refer patient */}
                     {
-                        state.userType !== 'admin'
+                        state.userType !== 'ADMIN'
                         ? <ListItem classes={{ root: headerClasses.listItem }}>
                             <Link
                                 to='/refer'

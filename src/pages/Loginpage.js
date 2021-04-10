@@ -240,7 +240,7 @@ function Loginpage({ classes }) {
 
     // Check if user is logged in, redirect to appropriate page
     if (state.loggedIn) {
-        if (state.userType === 'admin') {
+        if (state.userType === 'ADMIN') {
             return <Redirect to='/admin' />
         } else {
             return <Redirect to='/home' />
