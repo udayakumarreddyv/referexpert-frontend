@@ -41,13 +41,13 @@ function ScheduleAppointmentDialog(props) {
         doctorDetails,
 
         // Input states
-        updatePatientName,
+        updateSubjectLine,
         updateReason,
         updateAppointmentTimestamp,
         handleScheduleAppointment,
 
         // Validation states
-        validatePatientName,
+        validateSubjectLine,
         validateReason,
         validateAppointmentTimestamp
     } = props;
@@ -87,12 +87,12 @@ function ScheduleAppointmentDialog(props) {
                 <section id='scheduleAppointmentDialog-appointmentDetailsContainer'>
                     {/* Patient name */}
                     <TextField
-                        name='patientName'
-                        label='Patient name'
+                        name='subject'
+                        label='Subject'
                         variant='outlined'
                         classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
-                        onChange={(event) => updatePatientName(event.target.value)}
-                        error={validatePatientName.hasError}
+                        onChange={(event) => updateSubjectLine(event.target.value)}
+                        error={validateSubjectLine.hasError}
                         fullWidth
                     />
 

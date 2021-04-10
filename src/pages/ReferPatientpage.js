@@ -81,12 +81,12 @@ function ReferPatientpage({ classes }) {
     });
     
     // Input states
-    const [patientName, updatePatientName] = useState('');
+    const [subjectLine, updateSubjectLine] = useState('');
     const [reason, updateReason] = useState('');
     const [appointmentTimestamp, updateAppointmentTimestamp] = useState(null);
     
     // Validate states
-    const [validatePatientName, updateValidatePatientName] = useState({ hasError: false, errorMessage: '' });
+    const [validateSubjectLine, updateValidateSubjectLine] = useState({ hasError: false, errorMessage: '' });
     const [validateReason, updateValidateReason] = useState({ hasError: false, errorMessage: '' });
     const [validateAppointmentTimestamp, updateValidateAppointmentTimestamp] = useState({ hasError: false, errorMessage: '' });
 
@@ -173,14 +173,14 @@ function ReferPatientpage({ classes }) {
     const handleScheduleAppointment = async () => {
 
         // Clear any previous validation errors
-        updateValidatePatientName({ hasError: false, errorMessage: '' });
+        updateValidateSubjectLine({ hasError: false, errorMessage: '' });
         updateValidateReason({ hasError: false, errorMessage: '' });
         updateValidateAppointmentTimestamp({ hasError: false, errorMessage: '' });
         let validateError = false;
 
-        // Validate patient name input
-        if (patientName.trim() === '') {
-            updateValidatePatientName({ hasError: true, errorMessage: '' });
+        // Validate subject line input
+        if (subjectLine.trim() === '') {
+            updateValidateSubjectLine({ hasError: true, errorMessage: '' });
             validateError = true;
         };
         
@@ -262,12 +262,12 @@ function ReferPatientpage({ classes }) {
         });
         
         // Clear appointment input states
-        updatePatientName('');
+        updateSubjectLine('');
         updateReason('');
         updateAppointmentTimestamp(null);
 
         // Clear appointment input validation states
-        updateValidatePatientName({ hasError: false, errorMessage: '' });
+        updateSubjectLine({ hasError: false, errorMessage: '' });
         updateValidateReason({ hasError: false, errorMessage: '' });
         updateValidateAppointmentTimestamp({ hasError: false, errorMessage: '' });
         
@@ -363,13 +363,13 @@ function ReferPatientpage({ classes }) {
                 doctorDetails={doctorDetails}
 
                 // Input states
-                updatePatientName={updatePatientName}
+                updateSubjectLine={updateSubjectLine}
                 updateReason={updateReason}
                 updateAppointmentTimestamp={updateAppointmentTimestamp}
                 handleScheduleAppointment={handleScheduleAppointment}
 
                 // Validation states
-                validatePatientName={validatePatientName}
+                validateSubjectLine={validateSubjectLine}
                 validateReason={validateReason}
                 validateAppointmentTimestamp={validateAppointmentTimestamp}
             />
