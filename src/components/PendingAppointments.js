@@ -70,17 +70,17 @@ function PendingAppointments(props) {
         };
 
         return appointmentsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((appointment) => {
-            const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, isAccepted, isServed } = appointment;
+            const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, reason, subject, isAccepted, isServed } = appointment;
             const date = moment(dateAndTimeString).format('MM/DD/YYYY');
             const time = moment(dateAndTimeString).format('h:mm a');
 
             // Format 
             return (
                 <TableRow key={appointmentId}>
-                    {/* <TableCell>{ patient }</TableCell> */}
                     <TableCell>{ appointmentFrom }</TableCell>
-                    <TableCell>{ date }</TableCell>
-                    <TableCell>{ time }</TableCell>
+                    <TableCell>{ time } { date }</TableCell>
+                    <TableCell>{ subject }</TableCell>
+                    <TableCell>{ reason }</TableCell>
                     <TableCell>
                         <Button
                             classes={{ root: `${ classes.primaryButton } ${ pendingAppointmentClasses.acceptButton }` }}
@@ -117,10 +117,10 @@ function PendingAppointments(props) {
                 {/* Table header */}
                 <TableHead>
                     <TableRow>
-                        {/* <TableCell>Patient</TableCell> */}
                         <TableCell>Referred by</TableCell>
-                        <TableCell>Appointment Date</TableCell>
-                        <TableCell>Appointment Time</TableCell>
+                        <TableCell>Appointment Datetime</TableCell>
+                        <TableCell>Subject</TableCell>
+                        <TableCell>Reason</TableCell>
                         <TableCell colSpan={2}>Accept/Reject</TableCell>
                     </TableRow>
                 </TableHead>
