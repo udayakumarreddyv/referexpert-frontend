@@ -56,7 +56,7 @@ function ReferPatientpage({ classes }) {
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
     // Search states
-    const [searchType, updateSearchType] = useState('firstName');
+    const [searchType, updateSearchType] = useState('city');
     const [searchValue, updateSearchValue] = useState('');
     // const [searchZipCode, updateSearchZipCode] = useState('');
     const [searchValueError, updateSearchValueError] = useState({ hasError: false, errorMessage: '' });
@@ -162,6 +162,7 @@ function ReferPatientpage({ classes }) {
 
             // Send request to api
             const results = await searchQueryApi(searchType, searchValue);
+
             // Filter out current user and admin accounts
             const filteredResults = results.filter((user) => user.userType !== 'ADMIN' && user.email !== state.userEmail);
 
@@ -297,6 +298,9 @@ function ReferPatientpage({ classes }) {
                         value={searchType}
                         onChange={(event) => updateSearchType(event.target.value)}
                     >
+                        <MenuItem value='city'>City</MenuItem>
+                        <MenuItem value='state'>State</MenuItem>
+                        {/* <MenuItem value='zip'>Zipcode</MenuItem> */}
                         <MenuItem value='firstName'>First name</MenuItem>
                         <MenuItem value='lastName'>Last name</MenuItem>
                         <MenuItem value='speciality'>Specialty</MenuItem>
