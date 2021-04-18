@@ -106,10 +106,16 @@ function ReferPatientpage({ classes }) {
     };
 
     // Submit appointment to api
-    const submitAppointmentApi = async (appointmentFrom, appointmentTo, dateAndTimeString) => {        
+    const submitAppointmentApi = async (appointmentFrom, appointmentTo, subjectLine, reason, dateAndTimeString) => {        
         try {
             const url = 'referexpert/requestappointment';
-            const body = { appointmentFrom, appointmentTo, dateAndTimeString };
+            const body = {
+                appointmentFrom,
+                appointmentTo,
+                dateAndTimeString,
+                subject: subjectLine,
+                reason,
+            };
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -207,7 +213,7 @@ function ReferPatientpage({ classes }) {
             updateLoadingScheduleAppointment(true);
 
             // Send request to api
-            const results = await submitAppointmentApi(state.userEmail, doctorDetails.email, appointmentTimestamp);
+            const results = await submitAppointmentApi(state.userEmail, doctorDetails.email, subjectLine, reason, appointmentTimestamp);
 
             // Caught an unexpected response
             if (!('message' in results)) {
