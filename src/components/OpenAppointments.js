@@ -125,7 +125,7 @@ function OpenAppointments({ classes, appointmentsData, handleCompleteDialogOpen 
                     <TableRow>
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
-                            colSpan={4}
+                            colSpan={5}
                             count={appointmentsData.length}
                             rowsPerPage={rowsPerPage}
                             page={page}
