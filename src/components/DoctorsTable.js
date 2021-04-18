@@ -47,7 +47,19 @@ function DoctorsTable(props) {
     // Create table rows
     const createTableRows = (searchResults) => {
         return doctorsData.map((doctor) => {
-            const { userId, email, phone, firstName, lastName, userType, userSpeciality, address } = doctor;
+            const {
+                userId,
+                email,
+                phone,
+                firstName,
+                lastName,
+                userType,
+                userSpeciality,
+                address,
+                city,
+                state,
+                zip,
+            } = doctor;
     
             // Format 
             return (
@@ -55,7 +67,7 @@ function DoctorsTable(props) {
                     <TableCell>{ firstName } { lastName }</TableCell>
                     <TableCell>{ userType }</TableCell>
                     <TableCell>{ userSpeciality }</TableCell>
-                    <TableCell>{ address }</TableCell>
+                    <TableCell>{ `${address}, ${city} ${state} ${zip}` }</TableCell>
                     <TableCell>{ phone }</TableCell>
                     <TableCell>
                         <Button
