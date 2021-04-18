@@ -8,9 +8,6 @@ import { Redirect } from 'react-router-dom';
 // Email validation
 import * as EmailValidator from 'email-validator';
 
-// Basic auth creation
-import createBasicAuth from '../utils/basicAuth';
-
 // Material UI
 import {
     Button,
@@ -58,6 +55,7 @@ function Registerpage({ classes }) {
     const registerpageClasses = useStyles();
     const [state, dispatch] = useContext(Context);
     const [loading, updateLoading] = useState(false);
+    const [signUpSuccessView, updateSignUpSuccessView] = useState(false);
 
     // Input states
     const [firstName, updateFirstName] = useState('');
@@ -66,9 +64,12 @@ function Registerpage({ classes }) {
     const [password, updatePassword] = useState('');
     const [confirmPassword, updateConfirmPassword] = useState('');
     const [address, updateAddress] = useState('');
+    const [city, updateCity] = useState('');
+    const [locationState, updateLocationState] = useState('');
+    const [zipcode, updateZipcode] = useState('');
     const [phone, updatePhone] = useState('');
     const [fax, updateFax] = useState('');
-    const [degree, updateDegree] = useState('');
+    // const [degree, updateDegree] = useState('');
     const [type, updateType] = useState('');
     const [terms, updateTerms] = useState(false);
     const [referralCode, updateReferralCode] = useState('');
@@ -80,9 +81,14 @@ function Registerpage({ classes }) {
     const [validatePassword, updateValidatePassword] = useState({ hasError: false, errorMessage: '' });
     const [validateConfirmPassword, updateValidateConfirmPassword] = useState({ hasError: false, errorMessage: '' });
     const [validateAddress, updateValidateAddress] = useState({ hasError: false, errorMessage: '' });
+    
+    const [validateCity, updateValidateCity] = useState({ hasError: false, errorMessage: '' });
+    const [validateLocationState, updateValidateLocationState] = useState({ hasError: false, errorMessage: '' });
+
+    const [validateZipcode, updateValidateZipcode] = useState({ hasError: false, errorMessage: '' });
     const [validatePhone, updateValidatePhone] = useState({ hasError: false, errorMessage: '' });
     const [validateFax, updateValidateFax] = useState({ hasError: false, errorMessage: '' });
-    const [validateDegree, updateValidateDegree] = useState({ hasError: false, errorMessage: '' });
+    // const [validateDegree, updateValidateDegree] = useState({ hasError: false, errorMessage: '' });
     const [validateType, updateValidateType] = useState({ hasError: false, errorMessage: '' });
     const [validateTerms, updateValidateTerms] = useState({ hasError: false, errorMessage: '' });
     const [validateReferralCode, updateValidateReferralCode] = useState({ hasError: false, errorMessage: '' });
@@ -98,9 +104,12 @@ function Registerpage({ classes }) {
         let tempPassword = { hasError: false, errorMessage: '' };
         let tempConfirmPassword = { hasError: false, errorMessage: '' };
         let tempAddress = { hasError: false, errorMessage: '' };
+        let tempCity = { hasError: false, errorMessage: '' };
+        let tempLocationState = { hasError: false, errorMessage: '' };
+        let tempZipcode = { hasError: false, errorMessage: '' };
         let tempPhone = { hasError: false, errorMessage: '' };
         let tempFax = { hasError: false, errorMessage: '' };
-        let tempDegree = { hasError: false, errorMessage: '' };
+        // let tempDegree = { hasError: false, errorMessage: '' };
         let tempType = { hasError: false, errorMessage: '' };
         let tempTerms = { hasError: false, errorMessage: '' };
         let tempReferralCode = { hasError: false, errorMessage: '' };
@@ -147,6 +156,25 @@ function Registerpage({ classes }) {
             tempAddress = { hasError: true, errorMessage: '' };
         };
 
+        // City
+        if (city.trim() === '') {
+            tempCity = { hasError: true, errorMessage: '' };
+        };
+
+        // State
+        if (state === '') {
+            tempLocationState = { hasError: true, errorMessage: '' };
+        };
+
+        // Zipcode
+        if (zipcode.trim() === '') {
+            tempZipcode = { hasError: true, errorMessage: '' };
+        } else if (!zipcode.match(/^[0-9]+$/)) {
+            tempZipcode = { hasError: true, errorMessage: 'Must only be numbers' };
+        } else if (zipcode.length !== 5) {
+            tempZipcode = { hasError: true, errorMessage: 'Must be 5 characters long' };
+        };
+
         // Phone
         if (phone.trim() === '') {
             tempPhone = { hasError: true, errorMessage: '' };
@@ -166,9 +194,9 @@ function Registerpage({ classes }) {
         };
 
         // Degree
-        if (degree === '') {
-            tempDegree = { hasError: true, errorMessage: '' };
-        };
+        // if (degree === '') {
+        //     tempDegree = { hasError: true, errorMessage: '' };
+        // };
 
         // Type
         if (type === '') {
@@ -188,7 +216,8 @@ function Registerpage({ classes }) {
         return {
             tempFirstName, tempLastName, tempEmail,
             tempPassword, tempConfirmPassword, tempAddress,
-            tempPhone, tempFax, tempDegree,
+            tempCity, tempLocationState, tempZipcode,
+            tempPhone, tempFax, // tempDegree,
             tempType, tempTerms, tempReferralCode
         };
     };
@@ -197,7 +226,8 @@ function Registerpage({ classes }) {
     const handleErrorStates = (
         tempFirstName, tempLastName, tempEmail,
         tempPassword, tempConfirmPassword, tempAddress,
-        tempPhone, tempFax, tempDegree,
+        tempCity, tempLocationState, tempZipcode,
+        tempPhone, tempFax, // tempDegree,
         tempType, tempTerms, tempReferralCode
     ) => {
         updateValidateFirstName(tempFirstName);
@@ -206,9 +236,12 @@ function Registerpage({ classes }) {
         updateValidatePassword(tempPassword);
         updateValidateConfirmPassword(tempConfirmPassword);
         updateValidateAddress(tempAddress);
+        updateValidateCity(tempCity);
+        updateValidateLocationState(tempLocationState);
+        updateValidateZipcode(tempZipcode);
         updateValidatePhone(tempPhone);
         updateValidateFax(tempFax);
-        updateValidateDegree(tempDegree);
+        // updateValidateDegree(tempDegree);
         updateValidateType(tempType);
         updateValidateTerms(tempTerms);
         updateValidateReferralCode(tempReferralCode);
@@ -225,9 +258,10 @@ function Registerpage({ classes }) {
 
             // Validate inputs
             const {
-                tempFirstName,tempLastName, tempEmail,
+                tempFirstName, tempLastName, tempEmail,
                 tempPassword, tempConfirmPassword, tempAddress,
-                tempPhone, tempFax, tempDegree,
+                tempCity, tempLocationState, tempZipcode,
+                tempPhone, tempFax, // tempDegree,
                 tempType, tempTerms, tempReferralCode
             } = validateInputs();
 
@@ -235,7 +269,8 @@ function Registerpage({ classes }) {
             handleErrorStates(
                 tempFirstName, tempLastName, tempEmail,
                 tempPassword, tempConfirmPassword, tempAddress,
-                tempPhone, tempFax, tempDegree,
+                tempCity, tempLocationState, tempZipcode,
+                tempPhone, tempFax, // tempDegree,
                 tempType, tempTerms, tempReferralCode
             );
 
@@ -247,9 +282,12 @@ function Registerpage({ classes }) {
                 || tempPassword.hasError
                 || tempConfirmPassword.hasError
                 || tempAddress.hasError
+                || tempCity.hasError
+                || tempLocationState.hasError
+                || tempZipcode.hasError
                 || tempPhone.hasError
                 || tempFax.hasError
-                || tempDegree.hasError
+                // || tempDegree.hasError
                 || tempType.hasError
                 || tempReferralCode.hasError
             ) {
@@ -272,28 +310,28 @@ function Registerpage({ classes }) {
                 email,
                 password,
                 address,
+                city,
+                state: locationState,
+                zip: zipcode,
                 phone,
                 fax,
-                degree,
+                // degree,
                 userType: type,
                 userSpeciality: 'PHYSICIAN1',
                 // terms
             };
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Authorization': createBasicAuth(),
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(postBody)
             });
-            const results = await response.json();
+            const registrationResults = await response.json();
 
             // Catch bad response
-            if (!('message' in results)) {
-                throw results;
+            if (!('message' in registrationResults)) {
+                throw registrationResults;
             } else {
-                const message = results.message;
+                const message = registrationResults.message;
                 
                 // Catch errors
                 if (message === 'The link is invalid or broken!') {
@@ -306,19 +344,11 @@ function Registerpage({ classes }) {
                     return;
                 };
 
-                // Success message, log in user
-                if (message === 'Registration Successful') {
-                    // Login user on frontend
-                    // TODO: Change payload to response
-                    const payload = { userEmail: email, userType: 'user' };
-                    dispatch({ type: 'LOGIN_USER', payload });
+                // Error that resulted in invalid registration
+                if (message !== 'Registration Successful') throw message;
 
-                    updateLoading(false);
-                    return;
-                };
-
-                // Throw any unhandled error messages
-                throw message;
+                // Show success message to user
+                updateSignUpSuccessView(true);
             };
         } catch (err) {
             console.log(err);
@@ -329,11 +359,30 @@ function Registerpage({ classes }) {
 
     // Check if user is logged in, redirect to appropriate page
     if (state.loggedIn) {
-        if (state.userType === 'admin') {
+        if (state.userType === 'ADMIN') {
             return <Redirect to='/admin' />
         } else {
             return <Redirect to='/home' />
         };
+    };
+
+    // Create united states elements 
+    const states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District Of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
+    const statesElements = states.map((state) => <MenuItem value={state}>{ state }</MenuItem> );
+
+    // Show user that they have successfully signed up
+    // Tell them that they need to confirm their account
+    if (signUpSuccessView) {
+        return (
+            <section id='registerpage-body'>
+            <h1 id='registerpage-headerText'>Join <span className='logoText'>ReferExpert</span></h1>
+
+            <Card elevation={3} classes={{ root: registerpageClasses.signUpCard }}>
+                <h1>Your account has been created!</h1>
+                Please check your email for a confirmation link to complete your account setup.
+            </Card>
+        </section>
+        );
     };
 
     return (
@@ -351,6 +400,7 @@ function Registerpage({ classes }) {
                     onChange={(e) => updateFirstName(e.target.value)}
                     error={validateFirstName.hasError}
                     helperText={validateFirstName.errorMessage}
+                    fullWidth
                 />
 
                 {/* Last Name */}
@@ -362,6 +412,7 @@ function Registerpage({ classes }) {
                     onChange={(e) => updateLastName(e.target.value)}
                     error={validateLastName.hasError}
                     helperText={validateLastName.errorMessage}
+                    fullWidth
                 />
 
                 {/* Email */}
@@ -415,6 +466,43 @@ function Registerpage({ classes }) {
                     fullWidth
                 />
 
+                {/* City */}
+                <TextField
+                    id='city'
+                    label='City'
+                    variant='outlined'
+                    classes={{ root: classes.textfield }}
+                    onChange={(e) => updateCity(e.target.value)}
+                    error={validateCity.hasError}
+                    helperText={validateCity.errorMessage}
+                    fullWidth
+                />
+
+                {/* State */}
+                <FormControl classes={{ root: registerpageClasses.select }}>
+                    <InputLabel>State</InputLabel>
+                    <Select
+                        id='state'
+                        value={locationState}
+                        onChange={(e) => updateLocationState(e.target.value)}
+                        error={validateLocationState.hasError}
+                        helperText={validateLocationState.errorMessage}
+                    >
+                        { statesElements }
+                    </Select>
+                </FormControl>
+
+                {/* Zipcode */}
+                <TextField
+                    id='zipcode'
+                    label='Zipcode'
+                    variant='outlined'
+                    classes={{ root: classes.textfield }}
+                    onChange={(e) => updateZipcode(e.target.value)}
+                    error={validateZipcode.hasError}
+                    helperText={validateZipcode.errorMessage}
+                />
+
                 {/* Phone */}
                 <TextField
                     id='phone'
@@ -441,22 +529,6 @@ function Registerpage({ classes }) {
                     fullWidth
                 />
 
-                {/* Degree */}
-                <FormControl classes={{ root: registerpageClasses.select }}>
-                    <InputLabel>Degree</InputLabel>
-                    <Select
-                        id='degree'
-                        value={degree}
-                        onChange={(e) => updateDegree(e.target.value)}
-                        error={validateDegree.hasError}
-                        helperText={validateDegree.errorMessage}
-                    >
-                        <MenuItem value='MD'>MD</MenuItem>
-                        <MenuItem value='DDS'>DDS</MenuItem>
-                        <MenuItem value='DMD'>DMD</MenuItem>
-                    </Select>
-                </FormControl>
-
                 {/* Type */}
                 <FormControl classes={{ root: registerpageClasses.select }}>
                     <InputLabel>Type</InputLabel>
@@ -471,6 +543,22 @@ function Registerpage({ classes }) {
                         <MenuItem value='SPECIALIST'>Specialist</MenuItem>
                     </Select>
                 </FormControl>
+
+                {/* Degree */}
+                {/* <FormControl classes={{ root: registerpageClasses.select }}>
+                    <InputLabel>Degree</InputLabel>
+                    <Select
+                        id='degree'
+                        value={degree}
+                        onChange={(e) => updateDegree(e.target.value)}
+                        error={validateDegree.hasError}
+                        helperText={validateDegree.errorMessage}
+                    >
+                        <MenuItem value='MD'>MD</MenuItem>
+                        <MenuItem value='DDS'>DDS</MenuItem>
+                        <MenuItem value='DMD'>DMD</MenuItem>
+                    </Select>
+                </FormControl> */}
 
                 {/* Referral code */}
                 <TextField
