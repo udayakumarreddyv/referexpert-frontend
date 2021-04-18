@@ -60,15 +60,25 @@ function CompleteAppointments({ classes, appointmentsData }) {
         };
 
         return appointmentsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((appointment) => {
-            const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, subject, reason, isAccepted, isServed } = appointment;
-            const date = moment(dateAndTimeString).format('MM/DD/YYYY');
-            const time = moment(dateAndTimeString).format('h:mm a');
+            const {
+                appointmentId,
+                appointmentFrom,
+                appointmentTo,
+                dateAndTimeString,
+                fromFirstName,
+                fromLastName,
+                subject,
+                reason,
+                isAccepted,
+                isServed
+            } = appointment;
+            const date = moment(dateAndTimeString).format('h:mma MM/DD/YY');
             
             // Format 
             return (
                 <TableRow key={appointmentId}>
-                    <TableCell>{ appointmentFrom }</TableCell>
-                    <TableCell>{ time } { date }</TableCell>
+                    <TableCell>{ fromFirstName } { fromLastName }</TableCell>
+                    <TableCell>{ date }</TableCell>
                     <TableCell>{ subject }</TableCell>
                     <TableCell>{ reason }</TableCell>
                 </TableRow>
