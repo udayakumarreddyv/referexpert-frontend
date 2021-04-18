@@ -27,7 +27,7 @@ import {
     Snackbar,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import { Schedule, Today, CheckCircle } from '@material-ui/icons';
+import { Schedule, Today, CheckCircle, Share } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Custom Material UI styles for this page
@@ -358,7 +358,7 @@ function Userpage({ classes }) {
 
             {/* Referrals */}
             <h1 className='pageTitle hasIcon'>
-                <Schedule classes={{ root: userpageClasses.titleIcon }} />
+                <Share classes={{ root: userpageClasses.titleIcon }} />
                 My referrals
             </h1>
             <section id='userpage-referralsContainer'>
