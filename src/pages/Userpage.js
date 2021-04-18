@@ -13,18 +13,23 @@ import OpenAppointments from '../components/OpenAppointments';
 import CompleteAppointments from '../components/CompleteAppointments';
 import Referrals from '../components/Referrals';
 
+// Email validation
+import * as EmailValidator from 'email-validator';
+
 // Page navigation
 import { Link } from 'react-router-dom';
 
 // Material UI
 import {
     Button,
+    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
     Snackbar,
+    TextField
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { Schedule, Today, CheckCircle, Share } from '@material-ui/icons';
@@ -84,16 +89,23 @@ const separateAppointments = (appointmentsList) => {
 function Userpage({ classes }) {
     const userpageClasses = useStyles();
     const [state, dispatch] = useContext(Context);
-
+    const [loading, updateLoading] = useState(false);
+    
     // Alert states
     const [alertOpen, updateAlertOpen] = useState(false);
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
     // Dialog states
+    const [dialogInviteDoctorOpen, updateDialogInviteDoctorOpen] = useState(false);
     const [dialogCompleteOpen, updateCompleteDialogOpen] = useState(false);
     const [dialogPendingAcceptOpen, updateDialogPendingAcceptOpen] = useState(false);
     const [dialogPendingRejectOpen, updateDialogPendingRejectOpen] = useState(false);
     const [dialogAppointmentId, updateDialogAppointmentId] = useState(null);
+
+    // Invite doctors states
+    const [inviteDoctorEmail, updateInviteDoctorEmail] = useState('');
+    const [validateInviteDoctorEmail, updateValidateInviteDoctorEmail] = useState({ hasError: false, errorMessage: '' });
+    const [inviteDoctorSubmitError, updateInviteDoctorSubmitError] = useState({ hasError: false, errorMessage: '' });
 
     // Appointment states
     const [pendingAppointments, updatePendingAppointments] = useState();
@@ -102,6 +114,11 @@ function Userpage({ classes }) {
 
     // Referrals states
     const [referralsData, updateReferralsData] = useState(null);
+
+    // Open invite doctor dialog
+    const handleInviteDoctorDialogOpen = () => {
+        updateDialogInviteDoctorOpen(true);
+    };
 
     // Open complete appointment dialog
     const handleCompleteDialogOpen = (appointmentId) => {
@@ -128,6 +145,9 @@ function Userpage({ classes }) {
         updateCompleteDialogOpen(false);
         updateDialogPendingAcceptOpen(false);
         updateDialogPendingRejectOpen(false);
+
+        updateDialogInviteDoctorOpen(false);
+        updateInviteDoctorEmail('');
     };
 
     // Fetch all appointments for user: open, pending
@@ -165,6 +185,60 @@ function Userpage({ classes }) {
         } catch (err) {
             updateReferralsData('error');
             console.log(err);
+        };
+    };
+
+    // Handle sending invite doctor
+    const handleInviteDoctor = async (email) => {
+        
+        // Validate email input
+        if (email.trim() === '') {
+            updateValidateInviteDoctorEmail({ hasError: true, errorMessage: 'Please enter an email address' });
+            return;
+        } else if (!EmailValidator.validate(email)) {
+            updateValidateInviteDoctorEmail({ hasError: true, errorMessage: 'Invalid format for email address' });
+            return;
+        };
+        
+        try {
+
+            // Clear error states, show loading spinner, disable button
+            updateValidateInviteDoctorEmail({ hasError: false, errorMessage: '' });
+            updateLoading(true);
+
+            // Send api request
+            const url = '/referexpert/referuser';
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userEmail: state.userDetails.email,
+                    docEmail: email,
+                }),
+            });
+            const results = await response.json();
+
+            // Hide loading spinner
+            updateLoading(false);
+
+            // Unexpected response from api
+            if (!('message' in results)) throw results;
+
+            // Show success alert
+            if (results.message === 'Referral Successful') {
+                updateAlertDetails({ type: 'info', message: 'Invite sent!' });
+                updateAlertOpen(true);
+
+                // Close dialog, clear errors
+                handleDialogClose();
+                updateInviteDoctorSubmitError({ hasError: false, errorMessage: '' });
+            } else {
+                throw results.message;
+            };
+        } catch (err) {
+            console.log(err);
+            updateLoading(false);
+            updateInviteDoctorSubmitError({ hasError: true, errorMessage: 'There was an error while sending the invite(s), please try again later' });
         };
     };
 
@@ -307,6 +381,15 @@ function Userpage({ classes }) {
 
             {/* Top bar for holding buttons */}
             <section id='userpage-topBar'>
+
+                {/* Invite doctor button */}
+                <Button
+                    classes={{ root: classes.primaryButton }}
+                    style={{ marginRight: '10px' }}
+                    onClick={handleInviteDoctorDialogOpen}
+                >
+                    Invite doctor
+                </Button>
                 
                 {/* Refer a patient button */}
                 <Button
@@ -456,6 +539,48 @@ function Userpage({ classes }) {
                         onClick={() => handleCompleteAppointmentUpdate(dialogAppointmentId)}
                     >
                         Complete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Invite doctor dialog */}
+            <Dialog
+                open={dialogInviteDoctorOpen}
+                onClose={handleDialogClose}
+                aria-labelledby="invite-doctor"
+                aria-describedby="Invite a doctor to referexpert"
+            >
+                {/* Title */}
+                <DialogTitle id="alert-dialog-title">Send invites to doctors who may like ReferExpert</DialogTitle>
+                
+                {/* Description */}
+                <DialogContent>
+                    <DialogContentText>Enter the email address of the doctor(s) and we'll notify them</DialogContentText>
+
+                    {/* Email */}
+                    <TextField
+                        name='inviteEmail'
+                        label='Email'
+                        variant='outlined'
+                        // classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
+                        onChange={(event) => updateInviteDoctorEmail(event.target.value)}
+                        error={validateInviteDoctorEmail.hasError}
+                        helperText={validateInviteDoctorEmail.errorMessage}
+                        fullWidth
+                    />
+
+                    <div className='errorMessage'>{ inviteDoctorSubmitError.errorMessage }</div>
+                </DialogContent>
+
+                {/* Action buttons */}
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Cancel</Button>
+                    <Button
+                        classes={{ root: classes.primaryButton }}
+                        onClick={() => handleInviteDoctor(inviteDoctorEmail)}
+                        disabled={loading}
+                    >
+                        { loading ? <CircularProgress size={20} color='primary' /> : 'Invite' }
                     </Button>
                 </DialogActions>
             </Dialog>
