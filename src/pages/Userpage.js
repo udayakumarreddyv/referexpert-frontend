@@ -283,8 +283,6 @@ function Userpage({ classes }) {
         fetchReferrals();
     }, []);
 
-    console.log(state);
-
     return (
         <section id='userpage-body'>
 
