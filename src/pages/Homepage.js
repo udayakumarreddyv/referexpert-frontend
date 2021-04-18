@@ -1,7 +1,11 @@
 import './styles/Homepage.css';
+import { useContext } from 'react';
+
+// Global store
+import { Context } from '../store/GlobalStore';
 
 // Routing
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 
 // Material UI
 import {
@@ -33,7 +37,16 @@ const useStyles = makeStyles((theme) => ({
 
 function Homepage({ classes }) {
     const homepageClasses = useStyles();
+    const [state, dispatch] = useContext(Context);
 
+    // Check if user is logged in, redirect to appropriate page
+    if (state.loggedIn) {
+        if (state.userType === 'ADMIN') {
+            return <Redirect to='/admin' />
+        } else {
+            return <Redirect to='/home' />
+        };
+    };
     return (
         <section id='homePageBody'>
 
