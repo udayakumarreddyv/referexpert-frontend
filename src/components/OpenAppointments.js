@@ -72,7 +72,7 @@ function OpenAppointments({ classes, appointmentsData, handleCompleteDialogOpen 
                 isAccepted,
                 isServed
             } = appointment;
-            const date = moment(dateAndTimeString).format('h:mma MM/DD/YYYY');
+            const date = moment(dateAndTimeString).format('h:mma MM/DD/YY');
             
             // Format 
             return (
