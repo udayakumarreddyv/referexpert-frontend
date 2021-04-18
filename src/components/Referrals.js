@@ -52,16 +52,27 @@ function Referrals ({ classes, referralsData }) {
     // Create referrals table rows
     const createTableRows = (referralsData) => {
         return referralsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((referral) => {
-            const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, isAccepted, isServed } = referral;
-            const date = moment(dateAndTimeString).format('MM/DD/YYYY');
-            const time = moment(dateAndTimeString).format('h:mm a');
+            const {
+                appointmentId,
+                appointmentFrom,
+                appointmentTo,
+                dateAndTimeString,
+                fromFirstName,
+                fromLastName,
+                subject,
+                reason,
+                isAccepted,
+                isServed
+            } = referral;
+            const date = moment(dateAndTimeString).format('h:mma MM/DD/YY');
             
             // Format 
             return (
                 <TableRow key={appointmentId}>
-                    <TableCell>{ appointmentTo }</TableCell>
+                    <TableCell>{ fromFirstName } { fromLastName }</TableCell>
                     <TableCell>{ date }</TableCell>
-                    <TableCell>{ time }</TableCell>
+                    <TableCell>{ subject }</TableCell>
+                    <TableCell>{ reason }</TableCell>
                     <TableCell>{ convertAcceptedSymbol(isAccepted) }</TableCell>
                     <TableCell>{ isServed }</TableCell>
                 </TableRow>
@@ -114,8 +125,9 @@ function Referrals ({ classes, referralsData }) {
                 <TableHead>
                     <TableRow>
                         <TableCell>Name</TableCell>
-                        <TableCell>Appointment Date</TableCell>
-                        <TableCell>Appointment Time</TableCell>
+                        <TableCell>Appointment Datetime</TableCell>
+                        <TableCell>Subject</TableCell>
+                        <TableCell>Reason</TableCell>
                         <TableCell>Status</TableCell>
                         <TableCell>Completed</TableCell>
                     </TableRow>
