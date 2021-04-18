@@ -10,6 +10,7 @@ import { Context } from '../store/GlobalStore';
 // Components
 import PendingAppointments from '../components/PendingAppointments';
 import OpenAppointments from '../components/OpenAppointments';
+import CompleteAppointments from '../components/CompleteAppointments';
 import Referrals from '../components/Referrals';
 
 // Page navigation
@@ -26,7 +27,7 @@ import {
     Snackbar,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import { Schedule, Today } from '@material-ui/icons';
+import { Schedule, Today, CheckCircle } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Custom Material UI styles for this page
@@ -97,6 +98,7 @@ function Userpage({ classes }) {
     // Appointment states
     const [pendingAppointments, updatePendingAppointments] = useState();
     const [openAppointments, updateOpenAppointments] = useState([]);
+    const [completeAppointments, updateCompleteAppointments] = useState();
 
     // Referrals states
     const [referralsData, updateReferralsData] = useState(null);
@@ -143,6 +145,7 @@ function Userpage({ classes }) {
             // Update appointments states
             updatePendingAppointments(pendingList);
             updateOpenAppointments(openList);
+            updateCompleteAppointments(completedList);
         } catch (err) {
             console.log(err);
         };
@@ -338,6 +341,18 @@ function Userpage({ classes }) {
                     classes={classes}
                     appointmentsData={pendingAppointments}
                     handlePendingDialogOpen={handlePendingDialogOpen}
+                />
+            </section>
+
+            {/* Complete appointments */}
+            <h1 className='pageTitle hasIcon'>
+                <CheckCircle classes={{ root: userpageClasses.titleIcon }} />
+                Completed appointments
+            </h1>
+            <section id='userpage-completeAppointmentsContainer'>
+                <CompleteAppointments
+                    classes={classes}
+                    appointmentsData={completeAppointments}
                 />
             </section>
 
