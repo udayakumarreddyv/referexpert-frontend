@@ -72,7 +72,7 @@ function DoctorsTable(props) {
                     <TableCell>
                         <Button
                             classes={{ root: `${ classes.primaryButton } ${ referpatientpageClasses.scheduleButton }` }}
-                            onClick={() => handleOpenScheduleDialog(userId, email, `${firstName} ${lastName}`, userType, userSpeciality, address)}
+                            onClick={() => handleOpenScheduleDialog(userId, email, `${firstName} ${lastName}`, userType, userSpeciality, `${address}, ${city} ${state} ${zip}`)}
                         >
                             Schedule
                         </Button>
