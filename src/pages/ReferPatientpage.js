@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import './styles/ReferPatientpage.css';
 
 // Global store
@@ -56,11 +56,13 @@ function ReferPatientpage({ classes }) {
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
     // Search states
-    const [searchType, updateSearchType] = useState('city');
+    const [currentLocation, updateCurrentLocation] = useState({ latitude: null, longitude: null });
+    const [currentLocationError, updateCurrentLocationError] = useState(null);
+    const [distanceType, updateDistanceType] = useState('currentLocation');
+    const [distanceAmount, updateDistanceAmount] = useState('15');
+    const [searchType, updateSearchType] = useState('firstName');
     const [searchValue, updateSearchValue] = useState('');
-    // const [searchZipCode, updateSearchZipCode] = useState('');
     const [searchValueError, updateSearchValueError] = useState({ hasError: false, errorMessage: '' });
-    // const [searchZipCodeError, updateSearchZipCodeError] = useState({ hasError: false, errorMessage: '' });
 
     // Loading states
     const [loadingDoctorsData, updateLoadingDoctorsData] = useState(false);
@@ -94,12 +96,49 @@ function ReferPatientpage({ classes }) {
     const [showScheduleView, updateShowScheduleView] = useState(false);
 
     // Fetch search results from api
-    const searchQueryApi = async (searchType, searchQuery) => {
+    const searchQueryApi = async ({ distanceType, distanceAmount, searchType, searchQuery }) => {
         try {
+            let url;
+            
+            // User wants to use their current location
+            if (distanceType === 'currentLocation') {
+                console.log('Using current lcoation');
+
+                // Error getting coordinates
+                if (currentLocationError) throw currentLocationError;    
+                
+                url = `referexpert/users/distance/${currentLocation.latitude}/${currentLocation.longitude}?${searchType}=${searchQuery}`;
+            } else {
+                url = `referexpert/users/${distanceType}/${distanceAmount}?${searchType}=${searchQuery}`;
+            };
+
             searchType = searchType.toLowerCase();
-            const url = `referexpert/users/${searchType}/${searchQuery}`;
             const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
             return await response.json();
+        } catch (err) {
+            throw err;
+        };
+    };
+
+    // Geolocation success
+    const geolocationSuccess = (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        updateCurrentLocation({ latitude, longitude });       
+    };
+
+    // Gelocation error
+    const geolocationError = () => updateCurrentLocationError('Please allow current location to use this distance by type');
+
+    // Get current location
+    const getCurrentLocation = async () => {
+        try {
+            // Check if geolocation api is supported by browser
+            if (!navigator.geolocation) {
+                updateCurrentLocationError('Your device does not support geolocation');
+            } else {
+                navigator.geolocation.getCurrentPosition(geolocationSuccess, geolocationError);
+            }
         } catch (err) {
             throw err;
         };
@@ -141,27 +180,19 @@ function ReferPatientpage({ classes }) {
         } else {
             updateSearchValueError({ hasError: false, errorMessage: '' });
         };
-        
-        // Validate search zip code input
-        // if (searchZipCode.trim() === '') {
-        //     updateSearchZipCodeError({ hasError: true, errorMessage: '' });
-        //     searchError = true;
-        // } else if (isNaN(searchZipCode) || searchZipCode.length !== 5) {
-        //     updateSearchZipCodeError({ hasError: true, errorMessage: 'Invalid zip code' });
-        //     searchError = true;
-        // } else {
-        //     updateSearchZipCodeError({ hasError: false, errorMessage: '' });
-        // };
 
         // Kill request if search input error
         if (searchError) return;
+
+        // Current location is not supported or user rejected permission
+        if (distanceType === 'currentLocation' && currentLocationError) return;
 
         try {
             // Show loading spinner inside doctors table
             updateLoadingDoctorsData(true);
 
             // Send request to api
-            const results = await searchQueryApi(searchType, searchValue);
+            const results = await searchQueryApi({ distanceType, distanceAmount, searchType, searchQuery: searchValue });
 
             // Filter out current user and admin accounts
             const filteredResults = results.filter((user) => user.userType !== 'ADMIN' && user.email !== state.userEmail);
@@ -281,6 +312,11 @@ function ReferPatientpage({ classes }) {
         // Hide dialog
         updateShowScheduleView(false);
     };
+
+    // Query api when search has changed
+    useEffect(async () => {
+        getCurrentLocation();
+    }, []);
     
     return (
         <section id='referpatientpage-body'>
@@ -298,9 +334,6 @@ function ReferPatientpage({ classes }) {
                         value={searchType}
                         onChange={(event) => updateSearchType(event.target.value)}
                     >
-                        <MenuItem value='city'>City</MenuItem>
-                        <MenuItem value='state'>State</MenuItem>
-                        {/* <MenuItem value='zip'>Zipcode</MenuItem> */}
                         <MenuItem value='firstName'>First name</MenuItem>
                         <MenuItem value='lastName'>Last name</MenuItem>
                         <MenuItem value='speciality'>Specialty</MenuItem>
@@ -319,17 +352,37 @@ function ReferPatientpage({ classes }) {
                     error={searchValueError.hasError}
                 />
 
-                {/* Location */}
-                {/* <TextField
-                    name='zipcode'
-                    label='Zipcode'
-                    variant='outlined'
-                    classes={{ root: `${ referpatientpageClasses.searchInput } ${ referpatientpageClasses.zipcodeInput } ${ referpatientpageClasses.inputMarginRight }` }}
-                    onChange={(event) => updateSearchZipCode(event.target.value)}
-                    error={searchZipCodeError.hasError}
-                    helperText={searchZipCodeError.errorMessage}
+                {/* Distance types */}
+                <FormControl variant='outlined' classes={{ root: referpatientpageClasses.inputMarginRight }}>
+                    <InputLabel>Distance by</InputLabel>
+                    <Select
+                        name='distanceType'
+                        label='Distance by'
+                        value={distanceType}
+                        onChange={(event) => updateDistanceType(event.target.value)}
+                        error={distanceType === 'currentLocation' && currentLocationError ? true : false}
+                    >
+                        <MenuItem value='currentLocation'>Current Location</MenuItem>
+                        <MenuItem value='distance'>Miles</MenuItem>
+                        <MenuItem value='address'>Address</MenuItem>
+                    </Select>
+                </FormControl>
 
-                /> */}
+                {/* Distance amount */}
+                <FormControl variant='outlined' classes={{ root: referpatientpageClasses.inputMarginRight }}>
+                    <InputLabel>Miles</InputLabel>
+                    <Select
+                        name='distanceAmount'
+                        label='Miles'
+                        value={distanceAmount}
+                        onChange={(event) => updateDistanceAmount(event.target.value)}
+                    >
+                        <MenuItem value='15'>15</MenuItem>
+                        <MenuItem value='30'>30</MenuItem>
+                        <MenuItem value='45'>45</MenuItem>
+                        <MenuItem value='60'>60</MenuItem>
+                    </Select>
+                </FormControl>
 
                 {/* Button */}
                 <Button
@@ -340,6 +393,9 @@ function ReferPatientpage({ classes }) {
                     Search
                 </Button>
             </section>
+
+            <div className='errorMessage'>{distanceType === 'currentLocation' && currentLocationError}</div>
+
 
             {/* Table for doctor results */}
             <section id='referpatientpage-doctorTable'>
