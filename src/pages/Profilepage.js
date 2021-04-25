@@ -8,11 +8,15 @@ import { Context } from '../store/GlobalStore';
 import {
     Button,
     CircularProgress,
+    FormControl,
+    InputLabel,
     Paper,
     List,
     ListItem,
     ListItemIcon,
     ListItemText,
+    MenuItem,
+    Select,
     Snackbar,
     TextField,
 } from '@material-ui/core';
@@ -61,6 +65,9 @@ function Profilepage({ classes }) {
     const [firstName, updateFirstName] = useState(state.userDetails.firstName);
     const [lastName, updateLastName] = useState(state.userDetails.lastName);
     const [address, updateAddress] = useState(state.userDetails.address);
+    const [city, updateCity] = useState(state.userDetails.city);
+    const [locationState, updateLocationState] = useState(state.userDetails.state);
+    const [zip, updateZip] = useState(state.userDetails.zip);
     const [phone, updatePhone] = useState(state.userDetails.phone);
     const [fax, updateFax] = useState(state.userDetails.fax);
     const [userType, updateUserType] = useState(state.userDetails.userType);
@@ -93,6 +100,9 @@ function Profilepage({ classes }) {
                 userType,
                 userSpeciality,
                 address,
+                city,
+                state: locationState,
+                zip,
                 phone,
                 fax,
                 userId: state.userDetails.userId,
@@ -251,6 +261,10 @@ function Profilepage({ classes }) {
         };
     };
     
+    // Create united states elements 
+    const states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District Of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
+    const statesElements = states.map((state) => <MenuItem value={state}>{ state }</MenuItem> );
+
     // Default page view
     return (
         <section id='profilepage-body'>
@@ -341,14 +355,51 @@ function Profilepage({ classes }) {
                         <ListItemText>
                             {
                                 showEdit
-                                ? <TextField
-                                    name='address'
-                                    label='Address'
-                                    variant='outlined'
-                                    value={address}
-                                    onChange={(event) => updateAddress(event.target.value)}
-                                />
-                                : state.userDetails.address
+                                ? <div>
+
+                                    {/* Address */}
+                                    <TextField
+                                        name='address'
+                                        label='Address'
+                                        variant='outlined'
+                                        value={address}
+                                        onChange={(event) => updateAddress(event.target.value)}
+                                        style={{ marginRight: '10px', marginBottom: '15px' }}
+                                    />
+
+                                    {/* City */}
+                                    <TextField
+                                        name='city'
+                                        label='City'
+                                        variant='outlined'
+                                        value={city}
+                                        onChange={(event) => updateCity(event.target.value)}
+                                    />
+
+                                    {/* State */}
+                                    <FormControl>
+                                        <InputLabel>State</InputLabel>
+                                        <Select
+                                            id='locationState'
+                                            value={locationState}
+                                            onChange={(e) => updateLocationState(e.target.value)}
+                                            style={{ marginRight: '10px' }}
+                                        >
+                                            { statesElements }
+                                        </Select>
+                                    </FormControl>
+
+                                    {/* Zipcode */}
+                                    <TextField
+                                        name='zipcode'
+                                        label='Zipcode'
+                                        variant='outlined'
+                                        value={zip}
+                                        onChange={(event) => updateZip(event.target.value)}
+                                        style={{ width: '100px' }}
+                                    />
+                                </div>
+                                : `${state.userDetails.address} ${state.userDetails.city}, ${state.userDetails.state} ${state.userDetails.zip}`
                             }
                         </ListItemText>
                     </ListItem>
