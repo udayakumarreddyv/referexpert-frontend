@@ -107,7 +107,7 @@ function ReferPatientpage({ classes }) {
                 // Error getting coordinates
                 if (currentLocationError) throw currentLocationError;    
                 
-                url = `referexpert/users/distance/${currentLocation.latitude}/${currentLocation.longitude}?${searchType}=${searchQuery}`;
+                url = `referexpert/users/distance/${currentLocation.latitude}/${currentLocation.longitude}/${distanceAmount}?${searchType}=${searchQuery}`;
             } else {
                 url = `referexpert/users/${distanceType}/${distanceAmount}?${searchType}=${searchQuery}`;
             };
@@ -363,7 +363,7 @@ function ReferPatientpage({ classes }) {
                         error={distanceType === 'currentLocation' && currentLocationError ? true : false}
                     >
                         <MenuItem value='currentLocation'>Current Location</MenuItem>
-                        <MenuItem value='distance'>Miles</MenuItem>
+                        <MenuItem value='distance'>Your address</MenuItem>
                         {/* <MenuItem value='address'>Address</MenuItem> */}
                     </Select>
                 </FormControl>
