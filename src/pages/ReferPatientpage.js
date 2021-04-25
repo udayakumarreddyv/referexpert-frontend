@@ -60,7 +60,7 @@ function ReferPatientpage({ classes }) {
     const [currentLocationError, updateCurrentLocationError] = useState(null);
     const [distanceType, updateDistanceType] = useState('currentLocation');
     const [distanceAmount, updateDistanceAmount] = useState('15');
-    const [searchType, updateSearchType] = useState('firstName');
+    const [searchType, updateSearchType] = useState('speciality');
     const [searchValue, updateSearchValue] = useState('');
     const [searchValueError, updateSearchValueError] = useState({ hasError: false, errorMessage: '' });
 
@@ -334,10 +334,10 @@ function ReferPatientpage({ classes }) {
                         value={searchType}
                         onChange={(event) => updateSearchType(event.target.value)}
                     >
-                        <MenuItem value='firstName'>First name</MenuItem>
-                        <MenuItem value='lastName'>Last name</MenuItem>
                         <MenuItem value='speciality'>Specialty</MenuItem>
                         <MenuItem value='type'>Type</MenuItem>
+                        <MenuItem value='firstName'>First name</MenuItem>
+                        <MenuItem value='lastName'>Last name</MenuItem>
                     </Select>
                 </FormControl>
 
@@ -364,7 +364,7 @@ function ReferPatientpage({ classes }) {
                     >
                         <MenuItem value='currentLocation'>Current Location</MenuItem>
                         <MenuItem value='distance'>Miles</MenuItem>
-                        <MenuItem value='address'>Address</MenuItem>
+                        {/* <MenuItem value='address'>Address</MenuItem> */}
                     </Select>
                 </FormControl>
 
