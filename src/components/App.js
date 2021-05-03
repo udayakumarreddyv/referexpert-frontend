@@ -11,6 +11,7 @@ import Store from '../store/GlobalStore';
 import Homepage from '../pages/Homepage';
 import Registerpage from '../pages/Registerpage';
 import Loginpage from '../pages/Loginpage';
+import ResetPasswordPage from '../pages/ResetPasswordPage';
 import Userpage from '../pages/Userpage';
 import Adminpage from '../pages/Adminpage';
 import ProfilePage from '../pages/Profilepage';
@@ -73,6 +74,11 @@ function App() {
                                 <Loginpage classes={classes} />
                             </Route>
 
+                            {/* Reset password page */}
+                            <Route path='/resetpass'>
+                                <ResetPasswordPage classes={classes} />
+                            </Route>
+                            
                             {/* Sign up page */}
                             <Route path='/signUp'>
                                 <Registerpage classes={classes} />
