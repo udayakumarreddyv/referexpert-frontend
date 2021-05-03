@@ -16,6 +16,7 @@ import Userpage from '../pages/Userpage';
 import Adminpage from '../pages/Adminpage';
 import ProfilePage from '../pages/Profilepage';
 import ReferPatientpage from '../pages/ReferPatientpage';
+import ConfirmPage from '../pages/Confirmpage';
 
 // Components
 import Header from './Header';
@@ -77,6 +78,11 @@ function App() {
                             {/* Reset password page */}
                             <Route path='/resetpass'>
                                 <ResetPasswordPage classes={classes} />
+                            </Route>
+
+                            {/* Confirm account page */}
+                            <Route path='/confirm'>
+                                <ConfirmPage classes={classes} />
                             </Route>
                             
                             {/* Sign up page */}
