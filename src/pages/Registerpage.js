@@ -1,11 +1,12 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import './styles/Registrationpage.css';
 
 // Global store
 import { Context } from '../store/GlobalStore';
 import { Redirect } from 'react-router-dom';
 
-// Email validation
+// Utils
+import * as queryString from 'query-string';
 import * as EmailValidator from 'email-validator';
 
 // Material UI
@@ -16,11 +17,14 @@ import {
     CircularProgress,
     FormControl,
     FormControlLabel,
+    IconButton,
+    InputAdornment,
     InputLabel,
     Select,
     MenuItem,
     TextField,
 } from '@material-ui/core';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Custom Material UI styles for this page
@@ -56,13 +60,13 @@ function Registerpage({ classes }) {
     const [state, dispatch] = useContext(Context);
     const [loading, updateLoading] = useState(false);
     const [signUpSuccessView, updateSignUpSuccessView] = useState(false);
+    const [showPassword, updateShowPassword] = useState(false);
 
     // Input states
     const [firstName, updateFirstName] = useState('');
     const [lastName, updateLastName] = useState('');
     const [email, updateEmail] = useState('');
     const [password, updatePassword] = useState('');
-    const [confirmPassword, updateConfirmPassword] = useState('');
     const [address, updateAddress] = useState('');
     const [city, updateCity] = useState('');
     const [locationState, updateLocationState] = useState('');
@@ -79,7 +83,6 @@ function Registerpage({ classes }) {
     const [validateLastName, updateValidateLastName] = useState({ hasError: false, errorMessage: '' });
     const [validateEmail, updateValidateEmail] = useState({ hasError: false, errorMessage: '' });
     const [validatePassword, updateValidatePassword] = useState({ hasError: false, errorMessage: '' });
-    const [validateConfirmPassword, updateValidateConfirmPassword] = useState({ hasError: false, errorMessage: '' });
     const [validateAddress, updateValidateAddress] = useState({ hasError: false, errorMessage: '' });
     
     const [validateCity, updateValidateCity] = useState({ hasError: false, errorMessage: '' });
@@ -102,7 +105,6 @@ function Registerpage({ classes }) {
         let tempLastName = { hasError: false, errorMessage: '' };
         let tempEmail = { hasError: false, errorMessage: '' };
         let tempPassword = { hasError: false, errorMessage: '' };
-        let tempConfirmPassword = { hasError: false, errorMessage: '' };
         let tempAddress = { hasError: false, errorMessage: '' };
         let tempCity = { hasError: false, errorMessage: '' };
         let tempLocationState = { hasError: false, errorMessage: '' };
@@ -142,13 +144,6 @@ function Registerpage({ classes }) {
             tempPassword = { hasError: true, errorMessage: 'Must be at least 8 characters' };
         } else if (!password.match(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)) {
             tempPassword = { hasError: true, errorMessage: 'Must contain at least an uppercase character, number, and special character' };
-        };
-
-        // Confirm password check
-        if (confirmPassword.trim() === '') {
-            tempConfirmPassword = { hasError: true, errorMessage: '' };
-        } else if (confirmPassword !== password) {
-            tempConfirmPassword = { hasError: true, errorMessage: 'Passwords do not match' };
         };
 
         // Address
@@ -215,8 +210,8 @@ function Registerpage({ classes }) {
 
         return {
             tempFirstName, tempLastName, tempEmail,
-            tempPassword, tempConfirmPassword, tempAddress,
-            tempCity, tempLocationState, tempZipcode,
+            tempPassword, tempAddress, tempCity, 
+            tempLocationState, tempZipcode,
             tempPhone, tempFax, // tempDegree,
             tempType, tempTerms, tempReferralCode
         };
@@ -225,8 +220,8 @@ function Registerpage({ classes }) {
     // Update error states
     const handleErrorStates = (
         tempFirstName, tempLastName, tempEmail,
-        tempPassword, tempConfirmPassword, tempAddress,
-        tempCity, tempLocationState, tempZipcode,
+        tempPassword, tempAddress, tempCity,
+        tempLocationState, tempZipcode,
         tempPhone, tempFax, // tempDegree,
         tempType, tempTerms, tempReferralCode
     ) => {
@@ -234,7 +229,6 @@ function Registerpage({ classes }) {
         updateValidateLastName(tempLastName);
         updateValidateEmail(tempEmail);
         updateValidatePassword(tempPassword);
-        updateValidateConfirmPassword(tempConfirmPassword);
         updateValidateAddress(tempAddress);
         updateValidateCity(tempCity);
         updateValidateLocationState(tempLocationState);
@@ -259,8 +253,8 @@ function Registerpage({ classes }) {
             // Validate inputs
             const {
                 tempFirstName, tempLastName, tempEmail,
-                tempPassword, tempConfirmPassword, tempAddress,
-                tempCity, tempLocationState, tempZipcode,
+                tempPassword, tempAddress, tempCity,
+                tempLocationState, tempZipcode,
                 tempPhone, tempFax, // tempDegree,
                 tempType, tempTerms, tempReferralCode
             } = validateInputs();
@@ -268,8 +262,8 @@ function Registerpage({ classes }) {
             // Update error states
             handleErrorStates(
                 tempFirstName, tempLastName, tempEmail,
-                tempPassword, tempConfirmPassword, tempAddress,
-                tempCity, tempLocationState, tempZipcode,
+                tempPassword, tempAddress, tempCity,
+                tempLocationState, tempZipcode,
                 tempPhone, tempFax, // tempDegree,
                 tempType, tempTerms, tempReferralCode
             );
@@ -280,7 +274,6 @@ function Registerpage({ classes }) {
                 || tempLastName.hasError
                 || tempEmail.hasError
                 || tempPassword.hasError
-                || tempConfirmPassword.hasError
                 || tempAddress.hasError
                 || tempCity.hasError
                 || tempLocationState.hasError
@@ -357,6 +350,21 @@ function Registerpage({ classes }) {
         };
     };
 
+    // Get url params if coming from referral link
+    useEffect(() => {
+        const urlParams = queryString.parse(window.location.search);
+        
+        // Get email
+        if (urlParams.email && EmailValidator.validate(urlParams.email)) {
+            updateEmail(urlParams.email);
+        };
+
+        // Get token
+        if (urlParams.token) {
+            updateReferralCode(urlParams.token);
+        };
+    }, []);
+
     // Check if user is logged in, redirect to appropriate page
     if (state.loggedIn) {
         if (state.userType === 'ADMIN') {
@@ -421,6 +429,7 @@ function Registerpage({ classes }) {
                     label='Email'
                     variant='outlined'
                     type='email'
+                    value={email}
                     classes={{ root: classes.textfield }}
                     onChange={(e) => updateEmail(e.target.value)}
                     error={validateEmail.hasError}
@@ -433,24 +442,24 @@ function Registerpage({ classes }) {
                     id='password'
                     label='Password'
                     variant='outlined'
-                    type='password'
+                    type={ showPassword ? 'text' : 'password' }
                     classes={{ root: classes.textfield }}
                     onChange={(e) => updatePassword(e.target.value)}
                     error={validatePassword.hasError}
                     helperText={validatePassword.errorMessage}
-                    fullWidth
-                />
-
-                {/* Confirm password */}
-                <TextField
-                    id='confirmPassword'
-                    label='Confirm password'
-                    variant='outlined'
-                    type='password'
-                    classes={{ root: classes.textfield }}
-                    onChange={(e) => updateConfirmPassword(e.target.value)}
-                    error={validateConfirmPassword.hasError}
-                    helperText={validateConfirmPassword.errorMessage}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => updateShowPassword(!showPassword)}
+                                    edge="end"
+                                >
+                                    { showPassword ? <Visibility /> : <VisibilityOff /> }
+                                </IconButton>
+                            </InputAdornment>
+                        )
+                    }}
                     fullWidth
                 />
 
@@ -565,6 +574,7 @@ function Registerpage({ classes }) {
                     id='referralCode'
                     label='Referral code'
                     variant='outlined'
+                    value={referralCode}
                     classes={{ root: classes.textfield }}
                     onChange={(e) => updateReferralCode(e.target.value)}
                     error={validateReferralCode.hasError}
