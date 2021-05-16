@@ -10,7 +10,6 @@ const initialState = {
     userType: null,
     userDetails: {}
 };
-const tokenCookieName = 'accessCookie';
 
 // Get user info
 const getUserInfo = async (token) => {
@@ -20,7 +19,7 @@ const getUserInfo = async (token) => {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
         });
-        
+
         // Failed to get user details
         if (response.status !== 200) {
             return 'Invalid token';
@@ -32,34 +31,103 @@ const getUserInfo = async (token) => {
     };
 };
 
+// Get refresh token
+const refreshAccessToken = async (refreshToken) => {
+    try {
+
+        // REQUEST HAS TO BE POST SINCE GET CANNOT HAVE BODY
+        // LET REDDY KNOW
+        const url = '/referexpert/refreshtoken';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'isRefreshToken': true,
+            },
+            body: JSON.stringify({ refreshToken }),
+        });
+
+        // Catch internal server errors
+        if (response.status > 499) throw response;
+        
+        // Check if expired
+        if (response.status === 401) return 'refresh token expired';
+
+        // Make sure body has keys we need
+        const results = await response.json();
+        const requiredKeys = ['accessToken', 'refreshToken', 'tokenType'];
+        if (!requiredKeys.every((neededKey) => Object.keys(results).includes(neededKey))) {
+            throw 'Missing a required key(s) in body of refresh response';
+        };
+
+        return results;
+    } catch (err) {
+        throw err;
+    };
+};
+
 // Holds global state for components to access
 const Store = ({ children }) => {
     const [state, dispatch] = useReducer(Reducer, initialState);
 
     useEffect(async () => {
         
-        // Check if access token cookie exists
-        const sessionCookie = CookieHelper.getCookie(tokenCookieName);
-        if (sessionCookie) {
+        // Get cookies
+        const accessCookie = CookieHelper.getCookie('accessCookie');
+        const refreshCookie = CookieHelper.getCookie('refreshCookie');
+        let newAccessCookie = null;
+
+        // Try to login user if we found either cookies
+        if (accessCookie || refreshCookie) {
 
             // Get user details
-            const userDetails = await getUserInfo(sessionCookie.token);
-            
-            // Expired or invalid token, remove cookie
-            if (userDetails === 'Invalid token') {
-                CookieHelper.deleteCookie(tokenCookieName);
-                return;
+            let userDetails;
+            let needToRefresh = false;
+            if (accessCookie && 'token' in accessCookie) {
+                userDetails = await getUserInfo(accessCookie.token);
+
+                // Expired or invalid token, remove cookie
+                if (userDetails === 'Invalid token') {
+                    needToRefresh = true;
+                    CookieHelper.deleteCookie('accessCookie');
+                };
+            } else {
+                needToRefresh = true;
+            };
+
+            // Need to refresh accessToken & we have the refreshCookie
+            if (needToRefresh && refreshCookie && 'token' in refreshCookie) {
+                console.log('Need to refresh token!')
+                const results = await refreshAccessToken(refreshCookie.token);
+                const newAccessToken = results.accessToken;
+
+                // Refresh request failed, send to login screen
+                if (results === 'refresh token expired') return;
+
+                // Try to get user details again
+                userDetails = await getUserInfo(newAccessToken);
+
+                // Expired or invalid token, remove cookie
+                // Exit trying to login user, send to signin page
+                if (userDetails === 'Invalid token') {
+                    CookieHelper.deleteCookie('refreshCookie');
+                    return;
+                };
+
+                // Update the accessCookie
+                newAccessCookie = { token: newAccessToken };
+                CookieHelper.saveCookie('accessCookie', newAccessCookie);
             };
 
             // Update state to login user
             const payload = {
-                token: sessionCookie.token,
+                token: newAccessCookie ? newAccessCookie.token : accessCookie.token,
                 userEmail: userDetails.email,
                 userType: userDetails.userType,
                 userDetails,
             };
             dispatch({ type: 'LOGIN_USER', payload: payload });
-        }; 
+        };
     }, []);
     
     return (

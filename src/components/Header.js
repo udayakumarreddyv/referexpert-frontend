@@ -67,8 +67,9 @@ function Header({ classes }) {
         // close drawer
         updateDrawerOpen(false);
 
-        // Delete cookie
+        // Delete cookies
         CookieHelper.deleteCookie('accessCookie');
+        CookieHelper.deleteCookie('refreshCookie');
     
         // Logout user in state
         dispatch({ type: 'LOGOUT_USER', payload: null });

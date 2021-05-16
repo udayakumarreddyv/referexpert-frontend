@@ -125,22 +125,27 @@ function Loginpage({ classes }) {
                 };
             };
 
-            // We got the JWT
-            if ('token' in results) {
-
-                // Get user details
-                const userDetails = await getUserInfo(results.token);
-                const payload = {
-                    token: results.token,
-                    userEmail: userDetails.email,
-                    userType: userDetails.userType,
-                    userDetails,
-                };
-
-                // Save cookie, update state to login user
-                CookieHelper.saveCookie('accessCookie', { token: results.token });
-                dispatch({ type: 'LOGIN_USER', payload });
+            // Make sure we got all creds we need
+            const requiredKeys = ['accessToken', 'refreshToken', 'tokenType'];
+            if (!requiredKeys.every((neededKey) => Object.keys(results).includes(neededKey))) {
+                throw 'Missing a required key in body login of response';
             };
+
+            // Get user details
+            const { accessToken, refreshToken, tokenType } = results;
+            const userDetails = await getUserInfo(accessToken);
+            const payload = {
+                token: accessToken,
+                userEmail: userDetails.email,
+                userType: userDetails.userType,
+                userDetails,
+            };
+
+            // Save cookie, update state to login user
+            CookieHelper.saveCookie('accessCookie', { token: accessToken });
+            CookieHelper.saveCookie('refreshCookie', { token: refreshToken });
+            dispatch({ type: 'LOGIN_USER', payload });
+
         } catch (err) {
             console.log(err);
             updateLoading(false);
