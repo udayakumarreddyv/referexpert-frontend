@@ -75,34 +75,34 @@ function Adminpage() {
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
     // Fetch user data
-    const fetchUserData = async (type, query, pageLoad = false) => {
+    const fetchUserData = async (type, query) => {
         try {
 
-            // Execute two search queries to get all users if page load
-            if (pageLoad) {
-                const adminUrl = 'referexpert/users/type/admin';
-                const userUrl = 'referexpert/users/type/p';
-
-                // Fetch results
-                const adminResponse = await fetch(adminUrl, { headers: { 'Authorization': `Bearer ${state.token}` }});
-                const userResponse = await fetch(userUrl, { headers: { 'Authorization': `Bearer ${state.token}` }});
-                const adminResults = await adminResponse.json();
-                const userResults = await userResponse.json();
-
-                // Join results
-                return adminResults.concat(userResults);
-            } else {
-
-                // Send request to api
-                const url = `referexpert/users/${type}/${query}`;
-                const response = await fetch(url);
-                return await response.json();
-            };
+            // Send request to api
+            const url = `referexpert/users?active=A&${type}=${query}`;
+            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` } });
+            return await response.json();
         } catch (err) {
             updateUserData('error');
             console.log(err);
             return 'error';
         }
+    };
+
+    // Fetch user counts
+    const fetchUserCounts = async () => {
+        try {
+            const url = 'referexpert/users/count';
+            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` } });
+            
+            // Error message
+            if (response.status !== 200) throw response;
+
+            return await response.json();
+        } catch (err) {
+            console.log(err);
+            return 'error';
+        };
     };
 
     // Update status of user
@@ -147,18 +147,12 @@ function Adminpage() {
 
     // Handle a user search
     const handleSearch = async () => {
-        let results;
 
         // Show loading spinner
         updateSearchLoading(true);
 
-        // No search input, get all results
-        if (searchInput.trim() === '') {
-            results = await fetchUserData(null, null, { pageLoad: true });
-        } else {
-            results = await fetchUserData(searchType, searchInput);
-        };
-
+        const results = await fetchUserData(searchType, searchInput);
+        
         // Filter by user status if one is chosen
         if (searchStatus !== 'all') {
             const filteredResults = results.filter((user) => user.isActive === searchStatus);
@@ -169,36 +163,6 @@ function Adminpage() {
 
         // Hide loading spinner
         updateSearchLoading(false);
-    };
-
-    // Create counts
-    function createUserCounts(data) {
-        const counts = { total: 0, active: 0, pending: 0, disabled: 0 };
-        
-        // Loop through each user and count based on status
-        data.map((user) => {
-
-            // Add to totals count
-            counts.total += 1;
-
-            // Add to right bucket
-            switch(user.isActive) {
-                case 'Y':
-                    counts.active += 1;
-                    break;
-                case 'P':
-                    counts.pending += 1;
-                    break;
-                case 'N':
-                    counts.disabled += 1;
-                    break;
-                default:
-                    break;
-            }
-        });
-
-        // Update counts state
-        updateUserCounts(counts);
     };
 
     // Create table rows
@@ -240,18 +204,10 @@ function Adminpage() {
         handleSearch(searchType, searchInput);
     }, [searchType, searchStatus, searchInput]);
 
-    // Fetch users and create counts
+    // Get user counts on page load
     useEffect(async () => {
-        const userList = await fetchUserData(null, null, { pageLoad: true });
-        updateUserData(userList);
-
-        // Failed to fetch all users, make counts 0
-        if (userList === 'error') {
-            createUserCounts([]);
-        } else {
-            createUserCounts(userList);
-        };
-
+        const results = await fetchUserCounts();
+        updateUserCounts(results);
         updatePageLoading(false);
     }, []);
 
