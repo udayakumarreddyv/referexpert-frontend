@@ -74,21 +74,6 @@ function Adminpage() {
     const [alertOpen, updateAlertOpen] = useState(false);
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
-    // Fetch user data
-    const fetchUserData = async (type, query) => {
-        try {
-
-            // Send request to api
-            const url = `referexpert/users?active=A&${type}=${query}`;
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` } });
-            return await response.json();
-        } catch (err) {
-            updateUserData('error');
-            console.log(err);
-            return 'error';
-        }
-    };
-
     // Fetch user counts
     const fetchUserCounts = async () => {
         try {
@@ -108,19 +93,46 @@ function Adminpage() {
     // Update status of user
     const updateUserStatus = async (email, status) => {
         try {
-            // const url = '';
-            // const response = await fetch(url, {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ email, status })
-            // });
-            // const results = await response.json();
 
-            // Update user status in current data
-            for (let index in userData) {
-                const currentUser = userData[index];
-                if (currentUser.email === email) currentUser.status = status;
+            // Check status to determine api endpoint to use
+            let url = 'referexpert/';
+            switch (status) {
+                case 'Y':
+                    url = url + 'activeuser';
+                    break;
+                case 'P':
+                    return 'Pending, do no update'
+                case 'N':
+                    url = url + 'deactiveuser';
+                    break;
+                default:
+                    throw 'Invalid option for parameter status, must be: Y, P, or N';
             };
+
+            // Send request to api to update user status
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                },
+                body: JSON.stringify({ email })
+            });
+            const results = await response.json();
+
+            // Unhandled error response
+            if (!('message' in results)) throw results;
+            
+            // Didn't get a success message for either action
+            if (
+                results.message !== 'Activated Successfully'
+                && results.message !== 'Deactivated Successfully'
+            ) {
+                throw results.message;
+            };
+
+            // Update changes to user status in current user data
+            updateUserData(userData.map((user) => user.email === email ? { ...user, isActive: status } : user));
             
             // Show success alert
             updateAlertDetails({ type: 'success', message: 'User status has been updated!' });
@@ -147,22 +159,31 @@ function Adminpage() {
 
     // Handle a user search
     const handleSearch = async () => {
+        try {
+            // Show loading spinner
+            updateSearchLoading(true);
 
-        // Show loading spinner
-        updateSearchLoading(true);
+            // Send request to api
+            const url = `referexpert/users?active=A&${searchType}=${searchInput}`;
+            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` } });
+            const results =  await response.json();
+            
+            // Filter by user status if one is chosen
+            if (searchStatus !== 'all') {
+                const filteredResults = results.filter((user) => user.isActive === searchStatus);
+                updateUserData(filteredResults);
+            } else {
+                updateUserData(results);
+            };
 
-        const results = await fetchUserData(searchType, searchInput);
-        
-        // Filter by user status if one is chosen
-        if (searchStatus !== 'all') {
-            const filteredResults = results.filter((user) => user.isActive === searchStatus);
-            updateUserData(filteredResults);
-        } else {
-            updateUserData(results);
+            // Hide loading spinner
+            updateSearchLoading(false);
+
+        } catch (err) {
+            updateUserData('error');
+            console.log(err);
+            return 'error';
         };
-
-        // Hide loading spinner
-        updateSearchLoading(false);
     };
 
     // Create table rows
