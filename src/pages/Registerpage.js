@@ -401,7 +401,6 @@ function Registerpage({ classes }) {
     useEffect(async () => {
         if (type) {
             const results = await fetchUserSpecialties();
-            console.log(results)
             const specialties = results[0].userSpeciality.specialities; // keep this spelling, comes from api call
             updateUserSpecialtiesOptions(specialties);
         };
