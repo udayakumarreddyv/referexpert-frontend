@@ -62,9 +62,9 @@ function Registerpage({ classes }) {
     const [signUpSuccessView, updateSignUpSuccessView] = useState(false);
     const [showPassword, updateShowPassword] = useState(false);
 
-    // States for user types and specialities
+    // States for user types and specialties
     const [userTypeOptions, updateUserTypeOptions] = useState([]);
-    const [userSpecialityOptions, updateUserSpecialityOptions] = useState([]);
+    const [userSpecialtiesOptions, updateUserSpecialtiesOptions] = useState([]);
 
     // Input states
     const [firstName, updateFirstName] = useState('');
@@ -78,7 +78,7 @@ function Registerpage({ classes }) {
     const [phone, updatePhone] = useState('');
     const [fax, updateFax] = useState('');
     const [type, updateType] = useState('');
-    const [speciality, updateSpeciality] = useState('');
+    const [specialty, updateSpecialty] = useState('');
     const [terms, updateTerms] = useState(false);
     const [referralCode, updateReferralCode] = useState('');
 
@@ -96,14 +96,14 @@ function Registerpage({ classes }) {
     const [validatePhone, updateValidatePhone] = useState({ hasError: false, errorMessage: '' });
     const [validateFax, updateValidateFax] = useState({ hasError: false, errorMessage: '' });
     const [validateType, updateValidateType] = useState({ hasError: false, errorMessage: '' });
-    const [validateSpeciality, updateValidateSpeciality] = useState({ hasError: false, errorMessage: '' });
+    const [validateSpecialty, updateValidateSpecialty] = useState({ hasError: false, errorMessage: '' });
     const [validateTerms, updateValidateTerms] = useState({ hasError: false, errorMessage: '' });
     const [validateReferralCode, updateValidateReferralCode] = useState({ hasError: false, errorMessage: '' });
 
     // Submit states
     const [submitError, updateSubmitError] = useState({ hasError: false, errorMessage: '' });
 
-    // Fetch types and specialities
+    // Fetch types
     const fetchUserTypes = async () => {
         try {
             const url = '/referexpert/usertypes';
@@ -114,8 +114,8 @@ function Registerpage({ classes }) {
         };
     };
 
-    // Fetch user specialities based on userType
-    const fetchUserSpecialities = async () => {
+    // Fetch user specialties based on userType
+    const fetchUserSpecialties = async () => {
         try {
             const url = `/referexpert/usertype/${type}`;
             const response = await fetch(url);
@@ -138,7 +138,7 @@ function Registerpage({ classes }) {
         let tempPhone = { hasError: false, errorMessage: '' };
         let tempFax = { hasError: false, errorMessage: '' };
         let tempType = { hasError: false, errorMessage: '' };
-        let tempSpeciality = { hasError: false, errorMessage: '' };
+        let tempSpecialty = { hasError: false, errorMessage: '' };
         let tempTerms = { hasError: false, errorMessage: '' };
         let tempReferralCode = { hasError: false, errorMessage: '' };
 
@@ -220,8 +220,8 @@ function Registerpage({ classes }) {
         };
 
         // Speciality
-        if (speciality === '') {
-            tempSpeciality = { hasError: true, errorMessage: '' };
+        if (specialty === '') {
+            tempSpecialty = { hasError: true, errorMessage: '' };
         };
 
         // Terms
@@ -239,7 +239,7 @@ function Registerpage({ classes }) {
             tempPassword, tempAddress, tempCity, 
             tempLocationState, tempZipcode,
             tempPhone, tempFax,
-            tempType, tempSpeciality, tempTerms, tempReferralCode
+            tempType, tempSpecialty, tempTerms, tempReferralCode
         };
     };
 
@@ -249,7 +249,7 @@ function Registerpage({ classes }) {
         tempPassword, tempAddress, tempCity,
         tempLocationState, tempZipcode,
         tempPhone, tempFax,
-        tempType, tempSpeciality, tempTerms, tempReferralCode
+        tempType, tempSpecialty, tempTerms, tempReferralCode
     ) => {
         updateValidateFirstName(tempFirstName);
         updateValidateLastName(tempLastName);
@@ -262,7 +262,7 @@ function Registerpage({ classes }) {
         updateValidatePhone(tempPhone);
         updateValidateFax(tempFax);
         updateValidateType(tempType);
-        updateValidateSpeciality(tempSpeciality);
+        updateValidateSpecialty(tempSpecialty);
         updateValidateTerms(tempTerms);
         updateValidateReferralCode(tempReferralCode);
     };
@@ -282,7 +282,7 @@ function Registerpage({ classes }) {
                 tempPassword, tempAddress, tempCity,
                 tempLocationState, tempZipcode,
                 tempPhone, tempFax,
-                tempType, tempSpeciality, tempTerms, tempReferralCode
+                tempType, tempSpecialty, tempTerms, tempReferralCode
             } = validateInputs();
 
             // Update error states
@@ -291,7 +291,7 @@ function Registerpage({ classes }) {
                 tempPassword, tempAddress, tempCity,
                 tempLocationState, tempZipcode,
                 tempPhone, tempFax,
-                tempType, tempSpeciality, tempTerms, tempReferralCode
+                tempType, tempSpecialty, tempTerms, tempReferralCode
             );
 
             // Kill request if we found an error
@@ -307,7 +307,7 @@ function Registerpage({ classes }) {
                 || tempPhone.hasError
                 || tempFax.hasError
                 || tempType.hasError
-                || tempSpeciality.hasError
+                || tempSpecialty.hasError
                 || tempReferralCode.hasError
             ) {
                 // Update submit error, hide loading spinner, enable button
@@ -335,7 +335,7 @@ function Registerpage({ classes }) {
                 phone,
                 fax,
                 userType: type,
-                userSpeciality: speciality,
+                userSpeciality: specialty,
                 // terms
             };
             const response = await fetch(url, {
@@ -397,12 +397,13 @@ function Registerpage({ classes }) {
         updateUserTypeOptions(userTypesFound);
     }, []);
 
-    // Fetch user specialities when user type changes
+    // Fetch user specialties when user type changes
     useEffect(async () => {
         if (type) {
-            const results = await fetchUserSpecialities();
-            const specialities = results[0].userSpeciality.specialities;
-            updateUserSpecialityOptions(specialities);
+            const results = await fetchUserSpecialties();
+            console.log(results)
+            const specialties = results[0].userSpeciality.specialities; // keep this spelling, comes from api call
+            updateUserSpecialtiesOptions(specialties);
         };
     },[type]);
 
@@ -601,21 +602,21 @@ function Registerpage({ classes }) {
                     </Select>
                 </FormControl>
 
-                {/* Specialities */}
+                {/* Specialties */}
                 <FormControl classes={{ root: registerpageClasses.select }}>
-                    <InputLabel>Speciality</InputLabel>
+                    <InputLabel>Specialty</InputLabel>
                     <Select
-                        id='speciality'
-                        value={speciality}
-                        onChange={(e) => updateSpeciality(e.target.value)}
-                        error={validateSpeciality.hasError}
-                        helperText={validateSpeciality.errorMessage}
+                        id='specialty'
+                        value={specialty}
+                        onChange={(e) => updateSpecialty(e.target.value)}
+                        error={validateSpecialty.hasError}
+                        helperText={validateSpecialty.errorMessage}
                     >
-                        {/* Create speciality items based on user types found */}
+                        {/* Create specialty items based on user types found */}
                         {
-                            userSpecialityOptions.length > 0
-                            ? userSpecialityOptions.map((userSpeciality) => {
-                                return <MenuItem value={userSpeciality}>{userSpeciality}</MenuItem>
+                            userSpecialtiesOptions.length > 0
+                            ? userSpecialtiesOptions.map((userSpecialty) => {
+                                return <MenuItem value={userSpecialty}>{userSpecialty}</MenuItem>
                             })
                             : <MenuItem value=''>Select a type first</MenuItem>
                         }
