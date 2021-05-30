@@ -60,16 +60,16 @@ const separateAppointments = (appointmentsList) => {
 
     // Loop through each appointment in list, separate into buckets
     appointmentsList.forEach((appointment) => {
-                
+
         // Pending appointment, open appointment, completed appointment
         if (appointment.isAccepted === 'P') {
             pendingList.push(appointment);
-        } else if (appointment.isServed === 'N') {
+        } else if (appointment.isAccepted === 'Y' && appointment.isServed === 'N') {
             openList.push(appointment);
         } else if (appointment.isServed === 'Y') {
             completedList.push(appointment);
         } else {
-            console.log('Invalid appointment!');
+            console.log(`Rejected appointment: ${appointment.appointmentId}`);
         };
     });
 
