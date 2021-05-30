@@ -222,7 +222,7 @@ function Adminpage() {
 
     // Don't update searchInput until user is done typing, aka debouncing
     const debouncedSearch = useCallback(
-        debounce((searchQuery) => updateSearchInput(searchQuery), 600)
+        debounce((searchQuery) => updateSearchInput(searchQuery), 800)
     ,[]);
 
     // Query api when search has changed
