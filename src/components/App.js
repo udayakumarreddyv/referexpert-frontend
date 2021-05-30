@@ -94,7 +94,7 @@ function App() {
                             <PrivateRoute path='/home' classes={classes} component={Userpage} />
 
                             {/* Admim page */}
-                            <PrivateRoute path='/admin' component={Adminpage} />
+                            <PrivateRoute path='/admin' classes={classes} component={Adminpage} />
 
                             {/* Homepage, not logged in */}
                             <Route to='/'>

@@ -4,14 +4,20 @@ import './styles/Adminpage.css';
 // Global store
 import { Context } from '../store/GlobalStore';
 
-// Debounce search input
-import debounce from 'lodash.debounce';
+// Components
+import InviteDoctorDialog from '../components/InviteDoctorDialog';
+
+// Utils
+import debounce from 'lodash.debounce'; // debounce search
 
 // Material UI
 import {
+    Button,
+    CircularProgress,
     FormControl,
     InputLabel,
     MenuItem,
+    Paper,
     Select,
     Snackbar,
     Table,
@@ -22,9 +28,7 @@ import {
     TableRow,
     TableFooter,
     TablePagination,
-    Paper,
     TextField,
-    CircularProgress,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { Search } from '@material-ui/icons';
@@ -49,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function Adminpage() {
+function Adminpage({ classes }) {
     const [state, dispatch] = useContext(Context);
     const adminpageClasses = useStyles();
 
@@ -73,6 +77,9 @@ function Adminpage() {
     // Alert status
     const [alertOpen, updateAlertOpen] = useState(false);
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
+
+    // Dialog states
+    const [dialogInviteDoctorOpen, updateDialogInviteDoctorOpen] = useState(false);
 
     // Fetch user counts
     const fetchUserCounts = async () => {
@@ -291,21 +298,18 @@ function Adminpage() {
     return (
         <section id='adminpage-body'>
 
-            {/* Alert popups, only shown when user status has been updated */}
-            <Snackbar
-                open={alertOpen}
-                autoHideDuration={3000}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                onClose={() => updateAlertOpen(false)}
-            >
-                <Alert
-                    severity={alertDetails.type}
-                    variant='filled'
-                    elevation={2}
+            {/* Top bar for holding buttons */}
+            <section id='userpage-topBar'>
+
+                {/* Invite doctor button */}
+                <Button
+                    classes={{ root: classes.primaryButton }}
+                    style={{ marginRight: '10px' }}
+                    onClick={() => updateDialogInviteDoctorOpen(true)}
                 >
-                    { alertDetails.message }
-                </Alert>
-            </Snackbar>
+                    Invite doctor
+                </Button>
+            </section>
 
             {/* Stats section */}
             <h1 className='pageTitle'>User stats</h1>
@@ -419,6 +423,33 @@ function Adminpage() {
                     </TableFooter>
                 </Table>
             </TableContainer>
+
+            {/* Invite doctor dialog component */}
+            <InviteDoctorDialog
+                classes={classes}
+                
+                userEmail={state.userEmail}
+                dialogInviteDoctorOpen={dialogInviteDoctorOpen}
+                updateDialogInviteDoctorOpen={updateDialogInviteDoctorOpen}
+                updateAlertDetails={updateAlertDetails}
+                updateAlertOpen={updateAlertOpen}
+            />
+
+            {/* Alert popups, only shown when user status has been updated */}
+            <Snackbar
+                open={alertOpen}
+                autoHideDuration={3000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                onClose={() => updateAlertOpen(false)}
+            >
+                <Alert
+                    severity={alertDetails.type}
+                    variant='filled'
+                    elevation={2}
+                >
+                    { alertDetails.message }
+                </Alert>
+            </Snackbar>
         </section>
     );
 };
