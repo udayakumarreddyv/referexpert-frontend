@@ -9,6 +9,8 @@ import {
     Button,
     CircularProgress,
     FormControl,
+    IconButton,
+    InputAdornment,
     InputLabel,
     Paper,
     List,
@@ -28,6 +30,8 @@ import {
     LocalHospital,
     Phone,
     Print,
+    Visibility,
+    VisibilityOff,
     Work,
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
@@ -74,15 +78,12 @@ function Profilepage({ classes }) {
     const [userSpeciality, updateUserSpeciality] = useState(state.userDetails.userSpeciality);
 
     // Change password states
-    const [currentPassword, updateCurrentPassword] = useState('');
     const [newPassword, updateNewPassword] = useState('');
-    const [confirmPassword, updateConfirmPassword] = useState('');
     const [passwordLoading, updatePasswordLoading] = useState(false);
+    const [showPassword, updateShowPassword] = useState(false);
 
     // Change password validation states
-    const [currentPasswordValidation, updateCurrentPasswordValidation] = useState({ hasError: false, errorMessage: '' });
     const [newPasswordValidation, updateNewPasswordValidation] = useState({ hasError: false, errorMessage: '' });
-    const [confirmPasswordValidation, updateConfirmPasswordValidation] = useState({ hasError: false, errorMessage: '' });
     const [submitError, updateSubmitError] = useState({ hasError: false, errorMessage: '' });
 
     // Save updated profile information
@@ -163,18 +164,14 @@ function Profilepage({ classes }) {
         saveProfileInfo();
     };
 
-    // Validate change password fields
-    const validatePasswordFields = () => {
-        let tempCurrentPassword = { hasError: false, errorMessage: '' };
-        let tempNewPassword = { hasError: false, errorMessage: '' };
-        let tempConfirmPassword = { hasError: false, errorMessage: '' };
+    // Handle change password submit
+    const handleChangePasswordSubmit = async () => {
 
-        // Check current password
-        if (currentPassword.trim() === '') {
-            tempCurrentPassword = { hasError: true, errorMessage: '' };
-        };
+        // Clear any submit errors
+        updateSubmitError({ hasError: false, errorMessage: '' });
 
         // Check new password
+        let tempNewPassword = { hasError: false, errorMessage: '' };
         if (newPassword.trim() === '') {
             tempNewPassword = { hasError: true, errorMessage: '' };
         } else if (newPassword.length < 8) {
@@ -183,39 +180,12 @@ function Profilepage({ classes }) {
             tempNewPassword = { hasError: true, errorMessage: 'Must contain at least one uppercase character, one number, and one special character' };
         };
 
-        // Check confirm password
-        if (confirmPassword.trim() === '') {
-            tempConfirmPassword = { hasError: true, errorMessage: '' };
-        } else if (confirmPassword !== newPassword) {
-            tempConfirmPassword = { hasError: true, errorMessage: 'Passwords do not match' };
-        };
-
-        return [tempCurrentPassword, tempNewPassword, tempConfirmPassword];
-    };
-
-    // Handle change password submit
-    const handleChangePasswordSubmit = async () => {
-
-        // Clear any submit errors
-        updateSubmitError({ hasError: false, errorMessage: '' });
-
-        // Validate password fields
-        const [
-            // tempCurrentPassword,
-            tempNewPassword, tempConfirmPassword
-        ] = validatePasswordFields();
-
         // Update validation states
-        // updateCurrentPasswordValidation(tempCurrentPassword);
         updateNewPasswordValidation(tempNewPassword);
-        updateConfirmPasswordValidation(tempConfirmPassword);
-
+        
         // Kill request if error in validation
-        if (
-            // tempCurrentPassword.hasError ||
-            tempNewPassword.hasError || tempConfirmPassword.hasError
-        ) {
-            updateSubmitError({ hasError: true, errorMessage: 'Please fill out all fields' });
+        if (tempNewPassword.hasError) {
+            updateSubmitError({ hasError: true, errorMessage: '' });
             return;
         };
 
@@ -248,8 +218,9 @@ function Profilepage({ classes }) {
             updateAlertDetails({ type: 'success', message: 'Your password has been updated!' });
             updateAlertOpen(true);
 
-            // Hide loading spinner
+            // Hide spinner and clear input
             updatePasswordLoading(false);
+            updateNewPassword('');
         } catch(err) {
             
             // Show success alert
@@ -464,42 +435,31 @@ function Profilepage({ classes }) {
                 {/* Change password section */}
                 <section id='profilepage-changePasswordContainer'>
                     <h3 className='pageSubTitle'>Change password</h3>
-                    
-                    {/* Current password */}
-                    {/* <TextField
-                        name='currentPassword'
-                        label='Current password'
-                        type='password'
-                        variant='outlined'
-                        classes={{ root: profilepageClasses.passwordInput }}
-                        onChange={(event) => updateCurrentPassword(event.target.value)}
-                        error={currentPasswordValidation.hasError}
-                        fullWidth
-                    /> */}
 
-                    {/* New password */}
+                    {/* Password */}
                     <TextField
-                        name='newPassword'
-                        label='New password'
-                        type='password'
+                        id='password'
+                        label='Password'
                         variant='outlined'
+                        value={newPassword}
+                        type={ showPassword ? 'text' : 'password' }
                         classes={{ root: profilepageClasses.passwordInput }}
-                        onChange={(event) => updateNewPassword(event.target.value)}
+                        onChange={(e) => updateNewPassword(e.target.value)}
                         error={newPasswordValidation.hasError}
                         helperText={newPasswordValidation.errorMessage}
-                        fullWidth
-                    />
-
-                    {/* Confirm password */}
-                    <TextField
-                        name='confirmPassword'
-                        label='Confirm password'
-                        type='password'
-                        variant='outlined'
-                        classes={{ root: profilepageClasses.passwordInput }}
-                        onChange={(event) => updateConfirmPassword(event.target.value)}
-                        error={confirmPasswordValidation.hasError}
-                        helperText={confirmPasswordValidation.errorMessage}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={() => updateShowPassword(!showPassword)}
+                                        edge="end"
+                                    >
+                                        { showPassword ? <Visibility /> : <VisibilityOff /> }
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
                         fullWidth
                     />
 
