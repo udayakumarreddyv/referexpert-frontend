@@ -101,6 +101,8 @@ function Adminpage() {
                     url = url + 'activeuser';
                     break;
                 case 'P':
+                    updateAlertDetails({ type: 'error', message: 'Pending is not a selectable option, please choose either Active or Disabled' });
+                    updateAlertOpen(true);
                     return 'Pending, do no update'
                 case 'N':
                     url = url + 'deactiveuser';
