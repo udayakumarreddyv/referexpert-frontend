@@ -62,7 +62,7 @@ function Adminpage() {
     const [userCounts, updateUserCounts] = useState({ total: 0, active: 0, pending: 0, disabled: 0 });
 
     // Search states
-    const [searchType, updateSearchType] = useState('firstname');
+    const [searchType, updateSearchType] = useState('firstName');
     const [searchStatus, updateSearchStatus] = useState('all');
     const [searchInput, updateSearchInput] = useState('');
 
@@ -342,8 +342,8 @@ function Adminpage() {
                         value={searchType}
                         onChange={(event) => updateSearchType(event.target.value)}
                     >
-                        <MenuItem value='firstname'>First Name</MenuItem>
-                        <MenuItem value='lastname'>Last Name</MenuItem>
+                        <MenuItem value='firstName'>First Name</MenuItem>
+                        <MenuItem value='lastName'>Last Name</MenuItem>
                         <MenuItem value='type'>User type</MenuItem>
                     </Select>
                 </FormControl>
