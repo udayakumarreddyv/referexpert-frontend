@@ -102,8 +102,7 @@ function ReferPatientpage({ classes }) {
             
             // User wants to use their current location
             if (distanceType === 'currentLocation') {
-                console.log('Using current lcoation');
-
+                
                 // Error getting coordinates
                 if (currentLocationError) throw currentLocationError;    
                 

@@ -59,7 +59,10 @@ function DoctorsTable(props) {
                 city,
                 state,
                 zip,
+                distance
             } = doctor;
+
+            console.log(doctor)
     
             // Format 
             return (
@@ -69,6 +72,7 @@ function DoctorsTable(props) {
                     <TableCell>{ userSpeciality }</TableCell>
                     <TableCell>{ `${address}, ${city} ${state} ${zip}` }</TableCell>
                     <TableCell>{ phone }</TableCell>
+                    <TableCell>{ Math.floor(distance) }mi</TableCell>
                     <TableCell>
                         <Button
                             classes={{ root: `${ classes.primaryButton } ${ referpatientpageClasses.scheduleButton }` }}
@@ -132,6 +136,7 @@ function DoctorsTable(props) {
                         <TableCell>Speciality</TableCell>
                         <TableCell>Address</TableCell>
                         <TableCell>Phone</TableCell>
+                        <TableCell>Distance</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                 </TableHead>
@@ -144,7 +149,7 @@ function DoctorsTable(props) {
                         !loading
                         ? tableRows
                         : <TableRow key={0}>
-                            <TableCell colSpan={5}>
+                            <TableCell colSpan={7}>
                                 <CircularProgress size={40} />
                             </TableCell>
                         </TableRow>
@@ -156,7 +161,7 @@ function DoctorsTable(props) {
                     <TableRow>
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
-                            colSpan={5}
+                            colSpan={7}
                             count={ doctorsData ? doctorsData.length : 0 }
                             rowsPerPage={rowsPerPage}
                             page={page}
