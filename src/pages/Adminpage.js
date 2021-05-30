@@ -137,6 +137,11 @@ function Adminpage() {
             // Show success alert
             updateAlertDetails({ type: 'success', message: 'User status has been updated!' });
             updateAlertOpen(true);
+
+            // Update user counts
+            const countResults = await fetchUserCounts();
+            updateUserCounts(countResults);
+            updatePageLoading(false);
         } catch(err) {
             
             // Show failed alert
