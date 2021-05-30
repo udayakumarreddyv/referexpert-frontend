@@ -54,11 +54,13 @@ function Referrals ({ classes, referralsData }) {
         return referralsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((referral) => {
             const {
                 appointmentId,
-                appointmentFrom,
-                appointmentTo,
+                // appointmentFrom,
+                // appointmentTo,
                 dateAndTimeString,
-                fromFirstName,
-                fromLastName,
+                // fromFirstName,
+                // fromLastName,
+                toFirstName,
+                toLastName,
                 subject,
                 reason,
                 isAccepted,
@@ -69,7 +71,7 @@ function Referrals ({ classes, referralsData }) {
             // Format 
             return (
                 <TableRow key={appointmentId}>
-                    <TableCell>{ fromFirstName } { fromLastName }</TableCell>
+                    <TableCell>{ toFirstName } { toLastName }</TableCell>
                     <TableCell>{ date }</TableCell>
                     <TableCell>{ subject }</TableCell>
                     <TableCell>{ reason }</TableCell>
