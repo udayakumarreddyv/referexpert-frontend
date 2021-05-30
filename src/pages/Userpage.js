@@ -12,9 +12,7 @@ import PendingAppointments from '../components/PendingAppointments';
 import OpenAppointments from '../components/OpenAppointments';
 import CompleteAppointments from '../components/CompleteAppointments';
 import Referrals from '../components/Referrals';
-
-// Email validation
-import * as EmailValidator from 'email-validator';
+import InviteDoctorDialog from '../components/InviteDoctorDialog';
 
 // Page navigation
 import { Link } from 'react-router-dom';
@@ -22,14 +20,12 @@ import { Link } from 'react-router-dom';
 // Material UI
 import {
     Button,
-    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
     Snackbar,
-    TextField
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { Schedule, Today, CheckCircle, Share } from '@material-ui/icons';
@@ -102,11 +98,6 @@ function Userpage({ classes }) {
     const [dialogPendingRejectOpen, updateDialogPendingRejectOpen] = useState(false);
     const [dialogAppointmentId, updateDialogAppointmentId] = useState(null);
 
-    // Invite doctors states
-    const [inviteDoctorEmail, updateInviteDoctorEmail] = useState('');
-    const [validateInviteDoctorEmail, updateValidateInviteDoctorEmail] = useState({ hasError: false, errorMessage: '' });
-    const [inviteDoctorSubmitError, updateInviteDoctorSubmitError] = useState({ hasError: false, errorMessage: '' });
-
     // Appointment states
     const [pendingAppointments, updatePendingAppointments] = useState();
     const [openAppointments, updateOpenAppointments] = useState([]);
@@ -114,11 +105,6 @@ function Userpage({ classes }) {
 
     // Referrals states
     const [referralsData, updateReferralsData] = useState(null);
-
-    // Open invite doctor dialog
-    const handleInviteDoctorDialogOpen = () => {
-        updateDialogInviteDoctorOpen(true);
-    };
 
     // Open complete appointment dialog
     const handleCompleteDialogOpen = (appointmentId) => {
@@ -145,9 +131,6 @@ function Userpage({ classes }) {
         updateCompleteDialogOpen(false);
         updateDialogPendingAcceptOpen(false);
         updateDialogPendingRejectOpen(false);
-
-        updateDialogInviteDoctorOpen(false);
-        updateInviteDoctorEmail('');
     };
 
     // Fetch all appointments for user: open, pending
@@ -185,60 +168,6 @@ function Userpage({ classes }) {
         } catch (err) {
             updateReferralsData('error');
             console.log(err);
-        };
-    };
-
-    // Handle sending invite doctor
-    const handleInviteDoctor = async (email) => {
-        
-        // Validate email input
-        if (email.trim() === '') {
-            updateValidateInviteDoctorEmail({ hasError: true, errorMessage: 'Please enter an email address' });
-            return;
-        } else if (!EmailValidator.validate(email)) {
-            updateValidateInviteDoctorEmail({ hasError: true, errorMessage: 'Invalid format for email address' });
-            return;
-        };
-        
-        try {
-
-            // Clear error states, show loading spinner, disable button
-            updateValidateInviteDoctorEmail({ hasError: false, errorMessage: '' });
-            updateLoading(true);
-
-            // Send api request
-            const url = '/referexpert/referuser';
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userEmail: state.userDetails.email,
-                    docEmail: email,
-                }),
-            });
-            const results = await response.json();
-
-            // Hide loading spinner
-            updateLoading(false);
-
-            // Unexpected response from api
-            if (!('message' in results)) throw results;
-
-            // Show success alert
-            if (results.message === 'Referral Successful') {
-                updateAlertDetails({ type: 'info', message: 'Invite sent!' });
-                updateAlertOpen(true);
-
-                // Close dialog, clear errors
-                handleDialogClose();
-                updateInviteDoctorSubmitError({ hasError: false, errorMessage: '' });
-            } else {
-                throw results.message;
-            };
-        } catch (err) {
-            console.log(err);
-            updateLoading(false);
-            updateInviteDoctorSubmitError({ hasError: true, errorMessage: 'There was an error while sending the invite(s), please try again later' });
         };
     };
 
@@ -363,22 +292,6 @@ function Userpage({ classes }) {
     return (
         <section id='userpage-body'>
 
-            {/* Alert popups, only shown when user status has been updated */}
-            <Snackbar
-                open={alertOpen}
-                autoHideDuration={3000}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                onClose={() => updateAlertOpen(false)}
-            >
-                <Alert
-                    severity={alertDetails.type}
-                    variant='filled'
-                    elevation={2}
-                >
-                    { alertDetails.message }
-                </Alert>
-            </Snackbar>
-
             {/* Top bar for holding buttons */}
             <section id='userpage-topBar'>
 
@@ -386,7 +299,7 @@ function Userpage({ classes }) {
                 <Button
                     classes={{ root: classes.primaryButton }}
                     style={{ marginRight: '10px' }}
-                    onClick={handleInviteDoctorDialogOpen}
+                    onClick={() => updateDialogInviteDoctorOpen(true)}
                 >
                     Invite doctor
                 </Button>
@@ -543,47 +456,32 @@ function Userpage({ classes }) {
                 </DialogActions>
             </Dialog>
 
-            {/* Invite doctor dialog */}
-            <Dialog
-                open={dialogInviteDoctorOpen}
-                onClose={handleDialogClose}
-                aria-labelledby="invite-doctor"
-                aria-describedby="Invite a doctor to referexpert"
-            >
-                {/* Title */}
-                <DialogTitle id="alert-dialog-title">Send invites to doctors who may like ReferExpert</DialogTitle>
+            {/* Invite doctor dialog component */}
+            <InviteDoctorDialog
+                classes={classes}
                 
-                {/* Description */}
-                <DialogContent>
-                    <DialogContentText>Enter the email address of the doctor(s) and we'll notify them</DialogContentText>
+                userEmail={state.userEmail}
+                dialogInviteDoctorOpen={dialogInviteDoctorOpen}
+                updateDialogInviteDoctorOpen={updateDialogInviteDoctorOpen}
+                updateAlertDetails={updateAlertDetails}
+                updateAlertOpen={updateAlertOpen}
+            />
 
-                    {/* Email */}
-                    <TextField
-                        name='inviteEmail'
-                        label='Email'
-                        variant='outlined'
-                        // classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
-                        onChange={(event) => updateInviteDoctorEmail(event.target.value)}
-                        error={validateInviteDoctorEmail.hasError}
-                        helperText={validateInviteDoctorEmail.errorMessage}
-                        fullWidth
-                    />
-
-                    <div className='errorMessage'>{ inviteDoctorSubmitError.errorMessage }</div>
-                </DialogContent>
-
-                {/* Action buttons */}
-                <DialogActions>
-                    <Button onClick={handleDialogClose}>Cancel</Button>
-                    <Button
-                        classes={{ root: classes.primaryButton }}
-                        onClick={() => handleInviteDoctor(inviteDoctorEmail)}
-                        disabled={loading}
-                    >
-                        { loading ? <CircularProgress size={20} color='primary' /> : 'Invite' }
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            {/* Alert popups, only shown when user status has been updated */}
+            <Snackbar
+                open={alertOpen}
+                autoHideDuration={3000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                onClose={() => updateAlertOpen(false)}
+            >
+                <Alert
+                    severity={alertDetails.type}
+                    variant='filled'
+                    elevation={2}
+                >
+                    { alertDetails.message }
+                </Alert>
+            </Snackbar>
         </section>
     );
 };
