@@ -145,15 +145,15 @@ function Registerpage({ classes }) {
         // First name check
         if (firstName.trim() === '') {
             tempFirstName = { hasError: true, errorMessage: '' };
-        } else if (!firstName.match(/^[A-Za-z]+$/)) {
-            tempFirstName = { hasError: true, errorMessage: 'Must contain only letters' };
+        } else if (!firstName.match(/^[a-z][a-z\s\']*$/)) {
+            tempFirstName = { hasError: true, errorMessage: 'Numbers or special characters are not permitted' };
         };
 
         // Last name check
         if (lastName.trim() === '') {
             tempLastName = { hasError: true, errorMessage: '' };
-        } else if (!lastName.match(/^[A-Za-z]+$/)) {
-            tempLastName = { hasError: true, errorMessage: 'Must contain only letters' };
+        } else if (!lastName.match(/^[a-z][a-z\s\']*$/)) {
+            tempLastName = { hasError: true, errorMessage: 'Numbers or special characters are not permitted' };
         };
 
         // Email check
@@ -183,7 +183,7 @@ function Registerpage({ classes }) {
         };
 
         // State
-        if (state === '') {
+        if (locationState === '') {
             tempLocationState = { hasError: true, errorMessage: '' };
         };
 
@@ -487,7 +487,7 @@ function Registerpage({ classes }) {
                     classes={{ root: classes.textfield }}
                     onChange={(e) => updatePassword(e.target.value)}
                     error={validatePassword.hasError}
-                    helperText={validatePassword.errorMessage}
+                    helperText={validatePassword.errorMessage ? validatePassword.errorMessage : 'Must be at least 8 characters, contain at least one: uppercase letter, number, and special character'}
                     InputProps={{
                         endAdornment: (
                             <InputAdornment position="end">
