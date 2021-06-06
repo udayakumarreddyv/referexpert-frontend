@@ -237,7 +237,11 @@ function ReferPatientpage({ classes }) {
         };
 
         // Kill request if validation error
-        if (validateError) return;
+        if (validateError) {
+            console.log('Caught an error')
+            console.log(validateAppointmentTimestamp)
+            return
+        };
 
         try {
             // Show loading spinner in schedule dialog popup

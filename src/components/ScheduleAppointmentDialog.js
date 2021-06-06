@@ -1,5 +1,10 @@
 import './styles/ScheduleAppointmentDialog.css';
 
+// Date picker
+import "flatpickr/dist/themes/dark.css";
+import Flatpickr from 'react-flatpickr';
+import * as moment from 'moment';
+
 // Material UI
 import {
     Button,
@@ -110,7 +115,7 @@ function ScheduleAppointmentDialog(props) {
                     />
 
                     {/* Appointment date & time */}
-                    <TextField
+                    {/* <TextField
                         name='appointmentDateTime'
                         label='Appointment date'
                         type='datetime-local'
@@ -119,6 +124,23 @@ function ScheduleAppointmentDialog(props) {
                         error={validateAppointmentTimestamp.hasError}
                         helperText={validateAppointmentTimestamp.errorMessage}
                         fullWidth
+                    /> */}
+
+                    {/* Datetime picker */}
+                    <div>Appointment time</div>
+                    <Flatpickr
+                        data-enable-time
+                        placeholder='Select a date...'
+                        onChange={(date, dateString) => updateAppointmentTimestamp(dateString)}
+                        options={{
+                            altInput: true,
+                            altFormat: 'M J, Y h:iK',
+                            minDate: moment().add(1, 'hour').startOf('hour').toISOString(),
+                            minuteIncrement: '15',
+                            defaultMinute: 0,
+                            mode: 'single',
+                        }}
+                        className='scheduleAppointmentDialog-datetimePicker'
                     />
                 </section>
             </DialogContent>
