@@ -145,14 +145,14 @@ function Registerpage({ classes }) {
         // First name check
         if (firstName.trim() === '') {
             tempFirstName = { hasError: true, errorMessage: '' };
-        } else if (!firstName.match(/^[a-z][a-z\s\']*$/)) {
+        } else if (!firstName.match(/^[a-zA-Z][a-zA-Z\s\']*$/)) {
             tempFirstName = { hasError: true, errorMessage: 'Numbers or special characters are not permitted' };
         };
 
         // Last name check
         if (lastName.trim() === '') {
             tempLastName = { hasError: true, errorMessage: '' };
-        } else if (!lastName.match(/^[a-z][a-z\s\']*$/)) {
+        } else if (!lastName.match(/^[a-zA-Z][a-zA-Z\s\']*$/)) {
             tempLastName = { hasError: true, errorMessage: 'Numbers or special characters are not permitted' };
         };
 
