@@ -62,8 +62,6 @@ function DoctorsTable(props) {
                 distance
             } = doctor;
 
-            console.log(doctor)
-    
             // Format 
             return (
                 <TableRow key={userId}>
