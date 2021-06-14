@@ -265,7 +265,7 @@ function Adminpage({ classes }) {
 
     // Query api when search has changed
     useEffect(async () => {
-        handleSearch(searchType, searchInput);
+        if (searchInput.length > 2) handleSearch(searchType, searchInput);
     }, [searchType, searchStatus, searchInput]);
 
     // Get user counts on page load
