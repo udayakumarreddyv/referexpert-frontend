@@ -14,6 +14,11 @@ import debounce from 'lodash.debounce'; // debounce search
 import {
     Button,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     FormControl,
     InputLabel,
     MenuItem,
@@ -70,6 +75,10 @@ function Adminpage({ classes }) {
     const [searchStatus, updateSearchStatus] = useState('all');
     const [searchInput, updateSearchInput] = useState('');
 
+    // Update user status states
+    const [userStatusEmail, updateStatusEmail] = useState('');
+    const [newUserStatus, updateNewUserStatus] = useState('');
+
     // Page states
     const [page, updatePage] = useState(0);
     const [rowsPerPage, updateRowsPerPage] = useState(10);
@@ -80,6 +89,7 @@ function Adminpage({ classes }) {
 
     // Dialog states
     const [dialogInviteDoctorOpen, updateDialogInviteDoctorOpen] = useState(false);
+    const [dialogChangeStatusOpen, updateDialogUpdateStatusOpen] = useState(false);
 
     // Fetch user counts
     const fetchUserCounts = async () => {
@@ -97,13 +107,30 @@ function Adminpage({ classes }) {
         };
     };
 
+    // Handle opening "are you sure" dialog for updating user status
+    const handleOpenChangeStatusDialog = (email, newStatus) => {
+        updateStatusEmail(email);
+        updateNewUserStatus(newStatus);
+        updateDialogUpdateStatusOpen(true);
+    };
+
+    // Handle closing the "are you sure" dialog
+    const handleCloseChangeStatusDialog = () => {
+        updateStatusEmail('');
+        updateNewUserStatus('');
+        updateDialogUpdateStatusOpen(false);  
+    };
+
     // Update status of user
-    const updateUserStatus = async (email, status) => {
+    const updateUserStatus = async () => {
         try {
+
+            // Close the dialog
+            updateDialogUpdateStatusOpen(false);
 
             // Check status to determine api endpoint to use
             let url = 'referexpert/';
-            switch (status) {
+            switch (newUserStatus) {
                 case 'Y':
                     url = url + 'activeuser';
                     break;
@@ -125,7 +152,7 @@ function Adminpage({ classes }) {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${state.token}`
                 },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email: userStatusEmail })
             });
             const results = await response.json();
 
@@ -141,7 +168,7 @@ function Adminpage({ classes }) {
             };
 
             // Update changes to user status in current user data
-            updateUserData(userData.map((user) => user.email === email ? { ...user, isActive: status } : user));
+            updateUserData(userData.map((user) => user.email === userStatusEmail ? { ...user, isActive: newUserStatus } : user));
             
             // Show success alert
             updateAlertDetails({ type: 'success', message: 'User status has been updated!' });
@@ -157,6 +184,8 @@ function Adminpage({ classes }) {
             updateAlertDetails({ type: 'error', message: 'Failed to update user status' })
             updateAlertOpen(true);
             console.log(err);
+        } finally {
+            handleCloseChangeStatusDialog();
         };
     };
 
@@ -217,7 +246,7 @@ function Adminpage({ classes }) {
                             variant='outlined'
                             value={isActive}
                             classes={{ root: adminpageClasses.statusChangeSelect }}
-                            onChange={(event) => updateUserStatus(email, event.target.value)}
+                            onChange={(event) => handleOpenChangeStatusDialog(email, event.target.value)}
                         >
                             <MenuItem value='Y'><span className='statusCircle activeCircle' /> Active</MenuItem>
                             <MenuItem value='P'><span className='statusCircle pendingCircle' /> Pending</MenuItem>
@@ -435,10 +464,39 @@ function Adminpage({ classes }) {
                 updateAlertOpen={updateAlertOpen}
             />
 
+            {/* "Are you sure" status update dialog component */}
+            <Dialog
+                open={dialogChangeStatusOpen}
+                onClose={handleCloseChangeStatusDialog}
+                aria-labelledby="change-status"
+                aria-describedby="Update the status of a user"
+            >
+                {/* Title */}
+                <DialogTitle id="alert-dialog-title">Are you sure you would like to change this user's status?</DialogTitle>
+                
+                {/* Description */}
+                <DialogContent>
+                    <DialogContentText>Changing this user's status could affect their usage of our application.</DialogContentText>
+                    {/* <div className='errorMessage'>{ inviteDoctorSubmitError.errorMessage }</div> */}
+                </DialogContent>
+
+                {/* Action buttons */}
+                <DialogActions>
+                    <Button onClick={handleCloseChangeStatusDialog}>Cancel</Button>
+                    <Button
+                        classes={{ root: classes.primaryButton }}
+                        onClick={updateUserStatus}
+                        // disabled={statusUpdateLoading}
+                    >
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Alert popups, only shown when user status has been updated */}
             <Snackbar
                 open={alertOpen}
-                autoHideDuration={3000}
+                autoHideDuration={5000}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                 onClose={() => updateAlertOpen(false)}
             >
