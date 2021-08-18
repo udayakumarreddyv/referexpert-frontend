@@ -79,6 +79,8 @@ function Registerpage({ classes }) {
     const [fax, updateFax] = useState('');
     const [type, updateType] = useState('');
     const [specialty, updateSpecialty] = useState('');
+    const [service, updateService] = useState('');
+    const [insurance, updateInsurance] = useState('');
     const [terms, updateTerms] = useState(false);
     const [referralCode, updateReferralCode] = useState('');
 
@@ -88,15 +90,15 @@ function Registerpage({ classes }) {
     const [validateEmail, updateValidateEmail] = useState({ hasError: false, errorMessage: '' });
     const [validatePassword, updateValidatePassword] = useState({ hasError: false, errorMessage: '' });
     const [validateAddress, updateValidateAddress] = useState({ hasError: false, errorMessage: '' });
-    
     const [validateCity, updateValidateCity] = useState({ hasError: false, errorMessage: '' });
     const [validateLocationState, updateValidateLocationState] = useState({ hasError: false, errorMessage: '' });
-
     const [validateZipcode, updateValidateZipcode] = useState({ hasError: false, errorMessage: '' });
     const [validatePhone, updateValidatePhone] = useState({ hasError: false, errorMessage: '' });
     const [validateFax, updateValidateFax] = useState({ hasError: false, errorMessage: '' });
     const [validateType, updateValidateType] = useState({ hasError: false, errorMessage: '' });
     const [validateSpecialty, updateValidateSpecialty] = useState({ hasError: false, errorMessage: '' });
+    const [validateService, updateValidateService] = useState({ hasError: false, errorMessage: '' });
+    const [validateInsurance, updateValidateInsurance] = useState({ hasError: false, errorMessage: '' });
     const [validateTerms, updateValidateTerms] = useState({ hasError: false, errorMessage: '' });
     const [validateReferralCode, updateValidateReferralCode] = useState({ hasError: false, errorMessage: '' });
 
@@ -139,6 +141,8 @@ function Registerpage({ classes }) {
         let tempFax = { hasError: false, errorMessage: '' };
         let tempType = { hasError: false, errorMessage: '' };
         let tempSpecialty = { hasError: false, errorMessage: '' };
+        let tempService = { hasError: false, errorMessage: '' };
+        let tempInsurance = { hasError: false, errorMessage: '' };
         let tempTerms = { hasError: false, errorMessage: '' };
         let tempReferralCode = { hasError: false, errorMessage: '' };
 
@@ -224,6 +228,21 @@ function Registerpage({ classes }) {
             tempSpecialty = { hasError: true, errorMessage: '' };
         };
 
+        // Service
+        if (service === '') {
+            tempService = { hasError: true, errorMessage: '' };
+        } else if (service.length > 250) { // has a max char length
+            tempService = { hasError: true, errorMessage: 'Character count too larger. Maximum is 250 characters' };
+        };
+
+        // Insurance
+        if (insurance === '') {
+            tempInsurance = { hasError: true, errorMessage: '' };
+
+        } else if (insurance.length > 250) { // has a max char length
+            tempInsurance = { hasError: true, errorMessage: 'Character count too larger. Maximum is 250 characters' };
+        };
+
         // Terms
         if (!terms) {
             tempTerms = { hasError: true, errorMessage: '' };
@@ -239,7 +258,8 @@ function Registerpage({ classes }) {
             tempPassword, tempAddress, tempCity, 
             tempLocationState, tempZipcode,
             tempPhone, tempFax,
-            tempType, tempSpecialty, tempTerms, tempReferralCode
+            tempType, tempSpecialty, tempService,
+            tempInsurance, tempTerms, tempReferralCode
         };
     };
 
@@ -249,7 +269,8 @@ function Registerpage({ classes }) {
         tempPassword, tempAddress, tempCity,
         tempLocationState, tempZipcode,
         tempPhone, tempFax,
-        tempType, tempSpecialty, tempTerms, tempReferralCode
+        tempType, tempSpecialty, tempService,
+        tempInsurance, tempTerms, tempReferralCode
     ) => {
         updateValidateFirstName(tempFirstName);
         updateValidateLastName(tempLastName);
@@ -263,6 +284,8 @@ function Registerpage({ classes }) {
         updateValidateFax(tempFax);
         updateValidateType(tempType);
         updateValidateSpecialty(tempSpecialty);
+        updateValidateService(tempService);
+        updateValidateInsurance(tempInsurance);
         updateValidateTerms(tempTerms);
         updateValidateReferralCode(tempReferralCode);
     };
@@ -282,7 +305,8 @@ function Registerpage({ classes }) {
                 tempPassword, tempAddress, tempCity,
                 tempLocationState, tempZipcode,
                 tempPhone, tempFax,
-                tempType, tempSpecialty, tempTerms, tempReferralCode
+                tempType, tempSpecialty, tempService,
+                tempInsurance, tempTerms, tempReferralCode
             } = validateInputs();
 
             // Update error states
@@ -291,7 +315,8 @@ function Registerpage({ classes }) {
                 tempPassword, tempAddress, tempCity,
                 tempLocationState, tempZipcode,
                 tempPhone, tempFax,
-                tempType, tempSpecialty, tempTerms, tempReferralCode
+                tempType, tempSpecialty, tempService,
+                tempInsurance, tempTerms, tempReferralCode
             );
 
             // Kill request if we found an error
@@ -308,6 +333,8 @@ function Registerpage({ classes }) {
                 || tempFax.hasError
                 || tempType.hasError
                 || tempSpecialty.hasError
+                || tempService.hasError
+                || tempInsurance.hasError
                 || tempReferralCode.hasError
             ) {
                 // Update submit error, hide loading spinner, enable button
@@ -334,6 +361,8 @@ function Registerpage({ classes }) {
                 zip: zipcode,
                 phone,
                 fax,
+                service,
+                insurance,
                 userType: type,
                 userSpeciality: specialty,
                 // terms
@@ -621,6 +650,52 @@ function Registerpage({ classes }) {
                         }
                     </Select>
                 </FormControl>
+
+                {/* Services */}
+                <TextField
+                    id='service'
+                    label='Services offered'
+                    variant='outlined'
+                    value={service}
+                    classes={{ root: classes.textfield }}
+                    onChange={(e) => updateService(e.target.value)}
+                    error={validateService.hasError}
+
+                    // Show error message
+                    // Else if character in box show counter
+                    // Else show 'Separate by commas'
+                    helperText={
+                        (validateService.errorMessage)
+                        ? validateService.errorMessage
+                        : (service.length > 0) ? `${service.length}/250` : 'Please separate by commas'
+                    }
+                    rows={2}
+                    multiline
+                    fullWidth
+                />
+
+                {/* Insurance */}
+                <TextField
+                    id='insurance'
+                    label='Insurance covered'
+                    variant='outlined'
+                    value={insurance}
+                    classes={{ root: classes.textfield }}
+                    onChange={(e) => updateInsurance(e.target.value)}
+                    error={validateInsurance.hasError}
+
+                    // Show error message
+                    // Else if character in box show counter
+                    // Else show 'Separate by commas'
+                    helperText={
+                        (validateInsurance.errorMessage)
+                        ? validateInsurance.errorMessage
+                        : (insurance.length > 0) ? `${insurance.length}/250` : 'Please separate by commas'
+                    }
+                    rows={2}
+                    multiline
+                    fullWidth
+                />
 
                 {/* Referral code */}
                 <TextField
