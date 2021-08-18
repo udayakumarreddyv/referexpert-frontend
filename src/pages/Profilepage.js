@@ -25,11 +25,13 @@ import {
 import Alert from '@material-ui/lab/Alert';
 import {
     AccountCircle,
+    Assignment,
     Email,
     Home,
     LocalHospital,
     Phone,
     Print,
+    School,
     Visibility,
     VisibilityOff,
     Work,
@@ -76,6 +78,8 @@ function Profilepage({ classes }) {
     const [fax, updateFax] = useState(state.userDetails.fax);
     const [userType, updateUserType] = useState(state.userDetails.userType);
     const [userSpeciality, updateUserSpeciality] = useState(state.userDetails.userSpeciality);
+    const [service, updateService] = useState(state.userDetails.service);
+    const [insurance, updateInsurance] = useState(state.userDetails.insurance);
 
     // Change password states
     const [newPassword, updateNewPassword] = useState('');
@@ -106,6 +110,8 @@ function Profilepage({ classes }) {
                 zip,
                 phone,
                 fax,
+                service,
+                insurance,
                 userId: state.userDetails.userId,
                 email: state.userDetails.email,
                 isActive: state.userDetails.isActive
@@ -418,7 +424,7 @@ function Profilepage({ classes }) {
                     {/* Degree */}
                     <ListItem>
                         <ListItemIcon>
-                            <LocalHospital className='primaryColor' />
+                            <School className='primaryColor' />
                         </ListItemIcon>
                         <ListItemText>{state.userDetails.userType}</ListItemText>
                     </ListItem>
@@ -429,6 +435,64 @@ function Profilepage({ classes }) {
                             <Work className='primaryColor' />
                         </ListItemIcon>
                         <ListItemText>{state.userDetails.userSpeciality}</ListItemText>
+                    </ListItem>
+
+                    {/* Services */}
+                    <ListItem>
+                        <ListItemIcon>
+                            <Assignment className='primaryColor' />
+                        </ListItemIcon>
+
+                        <ListItemText>
+                            {
+                                showEdit
+                                ? <TextField
+                                    name='service'
+                                    label='Services offered'
+                                    variant='outlined'
+                                    value={service}
+                                    onChange={(event) => updateService(event.target.value)}
+
+                                    // if character in box show counter
+                                    // Else show 'Separate by commas'
+                                    helperText={ service.length > 0 ? `${service.length}/250` : 'Please separate by commas' }
+                                    inputProps={{ maxLength: 250 }}
+                                    rows={2}
+                                    multiline
+                                    fullWidth
+                                />
+                                : state.userDetails.service
+                            }
+                        </ListItemText>
+                    </ListItem>
+
+                    {/* Insurance */}
+                    <ListItem>
+                        <ListItemIcon>
+                            <LocalHospital className='primaryColor' />
+                        </ListItemIcon>
+                        
+                        <ListItemText>
+                            {
+                                showEdit
+                                ? <TextField
+                                    name='insurance'
+                                    label='Insurances covered'
+                                    variant='outlined'
+                                    value={insurance}
+                                    onChange={(event) => updateInsurance(event.target.value)}
+
+                                    // Else if character in box show counter
+                                    // Else show 'Separate by commas'
+                                    helperText={ insurance.length > 0 ? `${insurance.length}/250` : 'Please separate by commas' }
+                                    inputProps={{ maxLength: 250 }}
+                                    rows={2}
+                                    multiline
+                                    fullWidth
+                                />
+                                : state.userDetails.insurance
+                            }
+                        </ListItemText>
                     </ListItem>
                 </List>
 
