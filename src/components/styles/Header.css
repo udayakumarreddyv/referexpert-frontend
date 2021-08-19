@@ -26,6 +26,10 @@
     text-decoration: none;
 }
 
+.headerLink:hover {
+    color: #1261a0
+}
+
 /* Drawer */
 .drawerItem {
     display: flex;
