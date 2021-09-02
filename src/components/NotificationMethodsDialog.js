@@ -122,7 +122,6 @@ function NotificationMethodsDialog({
         
         // Send api request
         try {
-            throw 'poop';
             const joinedEmails = [emailNotification1, emailNotification2].join(',');
             const joinedPhoneNumbers = [phoneNotification1,phoneNotification2].join(',');
             const url = `referexpert/notification`;
