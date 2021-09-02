@@ -53,10 +53,7 @@ function NotificationMethodsDialog({
     // Handle dialog close
     const handleDialogNotificationMethodsClose = () => {
         updateDialogNotificationMethodsOpen(false);
-        updatePhoneNotification1('');
-        updatePhoneNotification2('');
-        updateEmailNotification1('');
-        updateEmailNotification2('');
+        updateNotificationMethodsSubmitError({ hasError: false, errorMessage: '' });
     };
 
     // Strips the formatting down to just the numbers
@@ -125,6 +122,7 @@ function NotificationMethodsDialog({
         
         // Send api request
         try {
+            throw 'poop';
             const joinedEmails = [emailNotification1, emailNotification2].join(',');
             const joinedPhoneNumbers = [phoneNotification1,phoneNotification2].join(',');
             const url = `referexpert/notification`;
@@ -142,11 +140,8 @@ function NotificationMethodsDialog({
             
             // Failed response
             if (response.status !== 200) throw response.statusText;
-
-            const results = await response.json();
             
-            // Hide loading spinner, close dialog
-            updateNotificationMethodsLoading(false);
+            // Close dialog
             updateDialogNotificationMethodsOpen(false);
 
             // Show success alert
@@ -154,6 +149,13 @@ function NotificationMethodsDialog({
             updateAlertOpen(true);
         } catch (err) {
             console.log(err);
+
+            // Show success alert
+            updateNotificationMethodsSubmitError({ hasError: true, errorMessage: 'There was an error with our servers while saving your notification settings. Please wait a moment and try again'});
+            // updateAlertDetails({ type: 'error', message: 'Failed to save notification settings' });
+            // updateAlertOpen(true);
+        } finally {
+            updateNotificationMethodsLoading(false);
         };
     };
 
