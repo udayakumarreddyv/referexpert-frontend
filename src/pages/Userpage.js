@@ -13,6 +13,7 @@ import OpenAppointments from '../components/OpenAppointments';
 import CompleteAppointments from '../components/CompleteAppointments';
 import Referrals from '../components/Referrals';
 import InviteDoctorDialog from '../components/InviteDoctorDialog';
+import NotificationMethodsDialog from '../components/NotificationMethodsDialog';
 
 // Page navigation
 import { Link } from 'react-router-dom';
@@ -106,6 +107,10 @@ function Userpage({ classes }) {
     // Referrals states
     const [referralsData, updateReferralsData] = useState(null);
 
+    // Notification states
+    const [dialogNotificationMethodsOpen, updateDialogNotificationMethodsOpen] = useState(false);
+    const [notificationMethodsData, updateNotificationMethodsData] = useState(null);
+
     // Open complete appointment dialog
     const handleCompleteDialogOpen = (appointmentId) => {
         updateDialogAppointmentId(appointmentId);
@@ -167,6 +172,34 @@ function Userpage({ classes }) {
             updateReferralsData(results);
         } catch (err) {
             updateReferralsData('error');
+            console.log(err);
+        };
+    };
+
+    // Fetch notification methods
+    // This will let us know if we need to popup a modal to the user for them to add them
+    const fetchNotifications = async () => {
+        try {
+            const url = 'referexpert/notification';
+            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` } });
+            
+            // Catch errors
+            if (response.status !== 200) throw response;
+
+            const results = await response.json();
+
+            // User has not added there notification methods yet
+            // We know this by the empty object that is passed
+            const isEmptyObject = Object.keys(results).length === 0;
+            if (isEmptyObject) {
+                updateDialogNotificationMethodsOpen(true);
+                console.log('user needs to add notification methods');
+                return;
+            };
+
+            updateNotificationMethodsData(results);
+        } catch (err) {
+            updateNotificationMethodsData('error');
             console.log(err);
         };
     };
@@ -279,14 +312,11 @@ function Userpage({ classes }) {
         };
     };
 
-    // Launch fetch appointments on load
+    // Launch fetch appointments, referrals, and notifications on load
     useEffect(() => {
         fetchAppointments();
-    }, []);
-
-    // Launch fetch referrals on page load
-    useEffect(() => {
         fetchReferrals();
+        fetchNotifications();
     }, []);
 
     return (
@@ -465,6 +495,17 @@ function Userpage({ classes }) {
                 updateDialogInviteDoctorOpen={updateDialogInviteDoctorOpen}
                 updateAlertDetails={updateAlertDetails}
                 updateAlertOpen={updateAlertOpen}
+            />
+
+            {/* Add/Remove notification methods dialog */}
+            <NotificationMethodsDialog
+                classes={classes}
+                token={state.token}
+                updateAlertDetails={updateAlertDetails}
+                updateAlertOpen={updateAlertOpen}
+                notificationMethods={notificationMethodsData}
+                dialogNotificationMethodsOpen={dialogNotificationMethodsOpen}
+                updateDialogNotificationMethodsOpen={updateDialogNotificationMethodsOpen}
             />
 
             {/* Alert popups, only shown when user status has been updated */}

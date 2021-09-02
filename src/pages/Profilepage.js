@@ -4,6 +4,9 @@ import './styles/Profilepage.css';
 // Global store
 import { Context } from '../store/GlobalStore';
 
+// Component
+import NotificationMethodsDialog from '../components/NotificationMethodsDialog';
+
 // Material UI
 import {
     Button,
@@ -48,6 +51,10 @@ const useStyles = makeStyles((theme) => ({
     editButton: {
         float: 'right',
     },
+    notificationButton: {
+        float: 'right',
+        marginRight: '10px'
+    },
     passwordInput: {
         marginBottom: '10px',
     },
@@ -65,6 +72,10 @@ function Profilepage({ classes }) {
     // Alert states
     const [alertOpen, updateAlertOpen] = useState(false);
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
+
+    // Notification states
+    const [dialogNotificationMethodsOpen, updateDialogNotificationMethodsOpen] = useState(false);
+    const [notificationMethodsData, updateNotificationMethodsData] = useState(null);
 
     // Edit states
     const [showEdit, updateShowEdit] = useState(false);
@@ -89,6 +100,34 @@ function Profilepage({ classes }) {
     // Change password validation states
     const [newPasswordValidation, updateNewPasswordValidation] = useState({ hasError: false, errorMessage: '' });
     const [submitError, updateSubmitError] = useState({ hasError: false, errorMessage: '' });
+
+    // Fetch notification methods
+    // This will let us know if we need to popup a modal to the user for them to add them
+    const fetchNotifications = async () => {
+        try {
+            const url = 'referexpert/notification';
+            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` } });
+            
+            // Catch errors
+            if (response.status !== 200) throw response;
+
+            const results = await response.json();
+
+            // User has not added there notification methods yet
+            // We know this by the empty object that is passed
+            const isEmptyObject = Object.keys(results).length === 0;
+            if (isEmptyObject) {
+                updateDialogNotificationMethodsOpen(true);
+                console.log('user needs to add notification methods');
+                return;
+            };
+
+            updateNotificationMethodsData(results);
+        } catch (err) {
+            updateNotificationMethodsData('error');
+            console.log(err);
+        };
+    };
 
     // Save updated profile information
     const saveProfileInfo = async () => {
@@ -237,6 +276,12 @@ function Profilepage({ classes }) {
             updatePasswordLoading(false);
         };
     };
+
+    // Launch fetch appointments, referrals, and notifications on load
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
     
     // Create united states elements 
     const states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District Of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
@@ -280,6 +325,12 @@ function Profilepage({ classes }) {
                         {/* Show edit button if not clicked yet */}
                         { !showEdit ? 'Edit' : null }
                     </Button>
+
+                    {/* Notification settings button */}
+                    <Button
+                        classes={{ root: `${classes.primaryButton} ${profilepageClasses.notificationButton}` }}
+                        onClick={() => updateDialogNotificationMethodsOpen(true)}
+                    >Notification settings</Button>
                 </h1>
 
                 {/* Profile details */}
@@ -540,6 +591,17 @@ function Profilepage({ classes }) {
                     </Button>
                 </section>
             </Paper>
+
+            {/* Add/Remove notification methods dialog */}
+            <NotificationMethodsDialog
+                classes={classes}
+                token={state.token}
+                updateAlertDetails={updateAlertDetails}
+                updateAlertOpen={updateAlertOpen}
+                notificationMethods={notificationMethodsData}
+                dialogNotificationMethodsOpen={dialogNotificationMethodsOpen}
+                updateDialogNotificationMethodsOpen={updateDialogNotificationMethodsOpen}
+            />
         </section>
     );
 };

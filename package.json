@@ -12,6 +12,7 @@
     "@testing-library/user-event": "^12.6.0",
     "email-validator": "^2.0.4",
     "lodash.debounce": "^4.0.8",
+    "material-ui-phone-number": "^2.2.6",
     "moment": "^2.29.1",
     "query-string": "^4.3.4",
     "react": "^17.0.1",
