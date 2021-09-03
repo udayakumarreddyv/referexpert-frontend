@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
 // Table for appointments that have been completed
 function CompleteAppointments({ classes, appointmentsData }) {
     const openAppointmentsClasses = useStyles();
+    const numTableCols = 4;
 
     // Pagination states
     const [page, updatePage] = useState(0);
@@ -52,7 +53,7 @@ function CompleteAppointments({ classes, appointmentsData }) {
         if (appointmentsData.length === 0) {
             return (
                 <TableRow>
-                    <TableCell colSpan={3}>
+                    <TableCell colSpan={numTableCols}>
                         You have no open appointments at this time
                     </TableCell>
                 </TableRow>
@@ -116,7 +117,7 @@ function CompleteAppointments({ classes, appointmentsData }) {
                     <TableRow>
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
-                            colSpan={4}
+                            colSpan={numTableCols}
                             count={appointmentsData.length}
                             rowsPerPage={rowsPerPage}
                             page={page}
