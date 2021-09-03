@@ -41,6 +41,7 @@ function PendingAppointments(props) {
         handlePendingDialogOpen,
     } = props;
     const pendingAppointmentClasses = useStyles();
+    const numTableCols = 6;
 
     // Pagination states
     const [page, updatePage] = useState(0);
@@ -64,7 +65,7 @@ function PendingAppointments(props) {
         if (appointmentsData.length === 0) {
             return (
                 <TableRow>
-                    <TableCell colSpan={4}>You have no pending appointments at this time</TableCell>
+                    <TableCell colSpan={numTableCols}>You have no pending appointments at this time</TableCell>
                 </TableRow>
             );
         };
@@ -143,7 +144,7 @@ function PendingAppointments(props) {
                     <TableRow>
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
-                            colSpan={6}
+                            colSpan={numTableCols}
                             count={appointmentsData.length}
                             rowsPerPage={rowsPerPage}
                             page={page}
