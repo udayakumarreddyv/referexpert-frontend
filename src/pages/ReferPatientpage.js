@@ -338,6 +338,7 @@ function ReferPatientpage({ classes }) {
                         onChange={(event) => updateSearchType(event.target.value)}
                     >
                         <MenuItem value='speciality'>Specialty</MenuItem>
+                        <MenuItem value='services'>Services</MenuItem>
                         <MenuItem value='type'>Type</MenuItem>
                         <MenuItem value='firstName'>First name</MenuItem>
                         <MenuItem value='lastName'>Last name</MenuItem>

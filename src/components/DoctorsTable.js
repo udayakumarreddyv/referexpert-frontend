@@ -28,6 +28,7 @@ function DoctorsTable(props) {
         // Open dialog on schedule button click
         handleOpenScheduleDialog,
     } = props;
+    const numTableCols = 9;
 
     // Pagination states
     const [page, updatePage] = useState(0);
@@ -55,6 +56,8 @@ function DoctorsTable(props) {
                 lastName,
                 userType,
                 userSpeciality,
+                insurance,
+                service,
                 address,
                 city,
                 state,
@@ -68,6 +71,8 @@ function DoctorsTable(props) {
                     <TableCell>{ firstName } { lastName }</TableCell>
                     <TableCell>{ userType }</TableCell>
                     <TableCell>{ userSpeciality }</TableCell>
+                    <TableCell>{ service }</TableCell>
+                    <TableCell>{ insurance }</TableCell>
                     <TableCell>{ `${address}, ${city} ${state} ${zip}` }</TableCell>
                     <TableCell>{ phone }</TableCell>
                     <TableCell>{ Math.floor(distance) }mi</TableCell>
@@ -87,7 +92,7 @@ function DoctorsTable(props) {
     // Search for results row
     const searchForResults = (
         <TableRow key={0}>
-            <TableCell colSpan={5}>
+            <TableCell colSpan={numTableCols}>
                 <span className='noResults'>Search for results</span>
             </TableCell>
         </TableRow>
@@ -96,7 +101,7 @@ function DoctorsTable(props) {
     // No results row
     const noResults = (
         <TableRow key={0}>
-            <TableCell colSpan={5} >
+            <TableCell colSpan={numTableCols} >
                 <div className='noResults'>No results to display</div>
             </TableCell>
         </TableRow>
@@ -105,7 +110,7 @@ function DoctorsTable(props) {
     // Error row
     const errorResults = (
         <TableRow key={0}>
-            <TableCell colSpan={5} >
+            <TableCell colSpan={numTableCols} >
                 <div className='noResults errorMessage'>Sorry, this request failed. Please try again later.</div>
             </TableCell>
         </TableRow>
@@ -132,6 +137,8 @@ function DoctorsTable(props) {
                         <TableCell>Name</TableCell>
                         <TableCell>Type</TableCell>
                         <TableCell>Speciality</TableCell>
+                        <TableCell>Services</TableCell>
+                        <TableCell>Insurance</TableCell>
                         <TableCell>Address</TableCell>
                         <TableCell>Phone</TableCell>
                         <TableCell>Distance</TableCell>
@@ -147,7 +154,7 @@ function DoctorsTable(props) {
                         !loading
                         ? tableRows
                         : <TableRow key={0}>
-                            <TableCell colSpan={7}>
+                            <TableCell colSpan={numTableCols}>
                                 <CircularProgress size={40} />
                             </TableCell>
                         </TableRow>
@@ -159,7 +166,7 @@ function DoctorsTable(props) {
                     <TableRow>
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
-                            colSpan={7}
+                            colSpan={numTableCols}
                             count={ doctorsData ? doctorsData.length : 0 }
                             rowsPerPage={rowsPerPage}
                             page={page}
