@@ -19,6 +19,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 
 function Referrals ({ classes, referralsData }) {
+    const numTableCols = 6;
 
     // Pagination states
     const [page, updatePage] = useState(0);
@@ -85,7 +86,7 @@ function Referrals ({ classes, referralsData }) {
     // Row with loading spinner
     const loadingRow = (
         <TableRow>
-            <TableCell colSpan={6} className='noResults' style={{ textAlign: 'center' }}>
+            <TableCell colSpan={numTableCols} className='noResults' style={{ textAlign: 'center' }}>
                 <CircularProgress size={30} />
             </TableCell>
         </TableRow>
@@ -94,14 +95,14 @@ function Referrals ({ classes, referralsData }) {
     // No search results row
     const noResults = (
         <TableRow>
-            <TableCell colSpan={4}>You have not made any referrals yet</TableCell>
+            <TableCell colSpan={numTableCols}>You have not made any referrals yet</TableCell>
         </TableRow>
     );
 
     // Error row
     const errorRow = (
         <TableRow key={0}>
-            <TableCell colSpan={5} >
+            <TableCell colSpan={numTableCols} >
                 <div className='noResults errorMessage'>Sorry, this request failed. Please try again later.</div>
             </TableCell>
         </TableRow>
@@ -143,7 +144,7 @@ function Referrals ({ classes, referralsData }) {
                     <TableRow>
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
-                            colSpan={4}
+                            colSpan={numTableCols}
                             count={referralsData ? referralsData.length : 0}
                             rowsPerPage={rowsPerPage}
                             page={page}
