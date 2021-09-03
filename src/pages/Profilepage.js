@@ -330,7 +330,10 @@ function Profilepage({ classes }) {
                     <Button
                         classes={{ root: `${classes.primaryButton} ${profilepageClasses.notificationButton}` }}
                         onClick={() => updateDialogNotificationMethodsOpen(true)}
-                    >Notification settings</Button>
+                        style={ showEdit ? { display: 'none' } : null } // hide this button when editing profile
+                    >
+                        Notifications
+                    </Button>
                 </h1>
 
                 {/* Profile details */}
@@ -359,7 +362,7 @@ function Profilepage({ classes }) {
                                         variant='outlined'
                                         value={firstName}
                                         onChange={(event) => updateFirstName(event.target.value)}
-                                        style={{ marginRight: '10px' }}
+                                        style={{ marginRight: '10px', marginBottom: '15px' }}
                                     />
 
                                     <TextField
@@ -402,6 +405,7 @@ function Profilepage({ classes }) {
                                         variant='outlined'
                                         value={city}
                                         onChange={(event) => updateCity(event.target.value)}
+                                        style={{ marginBottom: '15px' }}
                                     />
 
                                     {/* State */}
