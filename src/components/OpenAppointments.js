@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
 // Table for appointments that have been accepted and have not been completed
 function OpenAppointments({ classes, appointmentsData, handleCompleteDialogOpen }) {
     const openAppointmentsClasses = useStyles();
+    const numTableCols = 5;
 
     // Pagination states
     const [page, updatePage] = useState(0);
@@ -52,7 +53,7 @@ function OpenAppointments({ classes, appointmentsData, handleCompleteDialogOpen 
         if (appointmentsData.length === 0) {
             return (
                 <TableRow>
-                    <TableCell colSpan={3}>
+                    <TableCell colSpan={numTableCols}>
                         You have no open appointments at this time
                     </TableCell>
                 </TableRow>
@@ -125,7 +126,7 @@ function OpenAppointments({ classes, appointmentsData, handleCompleteDialogOpen 
                     <TableRow>
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
-                            colSpan={5}
+                            colSpan={numTableCols}
                             count={appointmentsData.length}
                             rowsPerPage={rowsPerPage}
                             page={page}
