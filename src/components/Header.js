@@ -18,7 +18,7 @@ import {
     ListItem,
     ListItemText,
 } from '@material-ui/core';
-import { AccountCircle, ExitToApp, Home, Send } from '@material-ui/icons';
+import { AccountCircle, ExitToApp, Home, Send, Share } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Material UI styles
@@ -136,6 +136,26 @@ function Header({ classes }) {
                             </ListItemText>
                         </Link>
                     </ListItem>
+
+                    {/* Referrals page */}
+                    {/* Refer patient */}
+                    {
+                        state.userType !== 'ADMIN'
+                        ? <ListItem classes={{ root: headerClasses.listItem }}>
+                            <Link
+                                to='/referrals'
+                                className='drawerItem headerLink primaryTextColor'
+                                onClick={handleDrawerClose}
+                            >
+                                <Share />
+
+                                <ListItemText classes={{ root: headerClasses.listItemText }}>
+                                    <div className='drawerItemText'>Referrals</div>
+                                </ListItemText>
+                            </Link>
+                        </ListItem>
+                        : null
+                    }
 
                     {/* Refer patient */}
                     {

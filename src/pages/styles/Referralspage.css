@@ -1,0 +1,13 @@
+#referralspage-body {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 10px 0 10px;
+}
+
+#referralspage-topBar {
+    text-align: right;
+}
+
+#referralspage-currentAppointmentsContainer {
+    margin-bottom: 40px;
+}
