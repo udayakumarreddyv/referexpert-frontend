@@ -81,7 +81,7 @@ function DoctorsTable(props) {
                             classes={{ root: `${ classes.primaryButton } ${ referpatientpageClasses.scheduleButton }` }}
                             onClick={() => handleOpenScheduleDialog(userId, email, `${firstName} ${lastName}`, userType, userSpeciality, `${address}, ${city} ${state} ${zip}`)}
                         >
-                            Schedule
+                            Check Availability
                         </Button>
                     </TableCell>
                 </TableRow>
