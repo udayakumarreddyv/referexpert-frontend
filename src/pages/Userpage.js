@@ -11,7 +11,6 @@ import { Context } from '../store/GlobalStore';
 import PendingAppointments from '../components/PendingAppointments';
 import OpenAppointments from '../components/OpenAppointments';
 import CompleteAppointments from '../components/CompleteAppointments';
-import Referrals from '../components/Referrals';
 import InviteDoctorDialog from '../components/InviteDoctorDialog';
 import NotificationMethodsDialog from '../components/NotificationMethodsDialog';
 
@@ -104,9 +103,6 @@ function Userpage({ classes }) {
     const [openAppointments, updateOpenAppointments] = useState([]);
     const [completeAppointments, updateCompleteAppointments] = useState();
 
-    // Referrals states
-    const [referralsData, updateReferralsData] = useState(null);
-
     // Notification states
     const [dialogNotificationMethodsOpen, updateDialogNotificationMethodsOpen] = useState(false);
     const [notificationMethodsData, updateNotificationMethodsData] = useState(null);
@@ -155,23 +151,6 @@ function Userpage({ classes }) {
             updateOpenAppointments(openList);
             updateCompleteAppointments(completedList);
         } catch (err) {
-            console.log(err);
-        };
-    };
-
-    // Fetch referrals user had made
-    const fetchReferrals = async () => {
-        try {
-
-            // Fetch referrals from api
-            const url = `referexpert/myreferrals/${state.userEmail}`;
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
-            const results = sortAppointments(await response.json());
-            
-            // Update referrals state
-            updateReferralsData(results);
-        } catch (err) {
-            updateReferralsData('error');
             console.log(err);
         };
     };
@@ -315,7 +294,6 @@ function Userpage({ classes }) {
     // Launch fetch appointments, referrals, and notifications on load
     useEffect(() => {
         fetchAppointments();
-        fetchReferrals();
         fetchNotifications();
     }, []);
 
@@ -381,19 +359,6 @@ function Userpage({ classes }) {
                     appointmentsData={completeAppointments}
                 />
             </section>
-
-            {/* Referrals */}
-            <h1 className='pageTitle hasIcon'>
-                <Share classes={{ root: userpageClasses.titleIcon }} />
-                My referrals
-            </h1>
-            <section id='userpage-referralsContainer'>
-                <Referrals
-                    classes={classes}
-                    referralsData={referralsData}
-                />
-            </section>
-
 
 
             {/* DIALOG SECTION */}
