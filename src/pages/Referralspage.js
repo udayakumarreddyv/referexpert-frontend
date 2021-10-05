@@ -50,35 +50,6 @@ const sortAppointments = (appointmentsList) => {
     });
 };
 
-// Separate open, pending, and closed appointments
-const separateAppointments = (appointmentsList) => {
-    let pendingList = [];
-    let openList = [];
-    let completedList = [];
-
-    // Loop through each appointment in list, separate into buckets
-    appointmentsList.forEach((appointment) => {
-
-        // Pending appointment, open appointment, completed appointment
-        if (appointment.isAccepted === 'P') {
-            pendingList.push(appointment);
-        } else if (appointment.isAccepted === 'Y' && appointment.isServed === 'N') {
-            openList.push(appointment);
-        } else if (appointment.isServed === 'Y') {
-            completedList.push(appointment);
-        } else {
-            console.log(`Rejected appointment: ${appointment.appointmentId}`);
-        };
-    });
-
-    // Sort appointments by dates
-    pendingList = sortAppointments(pendingList);
-    openList = sortAppointments(openList);
-    completedList = sortAppointments(completedList);
-
-    return { pendingList, openList, completedList };
-};
-
 // Page component
 function Referralspage({ classes }) {
     const referralspageClasses = useStyles();
