@@ -47,14 +47,12 @@ function ScheduleAppointmentDialog(props) {
 
         // Input states
         updateSubjectLine,
-        updateReason,
-        updateAppointmentTimestamp,
+        updateRequestedAppointmentTimes,
         handleScheduleAppointment,
 
         // Validation states
         validateSubjectLine,
-        validateReason,
-        validateAppointmentTimestamp
+        validateRequestedAppointmentTimes,
     } = props;
 
     return (
@@ -62,7 +60,7 @@ function ScheduleAppointmentDialog(props) {
             open={showScheduleView}
             onClose={handleCloseScheduleDialog}
         >
-            <DialogTitle>Schedule an appointment</DialogTitle>
+            <DialogTitle>Request an appointment</DialogTitle>
             <DialogContent>
                 
                 {/* Doctor information */}
@@ -90,16 +88,6 @@ function ScheduleAppointmentDialog(props) {
                 {/* Appointment details */}
                 <div className='pageSubTitle'>Appointment details</div>
                 <section id='scheduleAppointmentDialog-appointmentDetailsContainer'>
-                    {/* Patient name */}
-                    <TextField
-                        name='subject'
-                        label='Subject'
-                        variant='outlined'
-                        classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
-                        onChange={(event) => updateSubjectLine(event.target.value)}
-                        error={validateSubjectLine.hasError}
-                        fullWidth
-                    />
 
                     {/* Reason */}
                     <TextField
@@ -107,41 +95,24 @@ function ScheduleAppointmentDialog(props) {
                         label='Reason'
                         variant='outlined'
                         classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
-                        onChange={(event) => updateReason(event.target.value)}
+                        onChange={(event) => updateRequestedAppointmentTimes(event.target.value)}
                         multiline
                         rows={3}
-                        error={validateReason.hasError}
+                        error={validateRequestedAppointmentTimes.hasError}
                         fullWidth
                     />
 
-                    {/* Appointment date & time */}
-                    {/* <TextField
-                        name='appointmentDateTime'
-                        label='Appointment date'
-                        type='datetime-local'
-                        // defaultValue={}
-                        onChange={(event) => updateAppointmentTimestamp(event.target.value)}
-                        error={validateAppointmentTimestamp.hasError}
-                        helperText={validateAppointmentTimestamp.errorMessage}
+                    {/* Requested time */}
+                    <TextField
+                        name='requestedTimes'
+                        label='Patient requested appointment time(s)'
+                        variant='outlined'
+                        classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
+                        onChange={(event) => updateSubjectLine(event.target.value)}
+                        error={validateSubjectLine.hasError}
                         fullWidth
-                    /> */}
-
-                    {/* Datetime picker */}
-                    <div>Appointment time</div>
-                    <Flatpickr
-                        data-enable-time
-                        placeholder='Select a date...'
-                        onChange={(date, dateString) => updateAppointmentTimestamp(dateString)}
-                        options={{
-                            altInput: true,
-                            altFormat: 'M J, Y h:iK',
-                            minDate: moment().add(1, 'hour').startOf('hour').toISOString(),
-                            minuteIncrement: '15',
-                            defaultMinute: 0,
-                            mode: 'single',
-                        }}
-                        className='scheduleAppointmentDialog-datetimePicker'
                     />
+
                 </section>
             </DialogContent>
 
@@ -149,13 +120,13 @@ function ScheduleAppointmentDialog(props) {
                 {/* Cancel button */}
                 <Button onClick={handleCloseScheduleDialog}>Cancel</Button>
                 
-                {/* Schedule button */}
+                {/* Request button */}
                 <Button
                     classes={{ root: classes.primaryButton }}
                     onClick={handleScheduleAppointment}
                     disabled={loadingScheduleAppointment}
                 >
-                    { loadingScheduleAppointment ? <CircularProgress size={20} /> : 'Schedule' }
+                    { loadingScheduleAppointment ? <CircularProgress size={20} /> : 'Request' }
                 </Button>
             </DialogActions>
         </Dialog>

@@ -84,13 +84,11 @@ function ReferPatientpage({ classes }) {
     
     // Input states
     const [subjectLine, updateSubjectLine] = useState('');
-    const [reason, updateReason] = useState('');
-    const [appointmentTimestamp, updateAppointmentTimestamp] = useState(null);
+    const [requestedAppointmentTimes, updateRequestedAppointmentTimes] = useState('');
     
     // Validate states
     const [validateSubjectLine, updateValidateSubjectLine] = useState({ hasError: false, errorMessage: '' });
-    const [validateReason, updateValidateReason] = useState({ hasError: false, errorMessage: '' });
-    const [validateAppointmentTimestamp, updateValidateAppointmentTimestamp] = useState({ hasError: false, errorMessage: '' });
+    const [validateRequestedAppointmentTimes, updateValidateRequestedAppointmentTimes] = useState({ hasError: false, errorMessage: '' });
 
     // View states
     const [showScheduleView, updateShowScheduleView] = useState(false);
@@ -144,15 +142,14 @@ function ReferPatientpage({ classes }) {
     };
 
     // Submit appointment to api
-    const submitAppointmentApi = async (appointmentFrom, appointmentTo, subjectLine, reason, dateAndTimeString) => {        
+    const submitAppointmentApi = async (appointmentFrom, appointmentTo, subjectLine, requestedAppointmentTimes) => {        
         try {
-            const url = 'referexpert/requestappointment';
+            const url = 'referexpert/availabilityrequest'
             const body = {
                 appointmentFrom,
                 appointmentTo,
-                dateAndTimeString,
                 subject: subjectLine,
-                reason,
+                reason: requestedAppointmentTimes,
             };
             const response = await fetch(url, {
                 method: 'POST',
@@ -211,8 +208,7 @@ function ReferPatientpage({ classes }) {
 
         // Clear any previous validation errors
         updateValidateSubjectLine({ hasError: false, errorMessage: '' });
-        updateValidateReason({ hasError: false, errorMessage: '' });
-        updateValidateAppointmentTimestamp({ hasError: false, errorMessage: '' });
+        updateValidateRequestedAppointmentTimes({ hasError: false, errorMessage: '' });
         let validateError = false;
 
         // Validate subject line input
@@ -221,25 +217,15 @@ function ReferPatientpage({ classes }) {
             validateError = true;
         };
         
-        // Validate reason input
-        if (reason.trim() === '') {
-            updateValidateReason({ hasError: true, errorMessage: '' });
-            validateError = true;
-        };
-
-        // Validate appointment timestamp
-        if (!appointmentTimestamp) {
-            updateValidateAppointmentTimestamp({ hasError: true, errorMessage: '' });
-            validateError = true;
-        } else if (!moment(appointmentTimestamp).isValid()) {
-            updateValidateAppointmentTimestamp({ hasError: true, errorMessage: 'Invalid timestamp' });
+        // Validate requestedAppointmentTimes input
+        if (requestedAppointmentTimes.trim() === '') {
+            updateValidateRequestedAppointmentTimes({ hasError: true, errorMessage: '' });
             validateError = true;
         };
 
         // Kill request if validation error
         if (validateError) {
-            console.log('Caught an error')
-            console.log(validateAppointmentTimestamp)
+            console.log('Caught an error');
             return
         };
 
@@ -248,7 +234,7 @@ function ReferPatientpage({ classes }) {
             updateLoadingScheduleAppointment(true);
 
             // Send request to api
-            const results = await submitAppointmentApi(state.userEmail, doctorDetails.email, subjectLine, reason, appointmentTimestamp);
+            const results = await submitAppointmentApi(state.userEmail, doctorDetails.email, subjectLine, requestedAppointmentTimes);
 
             // Caught an unexpected response
             if (!('message' in results)) {
@@ -256,7 +242,8 @@ function ReferPatientpage({ classes }) {
             };
 
             // Appoinment has been booked
-            if (results.message === 'Appointment Request Successful') {
+            const successResponseText = 'Appointment Request Inserted Successful';
+            if (results.message === successResponseText) {
 
                 // Show success alert, hide dialog popup
                 updateAlertDetails({ type: 'info', message: `Appointment has been requested!` });
@@ -304,13 +291,11 @@ function ReferPatientpage({ classes }) {
         
         // Clear appointment input states
         updateSubjectLine('');
-        updateReason('');
-        updateAppointmentTimestamp(null);
+        updateRequestedAppointmentTimes('');
 
         // Clear appointment input validation states
         updateSubjectLine({ hasError: false, errorMessage: '' });
-        updateValidateReason({ hasError: false, errorMessage: '' });
-        updateValidateAppointmentTimestamp({ hasError: false, errorMessage: '' });
+        updateValidateRequestedAppointmentTimes({ hasError: false, errorMessage: '' });
         
         // Hide dialog
         updateShowScheduleView(false);
@@ -435,14 +420,12 @@ function ReferPatientpage({ classes }) {
 
                 // Input states
                 updateSubjectLine={updateSubjectLine}
-                updateReason={updateReason}
-                updateAppointmentTimestamp={updateAppointmentTimestamp}
+                updateRequestedAppointmentTimes={updateRequestedAppointmentTimes}
                 handleScheduleAppointment={handleScheduleAppointment}
 
                 // Validation states
                 validateSubjectLine={validateSubjectLine}
-                validateReason={validateReason}
-                validateAppointmentTimestamp={validateAppointmentTimestamp}
+                validateRequestedAppointmentTimes={validateRequestedAppointmentTimes}
             />
 
             {/* Alert popups, only shown when user status has been updated */}
