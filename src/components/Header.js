@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect, Fragment } from 'react';
 import './styles/Header.css'
 
 // Global store
@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 
 // Material UI
 import {
+    Badge,
     Button,
     Drawer,
     List,
@@ -51,6 +52,13 @@ function Header({ classes }) {
 
     // Menu states
     const [drawerOpen, updateDrawerOpen] = useState(false);
+
+    // pending tasks states
+    const [pendingTasksInfo, updatePendingTasksInfo] = useState({
+        hasPendingTask: false,
+        pendingAppointment: false,
+        pendingAvailability: false,
+    });
     
     // Handle drawer open
     const handleDrawerOpen = () => {
@@ -74,6 +82,28 @@ function Header({ classes }) {
         // Logout user in state
         dispatch({ type: 'LOGOUT_USER', payload: null });
     };
+
+    // Check if we should show badge on account button
+    // This notifies the user that they have a pending task to attend to
+    useEffect(() => {
+        let hasPendingTask = false;
+        let pendingAppointment = false;
+        let pendingAvailability = false;
+
+        // Check if pending appointment
+        if (state.pendingTasks.pendingAppointment === 'Y') {
+            hasPendingTask = true;
+            pendingAppointment = true;
+        };
+
+        // Check if pending availability
+        if (state.pendingTasks.pendingAvailability === 'Y') {
+            hasPendingTask = true;
+            pendingAvailability = true;
+        };
+
+        updatePendingTasksInfo({ hasPendingTask, pendingAppointment, pendingAvailability });
+    }, [state.pendingTasks]);
 
     // View when user is not logged in
     const notLoggedInView = (
@@ -101,13 +131,17 @@ function Header({ classes }) {
     // View when user is logged in
     const loggedInView = (
         <div id='headerLinksContainer'>
-            <Button
-                variant='outlined'
-                style={{ marginRight: '10px', fontSize: '12px', }}
-                onClick={handleDrawerOpen}
-            >
-                {state.userDetails.firstName} <AccountCircle className='primaryColor' classes={{ root: headerClasses.accountIcon }} />
-            </Button>
+
+            {/* Header button */}
+            <Badge badgeContent=" " color='error' invisible={!pendingTasksInfo.pendingAvailability}>
+                <Button
+                    variant='outlined'
+                    style={{ marginRight: '0px', fontSize: '12px', }}
+                    onClick={handleDrawerOpen}
+                >
+                    {state.userDetails.firstName} <AccountCircle className='primaryColor' classes={{ root: headerClasses.accountIcon }} />
+                </Button>
+            </Badge>
 
             {/* Drawer */}
             <Drawer
@@ -138,21 +172,26 @@ function Header({ classes }) {
                     </ListItem>
 
                     {/* Referrals page */}
-                    {/* Refer patient */}
                     {
                         state.userType !== 'ADMIN'
                         ? <ListItem classes={{ root: headerClasses.listItem }}>
-                            <Link
-                                to='/referrals'
-                                className='drawerItem headerLink primaryTextColor'
-                                onClick={handleDrawerClose}
+                            <Badge
+                                variant='dot'
+                                color='error'
+                                invisible={!pendingTasksInfo.pendingAvailability}
                             >
-                                <Share />
+                                <Link
+                                    to='/referrals'
+                                    className='drawerItem headerLink primaryTextColor'
+                                    onClick={handleDrawerClose}
+                                >
+                                    <Share />
 
-                                <ListItemText classes={{ root: headerClasses.listItemText }}>
-                                    <div className='drawerItemText'>Referrals</div>
-                                </ListItemText>
-                            </Link>
+                                    <ListItemText classes={{ root: headerClasses.listItemText }}>
+                                        <div className='drawerItemText'>Referrals</div>
+                                    </ListItemText>
+                                </Link>
+                            </Badge>
                         </ListItem>
                         : null
                     }
