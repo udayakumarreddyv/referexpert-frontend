@@ -176,7 +176,7 @@ function AvailabilityTable ({
     let tableHeader;
     if (availabilityType === 'request') {
         tableHeader = (
-            <TableHead>
+            <TableHead className='tableHeader'>
                 <TableRow>
                     <TableCell>To</TableCell>
                     <TableCell>Subject</TableCell>
@@ -189,7 +189,7 @@ function AvailabilityTable ({
     } else {
         // Reponse header
         tableHeader = (
-            <TableHead>
+            <TableHead className='tableHeader'>
                 <TableRow>
                     <TableCell>From</TableCell>
                     <TableCell>Subject</TableCell>

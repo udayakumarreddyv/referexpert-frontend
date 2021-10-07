@@ -126,7 +126,7 @@ function PendingAppointments(props) {
             <Table>
 
                 {/* Table header */}
-                <TableHead>
+                <TableHead className='tableHeader'>
                     <TableRow>
                         <TableCell>Referred by</TableCell>
                         <TableCell>Appointment Datetime</TableCell>

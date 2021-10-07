@@ -100,7 +100,7 @@ function CompleteAppointments({ classes, appointmentsData }) {
             <Table>
 
                 {/* Table header */}
-                <TableHead>
+                <TableHead className='tableHeader'>
                     <TableRow>
                         <TableCell>Referred by</TableCell>
                         <TableCell>Appointment Datetime</TableCell>

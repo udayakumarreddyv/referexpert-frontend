@@ -125,7 +125,7 @@ function Referrals ({ classes, referralsData }) {
             <Table>
 
                 {/* Table header */}
-                <TableHead>
+                <TableHead className='tableHeader'>
                     <TableRow>
                         <TableCell>Name</TableCell>
                         <TableCell>Appointment Datetime</TableCell>

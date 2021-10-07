@@ -132,7 +132,7 @@ function DoctorsTable(props) {
             <Table>
 
                 {/* Table header */}
-                <TableHead>
+                <TableHead className='tableHeader'>
                     <TableRow>
                         <TableCell>Name</TableCell>
                         <TableCell>Type</TableCell>

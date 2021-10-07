@@ -62,3 +62,13 @@ body {
     font-size: 17px;
     text-align: center;
 }
+
+.tableHeader {
+    background-color: #1261a0 !important;
+    color: white;
+}
+
+.tableHeader th {
+    background-color: #1261a0 !important;
+    color: white;
+}

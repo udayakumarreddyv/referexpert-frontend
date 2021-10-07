@@ -108,7 +108,7 @@ function OpenAppointments({ classes, appointmentsData, handleCompleteDialogOpen 
             <Table>
 
                 {/* Table header */}
-                <TableHead>
+                <TableHead className='tableHeader'>
                     <TableRow>
                         <TableCell>Referred by</TableCell>
                         <TableCell>Appointment Datetime</TableCell>
