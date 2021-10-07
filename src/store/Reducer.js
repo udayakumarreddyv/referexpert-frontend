@@ -26,6 +26,7 @@ const Reducer = (state, action) => {
                 loggedIn: false,
                 userEmail: null,
                 userType: null,
+                pendingTasks: {}
             };
         default:
             return state;

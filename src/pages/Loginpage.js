@@ -69,6 +69,22 @@ function Loginpage({ classes }) {
         };
     };
 
+    // Get the pending tasks that the user needs to attend to
+    const fetchPendingTasks = async (token) => {
+        try {
+            const url = 'referexpert/pendingtasks';
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+            return await response.json();
+        } catch (err) {
+            console.log(err);
+        };
+    };
+
     // Handle login attempt
     const handleLogin = async () => {
     
@@ -134,11 +150,13 @@ function Loginpage({ classes }) {
             // Get user details
             const { accessToken, refreshToken, tokenType } = results;
             const userDetails = await getUserInfo(accessToken);
+            const pendingTasks = await fetchPendingTasks(accessToken);
             const payload = {
                 token: accessToken,
                 userEmail: userDetails.email,
                 userType: userDetails.userType,
                 userDetails,
+                pendingTasks
             };
 
             // Save cookie, update state to login user
