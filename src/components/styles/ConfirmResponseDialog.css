@@ -1,0 +1,9 @@
+.confirmResponseDialog-doctorDetail {
+    padding-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#confirmResponseDialog-appointmentDetailsContainer {
+    margin: 20px 0 20px 0;
+}
