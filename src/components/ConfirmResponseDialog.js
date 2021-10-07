@@ -73,7 +73,7 @@ function ConfirmResponseDialog(props) {
                     {/* Appointment time request by patient */}
                     <div className='confirmResponseDialog-doctorDetail'>
                         <AccessTime classes={{ root: confirmResponseDialogClasses.doctorDetailsIcon }} />
-                        { confirmResponseDetails.subject }
+                        { confirmResponseDetails.dateAndTimeString }
                     </div>
                 </section>
             </DialogContent>
