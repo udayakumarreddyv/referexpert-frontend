@@ -132,7 +132,7 @@ function Referrals ({ classes, referralsData }) {
                         <TableCell>Subject</TableCell>
                         <TableCell>Reason</TableCell>
                         <TableCell>Status</TableCell>
-                        <TableCell>Completed</TableCell>
+                        <TableCell>Patient Visited</TableCell>
                     </TableRow>
                 </TableHead>
 
