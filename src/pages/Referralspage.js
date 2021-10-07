@@ -424,7 +424,7 @@ function Referralspage({ classes }) {
             {/* Referrals */}
             <h1 className='pageTitle hasIcon'>
                 <Share classes={{ root: referralspageClasses.titleIcon }} />
-                Completed referrals
+                My completed referrals
             </h1>
             <section id='referralspage-referralsContainer'>
                 <Referrals
