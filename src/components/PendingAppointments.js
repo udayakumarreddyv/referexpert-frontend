@@ -83,13 +83,13 @@ function PendingAppointments(props) {
                 isAccepted,
                 isServed
             } = appointment;
-            const date = moment(dateAndTimeString).format('h:mma MM/DD/YY');
+            // const date = moment(dateAndTimeString).format('MM/DD/YY h:mma');
 
             // Format 
             return (
                 <TableRow key={appointmentId}>
                     <TableCell>{ fromFirstName } { fromLastName }</TableCell>
-                    <TableCell>{ date }</TableCell>
+                    <TableCell>{ dateAndTimeString }</TableCell>
                     <TableCell>{ subject }</TableCell>
                     <TableCell>{ reason }</TableCell>
                     <TableCell>
