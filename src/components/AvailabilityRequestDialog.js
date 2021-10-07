@@ -1,9 +1,7 @@
-import './styles/ScheduleAppointmentDialog.css';
+import './styles/AvailabilityRequestDialog.css';
 
 // Date picker
 import "flatpickr/dist/themes/dark.css";
-import Flatpickr from 'react-flatpickr';
-import * as moment from 'moment';
 
 // Material UI
 import {
@@ -29,8 +27,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // Pop up dialog for when user wants to schedule a referral
-function ScheduleAppointmentDialog(props) {
-    const scheduleAppointmentDialogClasses = useStyles();
+function AvailabilityRequestDialog(props) {
+    const availabilityRequestDialogClasses = useStyles();
     const {
         // Styles
         classes,
@@ -67,34 +65,34 @@ function ScheduleAppointmentDialog(props) {
                 <div className='pageSubTitle'>Doctor details</div>
                 <section id='referpatientpage-doctorDetailsContainer'>
                     {/* Doctor name */}
-                    <div className='scheduleAppointmentDialog-doctorDetail'>
-                        <Person classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
+                    <div className='availabilityRequestDialog-doctorDetail'>
+                        <Person classes={{ root: availabilityRequestDialogClasses.doctorDetailsIcon }} />
                         { doctorDetails.name }
                     </div>
                     
                     {/* Doctor type */}
-                    <div className='scheduleAppointmentDialog-doctorDetail'>
-                        <LocalHospital classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
+                    <div className='availabilityRequestDialog-doctorDetail'>
+                        <LocalHospital classes={{ root: availabilityRequestDialogClasses.doctorDetailsIcon }} />
                         { doctorDetails.type } { doctorDetails.specialty }
                     </div>
                     
                     {/* Doctor location */}
-                    <div className='scheduleAppointmentDialog-doctorDetail'>
-                        <Home classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
+                    <div className='availabilityRequestDialog-doctorDetail'>
+                        <Home classes={{ root: availabilityRequestDialogClasses.doctorDetailsIcon }} />
                         { doctorDetails.address }
                     </div>
                 </section>
                 
                 {/* Appointment details */}
                 <div className='pageSubTitle'>Appointment details</div>
-                <section id='scheduleAppointmentDialog-appointmentDetailsContainer'>
+                <section id='availabilityRequestDialog-appointmentDetailsContainer'>
 
                     {/* Reason */}
                     <TextField
                         name='reason'
                         label='Reason'
                         variant='outlined'
-                        classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
+                        classes={{ root: availabilityRequestDialogClasses.inputBottomMargin }}
                         onChange={(event) => updateRequestedAppointmentTimes(event.target.value)}
                         multiline
                         rows={3}
@@ -107,7 +105,7 @@ function ScheduleAppointmentDialog(props) {
                         name='requestedTimes'
                         label='Patient requested appointment time(s)'
                         variant='outlined'
-                        classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
+                        classes={{ root: availabilityRequestDialogClasses.inputBottomMargin }}
                         onChange={(event) => updateSubjectLine(event.target.value)}
                         error={validateSubjectLine.hasError}
                         fullWidth
@@ -133,4 +131,4 @@ function ScheduleAppointmentDialog(props) {
     );
 };
 
-export default ScheduleAppointmentDialog;
+export default AvailabilityRequestDialog;

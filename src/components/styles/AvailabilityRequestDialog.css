@@ -1,14 +1,14 @@
-.scheduleAppointmentDialog-doctorDetail {
+.availabilityRequestDialog-doctorDetail {
     padding-bottom: 20px;
     display: flex;
     align-items: center;
 }
 
-#scheduleAppointmentDialog-appointmentDetailsContainer {
+#availabilityRequestDialog-appointmentDetailsContainer {
     margin: 20px 0 20px 0;
 }
 
-.scheduleAppointmentDialog-datetimePicker {
+.availabilityRequestDialog-datetimePicker {
     margin-top: 5px;
     padding: 10px;
     font-family: inherit;

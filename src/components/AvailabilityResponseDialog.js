@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 
 // Pop up dialog for when user wants to respond to an availability request
 function AvailabilityResponseDialog(props) {
-    const scheduleAppointmentDialogClasses = useStyles();
+    const availabilityResponseDialogClasses = useStyles();
     const {
         // Styles
         classes,
@@ -61,19 +61,19 @@ function AvailabilityResponseDialog(props) {
                 <section id='referpatientpage-doctorDetailsContainer'>
                     {/* Doctor name */}
                     <div className='availabilityResponseDialog-doctorDetail'>
-                        <Person classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
+                        <Person classes={{ root: availabilityResponseDialogClasses.doctorDetailsIcon }} />
                         { doctorDetails.fromName }
                     </div>
                     
                     {/* Subject */}
                     <div className='availabilityResponseDialog-doctorDetail'>
-                        <Notes classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
+                        <Notes classes={{ root: availabilityResponseDialogClasses.doctorDetailsIcon }} />
                         { doctorDetails.reason }
                     </div>
                     
                     {/* Appointment time request by patient */}
                     <div className='availabilityResponseDialog-doctorDetail'>
-                        <AccessTime classes={{ root: scheduleAppointmentDialogClasses.doctorDetailsIcon }} />
+                        <AccessTime classes={{ root: availabilityResponseDialogClasses.doctorDetailsIcon }} />
                         { doctorDetails.subject }
                     </div>
                 </section>
@@ -86,7 +86,7 @@ function AvailabilityResponseDialog(props) {
                         name='dateAndTimeString'
                         label='Appointment time response'
                         variant='outlined'
-                        classes={{ root: scheduleAppointmentDialogClasses.inputBottomMargin }}
+                        classes={{ root: availabilityResponseDialogClasses.inputBottomMargin }}
                         onChange={(event) => updateAvailabilityTimeResponse(event.target.value)}
                         error={validateAvailabilityTimeResponse.hasError}
                         fullWidth

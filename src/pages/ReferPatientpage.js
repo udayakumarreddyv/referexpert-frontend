@@ -9,7 +9,7 @@ import * as moment from 'moment';
 
 // Components
 import DoctorsTable from "../components/DoctorsTable";
-import ScheduleAppointmentDialog from '../components/ScheduleAppointmentDialog';
+import AvailabilityRequestDialog from '../components/AvailabilityRequestDialog';
 
 // Material UI
 import {
@@ -403,7 +403,7 @@ function ReferPatientpage({ classes }) {
             </section>
 
             {/* Dialog popup for scheduling an appointment */}
-            <ScheduleAppointmentDialog
+            <AvailabilityRequestDialog
                 // Styles
                 classes={classes}
                 referpatientpageClasses={referpatientpageClasses}
