@@ -8,7 +8,8 @@ const initialState = {
     token: null,
     userEmail: null,
     userType: null,
-    userDetails: {}
+    userDetails: {},
+    pendingTasks: {}
 };
 
 // Get user info
@@ -28,6 +29,22 @@ const getUserInfo = async (token) => {
         return await response.json();
     } catch (err) {
         throw err;
+    };
+};
+
+// Get the pending tasks that the user needs to attend to
+const fetchPendingTasks = async (token) => {
+    try {
+        const url = 'referexpert/pendingtasks';
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+        });
+        return await response.json();
+    } catch (err) {
+        console.log(err);
     };
 };
 
@@ -82,9 +99,11 @@ const Store = ({ children }) => {
 
             // Get user details
             let userDetails;
+            let pendingTasks;
             let needToRefresh = false;
             if (accessCookie && 'token' in accessCookie) {
                 userDetails = await getUserInfo(accessCookie.token);
+                pendingTasks = await fetchPendingTasks(accessCookie.token);
 
                 // Expired or invalid token, remove cookie
                 if (userDetails === 'Invalid token') {
@@ -106,6 +125,7 @@ const Store = ({ children }) => {
 
                 // Try to get user details again
                 userDetails = await getUserInfo(newAccessToken);
+                pendingTasks = await fetchPendingTasks(newAccessToken);
 
                 // Expired or invalid token, remove cookie
                 // Exit trying to login user, send to signin page
@@ -125,6 +145,7 @@ const Store = ({ children }) => {
                 userEmail: userDetails.email,
                 userType: userDetails.userType,
                 userDetails,
+                pendingTasks
             };
             dispatch({ type: 'LOGIN_USER', payload: payload });
         };
