@@ -38,11 +38,11 @@ function AvailabilityTable ({
     handleOpenAvailabilityResponseDialog,
     handleOpenConfirmResponseDialog
 }) {
-    const numTableCols = 4;
     const availabilityTableClasses = useStyles();
 
     // Validate that availability type is a suitable option
     validateAvailabilityType(availabilityType);
+    const numTableCols = availabilityType === 'request' ? 5 : 4;
 
     // Pagination states
     const [page, updatePage] = useState(0);
