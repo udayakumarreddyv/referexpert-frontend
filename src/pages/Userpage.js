@@ -14,11 +14,15 @@ import CompleteAppointments from '../components/CompleteAppointments';
 import InviteDoctorDialog from '../components/InviteDoctorDialog';
 import NotificationMethodsDialog from '../components/NotificationMethodsDialog';
 
+// Apis
+import { refreshPendingTasks } from '../api/pendingTasksApi';
+
 // Page navigation
 import { Link } from 'react-router-dom';
 
 // Material UI
 import {
+    Badge,
     Button,
     Dialog,
     DialogActions,
@@ -227,6 +231,7 @@ function Userpage({ classes }) {
 
                 // Refresh appointments list from api
                 fetchAppointments();
+                refreshPendingTasks({ token: state.token, dispatch });
             } else if (results.message === 'Issue while updating refer expert') {
                 throw 'Invalid appointmentId';
             } else {
@@ -270,6 +275,7 @@ function Userpage({ classes }) {
 
                 // Refresh appointments list from api
                 fetchAppointments();
+                refreshPendingTasks({ token: state.token, dispatch });
 
                 // Close confirmation dialog
                 handleDialogClose();
@@ -324,8 +330,15 @@ function Userpage({ classes }) {
 
             {/* View scheduled appointments */}
             <h1 className='pageTitle hasIcon'>
-                <Today classes={{ root: userpageClasses.titleIcon }} />
-                Current appointments
+                <Badge
+                    badgeContent={" "}
+                    color='error'
+                    anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    invisible={ state.pendingTasks.currentAppointment === 'Y' ? false : true }
+                >
+                    <Today classes={{ root: userpageClasses.titleIcon }} />
+                    Current appointments
+                </Badge>
             </h1>
             <section id='userpage-currentAppointmentsContainer'>
                 <OpenAppointments
@@ -337,8 +350,15 @@ function Userpage({ classes }) {
 
             {/* Pending appointments */}
             <h1 className='pageTitle hasIcon'>
-                <Schedule classes={{ root: userpageClasses.titleIcon }} />
-                Pending appointments
+                <Badge
+                    badgeContent={" "}
+                    color='error'
+                    anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    invisible={ state.pendingTasks.pendingAppointment === 'Y' ? false : true }
+                >
+                    <Schedule classes={{ root: userpageClasses.titleIcon }} />
+                    Pending appointments
+                </Badge>
             </h1>
             <section id='userpage-pendingAppointmentsContainer'>
                 <PendingAppointments
