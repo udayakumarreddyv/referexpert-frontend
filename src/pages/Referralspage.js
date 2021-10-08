@@ -10,21 +10,29 @@ import AvailabilityTable from '../components/AvailabilityTable';
 import AvailabilityResponseDialog from '../components/AvailabilityResponseDialog';
 import ConfirmResponseDialog from '../components/ConfirmResponseDialog';
 
+// Apis
+import { refreshPendingTasks } from '../api/pendingTasksApi';
+import {
+    fetchAvailabilityResponses,
+    fetchPendingAvailabilityRequests,
+    fetchReferrals,
+    submitAvailabilityResponse,
+    submitAppointment,
+    submitFinalizeAvailabilityResponse,
+    submitRejectAvailabilityResponse,
+} from '../api/referralsApi';
+
 // Page navigation
 import { Link } from 'react-router-dom';
 
 // Material UI
 import {
+    Badge,
     Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
     Snackbar,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import { Schedule, Today, CheckCircle, Share } from '@material-ui/icons';
+import { Share } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Custom Material UI styles for this page
@@ -132,80 +140,6 @@ function Referralspage({ classes }) {
         updateShowConfirmResponseView(false);
     };
 
-    // Fetch open referrals
-    const fetchPendingAppointmentResponses = async () => {
-        try {
-            // Fetch referrals from api
-            const url = `referexpert/myavailabilityresponses/${state.userEmail}`;
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
-            const results = await response.json();
-            
-            // Filter out results that have already been responded to
-            // This prevents the user from responding to the same request twice
-            const filteredResults = results.filter((item) => item.isAccepted !== 'Y');
-            
-            // Update referrals state
-            updateAvailabilityResponses(filteredResults);
-        } catch (err) {
-            console.log(err);
-        };
-    };
-
-    // Fetch pending referrals
-    const fetchPendingAppointmentRequests = async () => {
-        try {
-            // Fetch referrals from api
-            const url = `referexpert/myavailabilityrequests/${state.userEmail}`;
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
-            const results = await response.json();
-            
-            // Filter out any requests where user has completed the appointment request
-            // This prevents the user from requesting the same appointment twice
-            const filteredResults = results.filter((item) => item.isServed === '');
-
-            // Update referrals state
-            updateAvailabilityRequests(filteredResults);
-        } catch (err) {
-            console.log(err);
-        };
-    };
-
-    // Fetch referrals user had made
-    const fetchReferrals = async () => {
-        try {
-
-            // Fetch referrals from api
-            const url = `referexpert/myreferrals/${state.userEmail}`;
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
-            const results = await response.json();
-            
-            // Update referrals state
-            updateReferralsData(results);
-        } catch (err) {
-            updateReferralsData('error');
-            console.log(err);
-        };
-    };
-
-    // Make an api request to the availability response api
-    const submitAvailabilityResponseApi = async (appointmentId, dateAndTimeString) => {
-        try {
-            const url = 'referexpert/availabilityresponse';
-            const body = { appointmentId, dateAndTimeString };
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${state.token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
-            return await response.json();
-        } catch (err) {
-            throw err;
-        };
-    };
-
     // Handle scheduling a new appointment
     const handleAvailabilityResponseRequest = async () => {
 
@@ -223,7 +157,11 @@ function Referralspage({ classes }) {
             updateLoadingAvailabilityResponse(true);
 
             // Send request to api
-            const results = await submitAvailabilityResponseApi(doctorDetails.appointmentId, availabilityTimeResponse);
+            const results = await submitAvailabilityResponse({
+                appointmentId: doctorDetails.appointmentId,
+                dateAndTimeString: availabilityTimeResponse,
+                token: state.token
+            });
 
             // // Caught an unexpected response
             if (!('message' in results)) {
@@ -240,7 +178,8 @@ function Referralspage({ classes }) {
                 updateAlertDetails({ type: 'success', message: `Availability response has been sent!` });
                 updateAlertOpen(true);
                 handleCloseAvailabilityResponseDialog();
-                fetchPendingAppointmentResponses();
+                fetchAvailabilityResponses({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityResponses });
+                refreshPendingTasks({ token: state.token, dispatch });
             } else {
                 throw results;
             };
@@ -259,93 +198,20 @@ function Referralspage({ classes }) {
         };
     };
 
-    // Schedule appointment via api request
-    const handleAppointmentApi = async (appointmentFrom, appointmentTo, dateAndTimeString, subject, reason) => {
-        try {
-            const url = 'referexpert/requestappointment';
-            const body = { appointmentFrom, appointmentTo, dateAndTimeString, subject, reason };
-            console.log(body)
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${state.token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
-            const results = await response.json();
-
-            // Validate appointment was scheduled sucessfully
-            const successResponseText = 'Appointment Request Successful';
-            if (!('message' in results)) throw results;
-            if (results.message !== successResponseText) throw results.message;
-        } catch (err) {
-            throw err;
-        };
-    };
-
-    // Finalize availability response api
-    const handleFinalizeAvailabilityResponseApi = async (appointmentId) => {
-        try {
-            const url = 'referexpert/finalizeavailability';
-            const body = { appointmentId };
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${state.token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
-            const results = await response.json();
-
-            // Validate availability response was finalized sucessfully
-            const successResponseText = 'Updated Successfully';
-            if (!('message' in results)) throw results;
-            if (results.message !== successResponseText) throw results.message;
-        } catch (err) {
-            throw err;
-        };
-    };
-
-    // Reject availability response api
-    const handleRejectAvailabilityResponseApi = async (appointmentId) => {
-        try {
-            const url = 'referexpert/rejectavailability';
-            const body = { appointmentId };
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${state.token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
-            const results = await response.json();
-
-            // Validate availability response was rejected sucessfully
-            const successResponseText = 'Updated Successfully';
-            if (!('message' in results)) throw results;
-            if (results.message !== successResponseText) throw results.message;
-        } catch (err) {
-            throw err;
-        };
-    };
-
     // Handle either accept/reject a appointment request after availability response
     // responseType can be: accept or reject
     const handleConfirmResponseRequest = async (responseType) => {
         try {
             updateLoadingConfirmResponse(true);
-            
+            const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, subject, reason } = confirmResponseDetails;
+
             // Launch the needed api requests based on the responseType
             if (responseType === 'accept') {
-                const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, subject, reason } = confirmResponseDetails;
-                await handleAppointmentApi(appointmentFrom, appointmentTo, dateAndTimeString, subject, reason);
-                await handleFinalizeAvailabilityResponseApi(appointmentId);
+                await submitAppointment({ appointmentFrom, appointmentTo, dateAndTimeString, subject, reason, token: state.token });
+                await submitFinalizeAvailabilityResponse({ appointmentId, token: state.token });
                 updateAlertDetails({ type: 'success', message: `Appointment has been requested!` });
             } else if (responseType === 'reject') {
-                await handleRejectAvailabilityResponseApi(confirmResponseDetails.appointmentId);
+                await submitRejectAvailabilityResponse({ appointmentId, token: state.token });
                 updateAlertDetails({ type: 'success', message: `Reponse has been rejected!` });
             } else {
                 throw new Error('Invalid option for parameter "responseType" must be either: accept or reject');
@@ -356,8 +222,9 @@ function Referralspage({ classes }) {
             // Refresh availability requests table to remove this completed request
             updateAlertOpen(true);
             handleCloseConfirmResponseDialog();
-            fetchPendingAppointmentRequests();
-            fetchReferrals();
+            fetchPendingAvailabilityRequests({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityRequests });
+            fetchReferrals({ userEmail: state.userEmail, token: state.token, updateState: updateReferralsData });
+            refreshPendingTasks({ token: state.token, dispatch });
             updateLoadingConfirmResponse(false);
         } catch (err) {
             // Show failure alert
@@ -372,9 +239,9 @@ function Referralspage({ classes }) {
 
     // Launch fetch appointments, referrals, and notifications on load
     useEffect(() => {
-        fetchPendingAppointmentRequests(); // requests from other doctors to user
-        fetchPendingAppointmentResponses(); // requests to other doctors from user
-        fetchReferrals(); // completed referrals from user to other doctors
+        fetchPendingAvailabilityRequests({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityRequests });
+        fetchAvailabilityResponses({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityResponses });
+        fetchReferrals({ userEmail: state.userEmail, token: state.token, updateState: updateReferralsData }); // completed referrals from user to other doctors
     }, []);
 
     return (
@@ -395,8 +262,15 @@ function Referralspage({ classes }) {
 
             {/* Pending Availability responses */}
             <h1 className='pageTitle hasIcon'>
-                <Share classes={{ root: referralspageClasses.titleIcon }} />
-                Pending availability responses
+                <Badge
+                    badgeContent={" "}
+                    color='error'
+                    anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    invisible={ state.pendingTasks.pendingAvailabilityResponse === 'Y' ? false : true }
+                >
+                    <Share classes={{ root: referralspageClasses.titleIcon }} />
+                    Pending availability responses
+                </Badge>
             </h1>
             <section id='referralspage-referralsContainer'>
                 <AvailabilityTable
@@ -409,8 +283,15 @@ function Referralspage({ classes }) {
 
             {/* Pending Availability requests */}
             <h1 className='pageTitle hasIcon'>
-                <Share classes={{ root: referralspageClasses.titleIcon }} />
-                My pending availability requests
+                <Badge
+                    badgeContent={" "}
+                    color='error'
+                    anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    invisible={ state.pendingTasks.pendingAvailabilityRequest === 'Y' ? false : true }
+                >
+                    <Share classes={{ root: referralspageClasses.titleIcon }} />
+                    My pending availability requests
+                </Badge>
             </h1>
             <section id='referralspage-referralsContainer'>
                 <AvailabilityTable
