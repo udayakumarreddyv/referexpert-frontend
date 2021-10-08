@@ -2,6 +2,9 @@ import React, { createContext, useEffect, useReducer } from 'react';
 import Reducer from './Reducer';
 import CookieHelper from '../utils/cookieHelper';
 
+// Apis
+import { fetchPendingTasks } from '../api/pendingTasksApi';
+
 // Initial global state
 const initialState = {
     loggedIn: false,
@@ -29,22 +32,6 @@ const getUserInfo = async (token) => {
         return await response.json();
     } catch (err) {
         throw err;
-    };
-};
-
-// Get the pending tasks that the user needs to attend to
-const fetchPendingTasks = async (token) => {
-    try {
-        const url = 'referexpert/pendingtasks';
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-        });
-        return await response.json();
-    } catch (err) {
-        console.log(err);
     };
 };
 

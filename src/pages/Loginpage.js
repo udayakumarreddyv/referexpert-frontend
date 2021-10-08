@@ -9,6 +9,9 @@ import { Redirect } from 'react-router-dom';
 import LoginCard from '../components/LoginCard';
 import ForgotPasswordCard from '../components/ForgotPasswordCard';
 
+// Apis
+import { fetchPendingTasks } from '../api/pendingTasksApi';
+
 // Utils
 import CookieHelper from '../utils/cookieHelper';
 import * as EmailValidator from 'email-validator';
@@ -66,22 +69,6 @@ function Loginpage({ classes }) {
             return await response.json();
         } catch (err) {
             throw err;
-        };
-    };
-
-    // Get the pending tasks that the user needs to attend to
-    const fetchPendingTasks = async (token) => {
-        try {
-            const url = 'referexpert/pendingtasks';
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-            });
-            return await response.json();
-        } catch (err) {
-            console.log(err);
         };
     };
 
