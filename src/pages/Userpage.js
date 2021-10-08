@@ -1,9 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import './styles/Userpage.css';
 
-// Time parsing
-import * as moment from 'moment';
-
 // Global store
 import { Context } from '../store/GlobalStore';
 
@@ -16,6 +13,10 @@ import NotificationMethodsDialog from '../components/NotificationMethodsDialog';
 
 // Apis
 import { refreshPendingTasks } from '../api/pendingTasksApi';
+import { fetchAppointments, updatePendingAppointment, completeAppointment } from '../api/appointmentsApi';
+
+// Utils
+import { separateAppointments } from '../utils/appointmentsHelpers';
 
 // Page navigation
 import { Link } from 'react-router-dom';
@@ -48,42 +49,6 @@ const useStyles = makeStyles((theme) => ({
         }
     },
 }));
-
-// Sort appointments by date newest to furthest
-const sortAppointments = (appointmentsList) => {
-    return appointmentsList.sort((first, second) => {
-        return moment(second.dateAndTimeString) - moment(first.dateAndTimeString);
-    });
-};
-
-// Separate open, pending, and closed appointments
-const separateAppointments = (appointmentsList) => {
-    let pendingList = [];
-    let openList = [];
-    let completedList = [];
-
-    // Loop through each appointment in list, separate into buckets
-    appointmentsList.forEach((appointment) => {
-
-        // Pending appointment, open appointment, completed appointment
-        if (appointment.isAccepted === 'P') {
-            pendingList.push(appointment);
-        } else if (appointment.isAccepted === 'Y' && appointment.isServed === 'N') {
-            openList.push(appointment);
-        } else if (appointment.isServed === 'Y') {
-            completedList.push(appointment);
-        } else {
-            console.log(`Rejected appointment: ${appointment.appointmentId}`);
-        };
-    });
-
-    // Sort appointments by dates
-    pendingList = sortAppointments(pendingList);
-    openList = sortAppointments(openList);
-    completedList = sortAppointments(completedList);
-
-    return { pendingList, openList, completedList };
-};
 
 // Page component
 function Userpage({ classes }) {
@@ -138,14 +103,11 @@ function Userpage({ classes }) {
         updateDialogPendingRejectOpen(false);
     };
 
-    // Fetch all appointments for user: open, pending
-    const fetchAppointments = async () => {
+    const handleFetchAppointments = async () => {
         try {
 
-            // Fetch from api
-            const url = `/referexpert/myappointments/${state.userEmail}`;
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}`, }});
-            const results = await response.json();
+            // Fetch results from api
+            const results = await fetchAppointments({ userEmail: state.userEmail, token: state.token });
 
             // Separate appointments
             const { pendingList, openList, completedList } = separateAppointments(results);
@@ -153,7 +115,7 @@ function Userpage({ classes }) {
             // Update appointments states
             updatePendingAppointments(pendingList);
             updateOpenAppointments(openList);
-            updateCompleteAppointments(completedList);
+            updateCompleteAppointments(completedList);      
         } catch (err) {
             console.log(err);
         };
@@ -189,54 +151,22 @@ function Userpage({ classes }) {
 
     // Handle accept/reject of pending appointment
     const handlePendingAppointmentUpdate = async (appointmentId, action) => {
-        // actions can be: accept or reject
-
         try {
-            // Url changes depending on accept or reject
-            let url;
-            if (action === 'accept') {
-                url = 'referexpert/acceptappointment';
-            } else if (action === 'reject') {
-                url = 'referexpert/rejectappointment';
-            } else {
-                throw 'Invalid action';
-            };
+            // Update appointment status via api
+            // actions can be: accept or reject
+            await updatePendingAppointment({ action, appointmentId, token: state.token });
 
-            // Send api request
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${state.token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ appointmentId })
-            });
-            const results = await response.json();
+            // Show success alert
+            const actionText = action === 'accept' ? 'accepted' : 'rejected';
+            updateAlertDetails({ type: 'info', message: `Appointment has been ${actionText}` });
+            updateAlertOpen(true);
 
-            // Response is what we expect, throw err
-            if (!('message' in results)) {
-                throw results;
-            };
+            // Close dialog
+            handleDialogClose();
 
-            // Success message
-            if (results.message === 'Updated Successfully') {
-
-                // Show success alert
-                const actionText = action === 'accept' ? 'accepted' : 'rejected';
-                updateAlertDetails({ type: 'info', message: `Appointment has been ${actionText}` });
-                updateAlertOpen(true);
-
-                // Close dialog
-                handleDialogClose();
-
-                // Refresh appointments list from api
-                fetchAppointments();
-                refreshPendingTasks({ token: state.token, dispatch });
-            } else if (results.message === 'Issue while updating refer expert') {
-                throw 'Invalid appointmentId';
-            } else {
-                throw 'Unhandled response message';
-            };
+            // Refresh appointments list from api
+            handleFetchAppointments();
+            refreshPendingTasks({ token: state.token, dispatch });
         } catch(err) {
 
             // Show failed alert
@@ -250,44 +180,19 @@ function Userpage({ classes }) {
     // Handle completion of current appointment
     const handleCompleteAppointmentUpdate = async (appointmentId) => {
         try {
-            const url = `referexpert/finalizeappointment`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${state.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ appointmentId })
-            });
-            const results = await response.json();
-            
-            // Ensure message in response. catch erros elsewise
-            if (!('message' in results)) {
-                throw results;
-            };
-
-            // Success message
-            if (results.message === 'Updated Successfully') {
+            // Update appointment status via api
+            await completeAppointment({ appointmentId, token: state.token });
     
-                // Show success alert
-                updateAlertDetails({ type: 'info', message: `Appointment has been marked as completed!` });
-                updateAlertOpen(true);
+            // Show success alert
+            updateAlertDetails({ type: 'info', message: `Appointment has been marked as completed!` });
+            updateAlertOpen(true);
 
-                // Refresh appointments list from api
-                fetchAppointments();
-                refreshPendingTasks({ token: state.token, dispatch });
+            // Refresh appointments list from api
+            handleFetchAppointments();
+            refreshPendingTasks({ token: state.token, dispatch });
 
-                // Close confirmation dialog
-                handleDialogClose();
-            } else if (results.message === 'Issue while updating refer expert') {
-
-                // Bad appointmentId
-                throw 'Bad appointmentId';
-            } else {
-
-                // Throw unhandled errors
-                throw results;
-            };
+            // Close confirmation dialog
+            handleDialogClose();
         } catch (err) {
             // Show failed alert
             updateAlertDetails({ type: 'error', message: 'Failed to complete appointment' });
@@ -299,7 +204,7 @@ function Userpage({ classes }) {
 
     // Launch fetch appointments, referrals, and notifications on load
     useEffect(() => {
-        fetchAppointments();
+        handleFetchAppointments();
         fetchNotifications();
     }, []);
 
