@@ -3,6 +3,7 @@ import Reducer from './Reducer';
 import CookieHelper from '../utils/cookieHelper';
 
 // Apis
+import { getUserInfo } from '../api/userApi';
 import { fetchPendingTasks } from '../api/pendingTasksApi';
 
 // Initial global state
@@ -13,26 +14,6 @@ const initialState = {
     userType: null,
     userDetails: {},
     pendingTasks: {}
-};
-
-// Get user info
-const getUserInfo = async (token) => {
-    try {
-        const url = `/referexpert/userdetails`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
-        });
-
-        // Failed to get user details
-        if (response.status !== 200) {
-            return 'Invalid token';
-        };
-
-        return await response.json();
-    } catch (err) {
-        throw err;
-    };
 };
 
 // Get refresh token
@@ -89,7 +70,7 @@ const Store = ({ children }) => {
             let pendingTasks;
             let needToRefresh = false;
             if (accessCookie && 'token' in accessCookie) {
-                userDetails = await getUserInfo(accessCookie.token);
+                userDetails = await getUserInfo({ token: accessCookie.token});
                 pendingTasks = await fetchPendingTasks(accessCookie.token);
 
                 // Expired or invalid token, remove cookie
@@ -111,7 +92,7 @@ const Store = ({ children }) => {
                 if (results === 'refresh token expired') return;
 
                 // Try to get user details again
-                userDetails = await getUserInfo(newAccessToken);
+                userDetails = await getUserInfo({ token: newAccessToken});
                 pendingTasks = await fetchPendingTasks(newAccessToken);
 
                 // Expired or invalid token, remove cookie

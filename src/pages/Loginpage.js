@@ -10,6 +10,7 @@ import LoginCard from '../components/LoginCard';
 import ForgotPasswordCard from '../components/ForgotPasswordCard';
 
 // Apis
+import { getUserInfo, loginUser } from '../api/userApi';
 import { fetchPendingTasks } from '../api/pendingTasksApi';
 
 // Utils
@@ -52,26 +53,6 @@ function Loginpage({ classes }) {
     const [validatePassword, updateValidatePassword] = useState({ hasError: false, errorMessage: '' });
     const [submitError, updateSubmitError] = useState({ hasError: false, errorMessage: '' });
 
-    // Get user info
-    const getUserInfo = async (token) => {
-        try {
-            const url = `/referexpert/userdetails`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-            
-            // Failed to get user details
-            if (response.status !== 200) {
-                return 'Invalid token';
-            };
-
-            return await response.json();
-        } catch (err) {
-            throw err;
-        };
-    };
-
     // Handle login attempt
     const handleLogin = async () => {
     
@@ -104,28 +85,14 @@ function Loginpage({ classes }) {
             // Show loading spinner, disable button
             updateLoading(true);
 
-            const url = '/referexpert/validateuser';
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-            const results = await response.json();
-            
-            // Catch any errors
-            if ('error' in results) {
+            // Make api call to try to validate user credentials
+            const results = await loginUser({ email, password });
 
-                // Invalid credentials
-                if (results.error === 'Unauthorized') {
-                    updateSubmitError({ hasError: true, errorMessage: 'Invalid username & password combination' });
-                    
-                    // Hide loading spinner
-                    updateLoading(false);
-                } else {
-
-                    // Unhandled error
-                    throw results.error;
-                };
+            // Invalid login credentials
+            if (results === 'Unauthorized') {
+                updateSubmitError({ hasError: true, errorMessage: 'Invalid username & password combination' });
+                updateLoading(false);
+                return;
             };
 
             // Make sure we got all creds we need
@@ -136,7 +103,7 @@ function Loginpage({ classes }) {
 
             // Get user details
             const { accessToken, refreshToken, tokenType } = results;
-            const userDetails = await getUserInfo(accessToken);
+            const userDetails = await getUserInfo({ token: accessToken});
             const pendingTasks = await fetchPendingTasks(accessToken);
             const payload = {
                 token: accessToken,
