@@ -57,7 +57,9 @@ function Header({ classes }) {
     const [pendingTasksInfo, updatePendingTasksInfo] = useState({
         hasPendingTask: false,
         pendingAppointment: false,
-        pendingAvailability: false,
+        currentAppointment: false,
+        pendingAvailabilityRequest: false,
+        pendingAvailabilityResponse: false
     });
     
     // Handle drawer open
@@ -88,7 +90,9 @@ function Header({ classes }) {
     useEffect(() => {
         let hasPendingTask = false;
         let pendingAppointment = false;
-        let pendingAvailability = false;
+        let currentAppointment = false;
+        let pendingAvailabilityRequest = false;
+        let pendingAvailabilityResponse = false;
 
         // Check if pending appointment
         if (state.pendingTasks.pendingAppointment === 'Y') {
@@ -96,13 +100,25 @@ function Header({ classes }) {
             pendingAppointment = true;
         };
 
-        // Check if pending availability
-        if (state.pendingTasks.pendingAvailability === 'Y') {
+        // Check if current appointment
+        if (state.pendingTasks.currentAppointment === 'Y') {
             hasPendingTask = true;
-            pendingAvailability = true;
+            currentAppointment = true;
         };
 
-        updatePendingTasksInfo({ hasPendingTask, pendingAppointment, pendingAvailability });
+        // Check if pending availabilityRequest
+        if (state.pendingTasks.pendingAvailabilityRequest === 'Y') {
+            hasPendingTask = true;
+            pendingAvailabilityRequest = true;
+        };
+
+        // Check if pending availability
+        if (state.pendingTasks.pendingAvailabilityResponse === 'Y') {
+            hasPendingTask = true;
+            pendingAvailabilityResponse = true;
+        };
+
+        updatePendingTasksInfo({ hasPendingTask, pendingAppointment, currentAppointment, pendingAvailabilityRequest, pendingAvailabilityResponse });
     }, [state.pendingTasks]);
 
     // View when user is not logged in
@@ -133,7 +149,11 @@ function Header({ classes }) {
         <div id='headerLinksContainer'>
 
             {/* Header button */}
-            <Badge badgeContent=" " color='error' invisible={!pendingTasksInfo.pendingAvailability}>
+            <Badge
+                badgeContent=" "
+                color='error'
+                invisible={ !pendingTasksInfo.pendingAvailabilityRequest && !pendingTasksInfo.pendingAvailabilityResponse }
+            >
                 <Button
                     variant='outlined'
                     style={{ marginRight: '0px', fontSize: '12px', }}
@@ -178,7 +198,7 @@ function Header({ classes }) {
                             <Badge
                                 variant='dot'
                                 color='error'
-                                invisible={!pendingTasksInfo.pendingAvailability}
+                                invisible={ !pendingTasksInfo.pendingAvailabilityRequest && !pendingTasksInfo.pendingAvailabilityResponse }
                             >
                                 <Link
                                     to='/referrals'
