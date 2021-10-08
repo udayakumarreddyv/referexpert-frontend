@@ -24,7 +24,7 @@ exports.separateAppointments = (appointmentsList) => {
         } else if (appointment.isServed === 'Y') {
             completedList.push(appointment);
         } else {
-            console.log(`Rejected appointment: ${appointment.appointmentId}`);
+            // console.log(`Rejected appointment: ${appointment.appointmentId}`);
         };
     });
 
