@@ -10,7 +10,7 @@ exports.fetchAvailabilityResponses = async ({ userEmail, token, updateState }) =
         const filteredResults = results.filter((item) => item.isAccepted !== 'Y');
         updateState(filteredResults);
     } catch (err) {
-        console.log(err);
+        throw err;
     };
 };
 
@@ -26,7 +26,7 @@ exports.fetchPendingAvailabilityRequests = async ({ userEmail, token, updateStat
         const filteredResults = results.filter((item) => item.isServed === '');
         updateState(filteredResults);
     } catch (err) {
-        console.log(err);
+        throw err;
     };
 };
 
@@ -40,8 +40,7 @@ exports.fetchReferrals = async ({ userEmail, token, updateState }) => {
         // Update referrals state
         updateState(results);
     } catch (err) {
-        updateState('error');
-        console.log(err);
+        throw err;
     };
 };
 
