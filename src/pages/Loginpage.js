@@ -10,7 +10,7 @@ import LoginCard from '../components/LoginCard';
 import ForgotPasswordCard from '../components/ForgotPasswordCard';
 
 // Apis
-import { getUserInfo, loginUser } from '../api/userApi';
+import { getUserInfo, loginUser, resetPassword } from '../api/userApi';
 import { fetchPendingTasks } from '../api/pendingTasksApi';
 
 // Utils
@@ -148,18 +148,7 @@ function Loginpage({ classes }) {
             updateLoading(true);
 
             // Send api request
-            const url = '/referexpert/resetnotification';
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-            });
-            const results = await response.json();
-            
-            // Catch errors
-            if (!('message' in results) || results.message !== 'Email sent successful') {
-                throw results;
-            };
+            await resetPassword({ email });
 
             // TODO: Handle successful password reset
             updatePasswordResetSuccess(true);

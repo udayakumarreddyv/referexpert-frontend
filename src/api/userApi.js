@@ -41,3 +41,23 @@ exports.getUserInfo = async ({ token }) => {
         throw err;
     };
 };
+
+// Reset a user's password
+exports.resetPassword = async ({ email }) => {
+    try {
+        const url = '/referexpert/resetnotification';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+        const results = await response.json();
+        
+        // Catch errors
+        if (!('message' in results) || results.message !== 'Email sent successful') {
+            throw results;
+        };
+    } catch (err) {
+        throw err;
+    };
+};
