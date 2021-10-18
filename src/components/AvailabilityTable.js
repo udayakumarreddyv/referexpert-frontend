@@ -15,6 +15,7 @@ import {
     Paper,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import moment from 'moment';
 
 // Custom Material UI styles for this page
 const useStyles = makeStyles((theme) => ({
@@ -90,17 +91,17 @@ function AvailabilityTable ({
                 isAccepted,
                 isServed
             } = referral;
-            // const date = moment(dateAndTimeString).format('h:mma MM/DD/YY');
-            
+
             // Determine what row type to create and then generate the row
             let tableRow;
             if (availabilityType === 'request') {
+                const availabilityResponseDateTimes = dateAndTimeString.split(',').map((dateTime) => moment(dateTime).format('MM/DD/YY hh:mm A'));
                 tableRow = (
                     <TableRow key={appointmentId}>
                         <TableCell>{ toFirstName } { toLastName }</TableCell>
                         <TableCell>{ reason }</TableCell>
                         <TableCell>{ subject }</TableCell>
-                        <TableCell>{ dateAndTimeString }</TableCell>
+                        <TableCell>{ availabilityResponseDateTimes.join(', ') }</TableCell>
                         <TableCell>
                             {
                                 isAccepted === 'Y'

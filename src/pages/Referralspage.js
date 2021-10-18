@@ -198,8 +198,14 @@ function Referralspage({ classes }) {
             // Show loading spinner in schedule dialog popup
             updateLoadingAvailabilityResponse(true);
 
+            // Format the suggested appointment times to look user friendly
+            const joinedDateTimeString = [
+                moment(appointmentDate1).format('MM/DD/YY hh:mm A'),
+                moment(appointmentDate2).format('MM/DD/YY hh:mm A'),
+                moment(appointmentDate3).format('MM/DD/YY hh:mm A'),
+            ].join(',');
+
             // Send request to api
-            const joinedDateTimeString = [appointmentDate1, appointmentDate2, appointmentDate3].join(',');
             const results = await submitAvailabilityResponse({
                 appointmentId: doctorDetails.appointmentId,
                 dateAndTimeString: joinedDateTimeString,
