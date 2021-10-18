@@ -67,14 +67,14 @@ function Referrals ({ classes, referralsData }) {
                 isAccepted,
                 isServed
             } = referral;
-            const date = moment(dateAndTimeString).format('h:mma MM/DD/YY');
+            // const date = moment(dateAndTimeString).format('h:mma MM/DD/YY');
             
             // Format 
             return (
                 <TableRow key={appointmentId}>
                     <TableCell>{ toFirstName } { toLastName }</TableCell>
-                    <TableCell>{ date }</TableCell>
                     <TableCell>{ subject }</TableCell>
+                    <TableCell>{ dateAndTimeString }</TableCell>
                     <TableCell>{ reason }</TableCell>
                     <TableCell>{ convertAcceptedSymbol(isAccepted) }</TableCell>
                     <TableCell>{ isServed }</TableCell>
@@ -128,8 +128,8 @@ function Referrals ({ classes, referralsData }) {
                 <TableHead className='tableHeader'>
                     <TableRow>
                         <TableCell>Name</TableCell>
-                        <TableCell>Appointment Datetime</TableCell>
-                        <TableCell>Subject</TableCell>
+                        <TableCell>Requested time</TableCell>
+                        <TableCell>Scheduled time</TableCell>
                         <TableCell>Reason</TableCell>
                         <TableCell>Status</TableCell>
                         <TableCell>Patient Visited</TableCell>
