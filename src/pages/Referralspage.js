@@ -94,6 +94,8 @@ function Referralspage({ classes }) {
         reason: '',
         dateAndTimeString: ''
     });
+    const [selectedAppointmentDate, updateSelectedAppointmentDate] = useState(null);
+    const [validateSelectedAppointmentDate, updateValidateSelectedAppointmentDate] = useState({ hasError: false, errorMessage: '' });
 
     // Handle opening of availability response dialog
     const handleOpenAvailabilityResponseDialog = (appointmentId, fromName, subject, reason) => {
@@ -249,15 +251,27 @@ function Referralspage({ classes }) {
     // responseType can be: accept or reject
     const handleConfirmResponseRequest = async (responseType) => {
         try {
-            updateLoadingConfirmResponse(true);
             const { appointmentId, appointmentFrom, appointmentTo, dateAndTimeString, subject, reason } = confirmResponseDetails;
 
             // Launch the needed api requests based on the responseType
             if (responseType === 'accept') {
-                await submitAppointment({ appointmentFrom, appointmentTo, dateAndTimeString, subject, reason, token: state.token });
+                
+                // Clear out bad validation state
+                updateValidateSelectedAppointmentDate({ hasError: false, errorMessage: '' });
+
+                // Validate that user selected an appointment date
+                if (!selectedAppointmentDate) {
+                    updateValidateSelectedAppointmentDate({ hasError: true, errorMessage: 'Please select an appointment time' });
+                    updateLoadingConfirmResponse(false);
+                    return;
+                };
+
+                updateLoadingConfirmResponse(true);
+                await submitAppointment({ appointmentFrom, appointmentTo, dateAndTimeString: selectedAppointmentDate, subject, reason, token: state.token });
                 await submitFinalizeAvailabilityResponse({ appointmentId, token: state.token });
                 updateAlertDetails({ type: 'success', message: `Appointment has been requested!` });
             } else if (responseType === 'reject') {
+                updateLoadingConfirmResponse(true);
                 await submitRejectAvailabilityResponse({ appointmentId, token: state.token });
                 updateAlertDetails({ type: 'success', message: `Reponse has been rejected!` });
             } else {
@@ -406,7 +420,11 @@ function Referralspage({ classes }) {
                 confirmResponseDetails={confirmResponseDetails}
 
                 // Input states
+                updateSelectedAppointmentDate={updateSelectedAppointmentDate}
                 handleConfirmResponseRequest={handleConfirmResponseRequest}
+
+                // Validation states
+                validateSelectedAppointmentDate={validateSelectedAppointmentDate}
             />
 
             {/* Alert popups, only shown when user status has been updated */}

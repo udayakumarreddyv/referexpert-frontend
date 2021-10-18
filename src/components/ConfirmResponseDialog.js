@@ -8,10 +8,17 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
     TextField,
+    Radio,
+    RadioGroup,
+    FormHelperText,
 } from '@material-ui/core';
 import { Person, Notes, AccessTime } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
+import moment from 'moment';
 
 // Material UI styles
 const useStyles = makeStyles((theme) => ({
@@ -45,15 +52,25 @@ function ConfirmResponseDialog(props) {
         confirmResponseDetails,
 
         // Input states
+        updateSelectedAppointmentDate,
         handleConfirmResponseRequest,
+
+        // Validation states
+        validateSelectedAppointmentDate,
     } = props;
+
+    // Generate radio buttons for all appointment times that doctorB has sent back
+    // We're only formmatting to add the day abv to the string for the user to see
+    const selectableAppointmentTimes = confirmResponseDetails.dateAndTimeString.split(',').map((appointmentTime) => {
+        return <FormControlLabel value={appointmentTime} control={<Radio />} label={moment(appointmentTime).format('ddd, MM/DD/YY hh:mm A')} />;
+    });
 
     return (
         <Dialog
             open={showConfirmResponseView}
             onClose={handleCloseConfirmResponseDialog}
         >
-            <DialogTitle>Would you like to schedule the appointment for this time?</DialogTitle>
+            <DialogTitle>Would you like to schedule the appointment for any of these times?</DialogTitle>
             <DialogContent>
                 
                 {/* Doctor information */}
@@ -72,8 +89,23 @@ function ConfirmResponseDialog(props) {
                     
                     {/* Appointment time request by patient */}
                     <div className='confirmResponseDialog-doctorDetail'>
-                        <AccessTime classes={{ root: confirmResponseDialogClasses.doctorDetailsIcon }} />
-                        { confirmResponseDetails.dateAndTimeString }
+                        <FormControl
+                            component='fieldset'
+                            error={validateSelectedAppointmentDate.hasError}
+                        >
+                            <FormLabel component='legend' style={{ display: 'flex', alignItems: 'center'}}>
+                                <AccessTime classes={{ root: confirmResponseDialogClasses.doctorDetailsIcon }} />
+                                Recommended appointment times
+                            </FormLabel>
+                            <RadioGroup
+                                aria-label='Please choose an appointment time of your liking'
+                                name='appointmentTimes-radioGroup'
+                                onChange={(event) => updateSelectedAppointmentDate(event.target.value)}
+                            >
+                                { selectableAppointmentTimes }
+                            </RadioGroup>
+                            <FormHelperText>{ validateSelectedAppointmentDate.errorMessage }</FormHelperText>
+                        </FormControl>
                     </div>
                 </section>
             </DialogContent>
