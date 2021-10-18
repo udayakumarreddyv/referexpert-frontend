@@ -35,6 +35,9 @@ import Alert from '@material-ui/lab/Alert';
 import { Share } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
+// Time
+import moment from 'moment';
+
 // Custom Material UI styles for this page
 const useStyles = makeStyles((theme) => ({
     titleIcon: {
@@ -58,6 +61,11 @@ function Referralspage({ classes }) {
     const [alertOpen, updateAlertOpen] = useState(false);
     const [alertDetails, updateAlertDetails] = useState({ type: 'success', message: '' });
 
+    // Table data states
+    const [referralsData, updateReferralsData] = useState(null);
+    const [availabilityRequests, updateAvailabilityRequests] = useState(null);
+    const [availabilityResponses, updateAvailabilityResponses] = useState(null);
+
     // Availability response dialog states
     const [loadingAvailabilityResponse, updateLoadingAvailabilityResponse] = useState(false);
     const [showAvailabilityResponseView, updateShowAvailabilityResponseView] = useState(false);
@@ -67,7 +75,12 @@ function Referralspage({ classes }) {
         subject: '',
         reason: '',
     });
-    const [availabilityTimeResponse, updateAvailabilityTimeResponse] = useState('');
+    const [appointmentDate1, updateAppointmentDate1] = useState();
+    const [appointmentDate2, updateAppointmentDate2] = useState(null);
+    const [appointmentDate3, updateAppointmentDate3] = useState(null);
+    const [validateAppointmentDate1, updateValidateAppointmentDate1] = useState({ hasError: false, errorMessage: '' });
+    const [validateAppointmentDate2, updateValidateAppointmentDate2] = useState({ hasError: false, errorMessage: '' });
+    const [validateAppointmentDate3, updateValidateAppointmentDate3] = useState({ hasError: false, errorMessage: '' });
 
     // Confirm Response dialog states
     const [loadingConfirmResponse, updateLoadingConfirmResponse] = useState(false);
@@ -81,16 +94,6 @@ function Referralspage({ classes }) {
         reason: '',
         dateAndTimeString: ''
     });
-
-    // Referrals states
-    const [referralsData, updateReferralsData] = useState(null);
-
-    // Appointment states
-    const [availabilityRequests, updateAvailabilityRequests] = useState(null);
-    const [availabilityResponses, updateAvailabilityResponses] = useState(null);
-
-    // Validation states
-    const [validateAvailabilityTimeResponse, updateValidateAvailabilityTimeResponse] = useState({ hasError: false, errorMessage: '' });
 
     // Handle opening of availability response dialog
     const handleOpenAvailabilityResponseDialog = (appointmentId, fromName, subject, reason) => {
@@ -110,11 +113,15 @@ function Referralspage({ classes }) {
         });
         
         // Clear appointment input states
-        updateAvailabilityTimeResponse('');
+        updateAppointmentDate1(null);
+        updateAppointmentDate2(null);
+        updateAppointmentDate3(null);
 
         // Clear appointment input validation states
-        updateValidateAvailabilityTimeResponse({ hasError: false, errorMessage: '' });
-        
+        updateValidateAppointmentDate1({ hasError: false, errorMessage: '' });
+        updateValidateAppointmentDate2({ hasError: false, errorMessage: '' });
+        updateValidateAppointmentDate3({ hasError: false, errorMessage: '' });
+
         // Hide dialog
         updateShowAvailabilityResponseView(false);
     };
@@ -140,33 +147,67 @@ function Referralspage({ classes }) {
         updateShowConfirmResponseView(false);
     };
 
-    // Handle scheduling a new appointment
+    // Handle sending back a response from availability responses table
     const handleAvailabilityResponseRequest = async () => {
 
         // Clear any previous validation errors
-        updateValidateAvailabilityTimeResponse({ hasError: false, errorMessage: '' });
+        updateValidateAppointmentDate1({ hasError: false, errorMessage: '' });
+        updateValidateAppointmentDate2({ hasError: false, errorMessage: '' });
+        updateValidateAppointmentDate3({ hasError: false, errorMessage: '' });
 
-        // Validate subject line input
-        if (availabilityTimeResponse.trim() === '') {
-            updateValidateAvailabilityTimeResponse({ hasError: true, errorMessage: '' });
-            return;
+        // Flag for this request to catch any validation errors and kill request if so
+        let hasValidationError = false;
+
+        // Used to compare times against each other
+        // We check times to make sure doctor hasn't suggested same datetime multiple times
+        const momentAppointmentDate1 = moment(appointmentDate1);
+        const momentAppointmentDate2 = moment(appointmentDate2);
+        const momentAppointmentDate3 = moment(appointmentDate3);
+
+        // Validate that appointment date 1 was selected
+        if (!appointmentDate1) {
+            updateValidateAppointmentDate1({ hasError: true, errorMessage: '' });
+            hasValidationError = true;
+        } else if (!moment(appointmentDate1).isValid()) {
+            updateValidateAppointmentDate1({ hasError: true, errorMessage: 'Invalid date for appointment date 1' });
+            hasValidationError = true;
         };
+
+        // Validate that appointment date 2 isn't the same time as any other appointment date
+        if (
+            appointmentDate2
+            && (momentAppointmentDate2.isSame(momentAppointmentDate1) || momentAppointmentDate2.isSame(momentAppointmentDate3))
+        ) {
+            updateValidateAppointmentDate2({ hasError: true, errorMessage: 'Appointment date cannot be same as others' });
+            hasValidationError = true;
+        };
+
+        // Validate that appointment date 3 isn't the same time as any other appointment date
+        if (
+            appointmentDate3
+            && (momentAppointmentDate3.isSame(momentAppointmentDate1) || momentAppointmentDate3.isSame(momentAppointmentDate2))
+        ) {
+            updateValidateAppointmentDate3({ hasError: true, errorMessage: 'Appointment date cannot be same as others' });
+            hasValidationError = true;
+        };
+
+        // Kill request if there were any validation errors
+        if (hasValidationError) return;
 
         try {
             // Show loading spinner in schedule dialog popup
             updateLoadingAvailabilityResponse(true);
 
             // Send request to api
+            const joinedDateTimeString = [appointmentDate1, appointmentDate2, appointmentDate3].join(',');
             const results = await submitAvailabilityResponse({
                 appointmentId: doctorDetails.appointmentId,
-                dateAndTimeString: availabilityTimeResponse,
+                dateAndTimeString: joinedDateTimeString,
                 token: state.token
             });
 
             // // Caught an unexpected response
-            if (!('message' in results)) {
-                throw results;
-            };
+            if (!('message' in results)) throw results;
 
             // Appoinment has been booked
             const successResponseText = 'Appointment Response Updated Successful';
@@ -330,11 +371,18 @@ function Referralspage({ classes }) {
                 doctorDetails={doctorDetails}
 
                 // Input states
-                updateAvailabilityTimeResponse={updateAvailabilityTimeResponse}
+                appointmentDate1={appointmentDate1}
+                appointmentDate2={appointmentDate2}
+                appointmentDate3={appointmentDate3}
+                updateAppointmentDate1={updateAppointmentDate1}
+                updateAppointmentDate2={updateAppointmentDate2}
+                updateAppointmentDate3={updateAppointmentDate3}
                 handleAvailabilityResponseRequest={handleAvailabilityResponseRequest}
             
                 // Validation
-                validateAvailabilityTimeResponse={validateAvailabilityTimeResponse}
+                validateAppointmentDate1={validateAppointmentDate1}
+                validateAppointmentDate2={validateAppointmentDate2}
+                validateAppointmentDate3={validateAppointmentDate3}
             />
 
             {/* Dialog popup for accept/reject an appointment once the availability response has been sent back */}

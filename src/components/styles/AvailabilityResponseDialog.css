@@ -7,3 +7,25 @@
 #availabilityResponseDialog-appointmentDetailsContainer {
     margin: 20px 0 20px 0;
 }
+
+.availabilityResponseDialog-explanationText {
+    margin-top: 5px;
+    font-size: 15px;
+    color: #555555;
+}
+
+.availabilityResponseDialog-timeOptionContainer {
+    margin-bottom: 20px;
+}
+
+.availabilityResponseDialog-timeOptionLabel {
+    margin-right: 10px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.availabilityResponseDialog-requiredLabel {
+    margin-left: 5px;
+    font-size: 13px;
+    font-weight: bold;
+}

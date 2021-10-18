@@ -8,10 +8,13 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    TextField,
+    // TextField,
 } from '@material-ui/core';
+import DateTimePicker from 'react-datetime-picker';
+
 import { Person, Notes, AccessTime } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
+import moment from 'moment';
 
 // Material UI styles
 const useStyles = makeStyles((theme) => ({
@@ -41,12 +44,23 @@ function AvailabilityResponseDialog(props) {
         doctorDetails,
 
         // Input states
-        updateAvailabilityTimeResponse,
+        appointmentDate1,
+        appointmentDate2,
+        appointmentDate3,
+        updateAppointmentDate1,
+        updateAppointmentDate2,
+        updateAppointmentDate3,
         handleAvailabilityResponseRequest,
 
         // Validate states
-        validateAvailabilityTimeResponse,
+        validateAppointmentDate1,
+        validateAppointmentDate2,
+        validateAppointmentDate3,
     } = props;
+    
+    // This is used to prevent doctors from sending back appointment dates from today
+    // Doctor must select a date of at least tomorrow onward
+    const startOfTomorrow = moment().add(1, 'day').startOf('day').toDate();
 
     return (
         <Dialog
@@ -80,20 +94,75 @@ function AvailabilityResponseDialog(props) {
                 
                 {/* Appointment details */}
                 <div className='pageSubTitle'>Appointment details</div>
+                <div className='availabilityResponseDialog-explanationText'>Please recommend at least one appointment time to send back</div>
                 <section id='availabilityResponseDialog-appointmentDetailsContainer'>
-                    {/* Date and time string */}
-                    <TextField
-                        name='dateAndTimeString'
-                        label='Appointment time response'
-                        variant='outlined'
-                        classes={{ root: availabilityResponseDialogClasses.inputBottomMargin }}
-                        onChange={(event) => updateAvailabilityTimeResponse(event.target.value)}
-                        error={validateAvailabilityTimeResponse.hasError}
-                        fullWidth
-                    />
 
-                    {/* Explination text for the user */}
-                    <span>Please respond to whether you can do this appointment time or please recommend one</span>
+                    {/* Appointment time option 1 */}
+                    <div className='availabilityResponseDialog-timeOptionContainer'>
+                        <span
+                            className='availabilityResponseDialog-timeOptionLabel'
+                            style={validateAppointmentDate1.hasError ? { color: 'red' } : null }
+                        >Option 1</span>
+                        <DateTimePicker
+                            onChange={(newDateTime) => updateAppointmentDate1(newDateTime)}
+                            value={appointmentDate1}
+                            clearIcon={null}
+                            disableClock={true}
+                            minDate={startOfTomorrow}
+                            required={true}
+                            monthPlaceholder='MM'
+                            dayPlaceholder='DD'
+                            yearPlaceholder='YYYY'
+                            hourPlaceholder='HH'
+                            minutePlaceholder='MM'
+                        />
+                        <span
+                            className='availabilityResponseDialog-requiredLabel'
+                            style={validateAppointmentDate1.hasError ? { color: 'red' } : null }
+                        >* REQUIRED</span>
+                    </div>
+
+                    {/* Appointment time option 2 */}
+                    <div className='availabilityResponseDialog-timeOptionContainer'>
+                        <span
+                            className='availabilityResponseDialog-timeOptionLabel'
+                            style={validateAppointmentDate2.hasError ? { color: 'red' } : null }
+                        >Option 2</span>
+                        <DateTimePicker
+                            onChange={(newDateTime) => updateAppointmentDate2(newDateTime)}
+                            value={appointmentDate2}
+                            clearIcon={null}
+                            disableClock={true}
+                            minDate={startOfTomorrow}
+                            monthPlaceholder='MM'
+                            dayPlaceholder='DD'
+                            yearPlaceholder='YYYY'
+                            hourPlaceholder='HH'
+                            minutePlaceholder='MM'
+                        />
+                        <div className='errorMessage'>{ validateAppointmentDate2.errorMessage }</div>
+                    </div>
+
+                    {/* Appointment time option 3 */}
+                    <div className='availabilityResponseDialog-timeOptionContainer'>
+                        <span
+                            className='availabilityResponseDialog-timeOptionLabel'
+                            style={validateAppointmentDate3.hasError ? { color: 'red' } : null }
+                        >Option 3</span>
+                        <DateTimePicker
+                            onChange={(newDateTime) => updateAppointmentDate3(newDateTime)}
+                            value={appointmentDate3}
+                            clearIcon={null}
+                            disableClock={true}
+                            minDate={startOfTomorrow}
+                            monthPlaceholder='MM'
+                            dayPlaceholder='DD'
+                            yearPlaceholder='YYYY'
+                            hourPlaceholder='HH'
+                            minutePlaceholder='MM'
+                        />
+                        <div className='errorMessage'>{ validateAppointmentDate3.errorMessage }</div>
+                    </div>
                 </section>
             </DialogContent>
 
