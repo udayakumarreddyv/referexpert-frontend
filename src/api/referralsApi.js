@@ -68,7 +68,6 @@ exports.submitAppointment = async ({ appointmentFrom, appointmentTo, dateAndTime
     try {
         const url = 'referexpert/requestappointment';
         const body = { appointmentFrom, appointmentTo, dateAndTimeString, subject, reason };
-        console.log(body)
         const response = await fetch(url, {
             method: 'POST',
             headers: {
