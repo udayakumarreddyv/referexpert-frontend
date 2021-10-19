@@ -1,8 +1,5 @@
 import './styles/AvailabilityRequestDialog.css';
 
-// Date picker
-import "flatpickr/dist/themes/dark.css";
-
 // Material UI
 import {
     Button,
