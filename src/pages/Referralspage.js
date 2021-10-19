@@ -201,11 +201,10 @@ function Referralspage({ classes }) {
             updateLoadingAvailabilityResponse(true);
 
             // Format the suggested appointment times to look user friendly
-            const joinedDateTimeString = [
-                moment(appointmentDate1).format('MM/DD/YY hh:mm A'),
-                moment(appointmentDate2).format('MM/DD/YY hh:mm A'),
-                moment(appointmentDate3).format('MM/DD/YY hh:mm A'),
-            ].join(',');
+            // Remove any appointment dates that are null
+            const allAppointmentDates = [appointmentDate1, appointmentDate2, appointmentDate3];
+            let joinedDateTimeString = allAppointmentDates.filter((date) => date).map((date) => moment(date).format('MM/DD/YY hh:mm A'));
+            joinedDateTimeString = joinedDateTimeString.join(',');
 
             // Send request to api
             const results = await submitAvailabilityResponse({
