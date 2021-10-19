@@ -10,6 +10,11 @@ const Reducer = (state, action) => {
                 userDetails: action.payload.userDetails,
                 pendingTasks: action.payload.pendingTasks,
             };
+        case 'UPDATE_ACCESS_TOKEN':
+            return {
+                ...state,
+                token: action.payload.token,
+            };
         case 'UPDATE_USER':
             return {
                 ...state,
