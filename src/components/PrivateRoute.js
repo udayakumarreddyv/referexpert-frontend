@@ -36,7 +36,7 @@ const PrivateRoute = ({ component: Component, classes, ...rest }) => {
             const { accessToken, refreshToken, tokenType } = results;
             const newAccessCookie = { token: accessToken };
             CookieHelper.saveCookie('accessCookie', newAccessCookie);
-            await dispatch({ type: '', payload: newAccessCookie })
+            await dispatch({ type: 'UPDATE_ACCESS_TOKEN', payload: newAccessCookie })
         };
     });
 
