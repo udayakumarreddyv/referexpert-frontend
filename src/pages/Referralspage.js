@@ -298,10 +298,30 @@ function Referralspage({ classes }) {
     };
 
     // Launch fetch appointments, referrals, and notifications on load
-    useEffect(() => {
-        fetchPendingAvailabilityRequests({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityRequests });
-        fetchAvailabilityResponses({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityResponses });
-        fetchReferrals({ userEmail: state.userEmail, token: state.token, updateState: updateReferralsData }); // completed referrals from user to other doctors
+    useEffect(async () => {
+        try {
+            const availabilityRequestsData = await fetchPendingAvailabilityRequests({ userEmail: state.userEmail, token: state.token });
+            updateAvailabilityRequests(availabilityRequestsData);
+        } catch (err) {
+            console.log('Caught thy error')
+            updateAvailabilityRequests('error');
+        };
+
+        try {
+            const availabilityResponsesData = await fetchAvailabilityResponses({ userEmail: state.userEmail, token: state.token });
+            updateAvailabilityResponses(availabilityResponsesData);
+        } catch (err) {
+            console.log('Caught thy error')
+            updateAvailabilityResponses('error');
+        };
+
+        try {
+            const referralsData = await fetchReferrals({ userEmail: state.userEmail, token: state.token });
+            updateReferralsData(referralsData);
+        } catch (err) {
+            console.log('Caught thy error')
+            updateReferralsData('error');
+        };
     }, []);
 
     return (

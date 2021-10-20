@@ -1,51 +1,59 @@
+import { checkForBadResponse } from '../utils/apiHelpers';
+
 // Fetch pending availability responses for the user
-exports.fetchAvailabilityResponses = async ({ userEmail, token, updateState }) => {
+const fetchAvailabilityResponses = async ({ userEmail, token }) => {
     try {
         const url = `referexpert/myavailabilityresponses/${userEmail}`;
         const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` }});
-        const results = await response.json();
         
+        // Catch a failed response
+        checkForBadResponse({ status: response.status, functionName: 'fetchAvailabilityResponses' });
+
         // Filter out results that have already been responded to
         // This prevents the user from responding to the same request twice
-        const filteredResults = results.filter((item) => item.isAccepted !== 'Y');
-        updateState(filteredResults);
+        const results = await response.json();
+        return results.filter((item) => item.isAccepted !== 'Y');
     } catch (err) {
         throw err;
     };
 };
 
 // Fetch availability requests made by user
-exports.fetchPendingAvailabilityRequests = async ({ userEmail, token, updateState }) => {
+const fetchPendingAvailabilityRequests = async ({ userEmail, token }) => {
     try {
         const url = `referexpert/myavailabilityrequests/${userEmail}`;
         const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` }});
-        const results = await response.json();
         
+        // Catch a failed response
+        checkForBadResponse({ status: response.status, functionName: 'fetchPendingAvailabilityRequests' });
+
         // Filter out any requests where user has completed the appointment request
         // This prevents the user from requesting the same appointment twice
-        const filteredResults = results.filter((item) => item.isServed === '');
-        updateState(filteredResults);
+        const results = await response.json();
+        return results.filter((item) => item.isServed === '');
     } catch (err) {
         throw err;
     };
 };
 
 // Fetch referrals user had made
-exports.fetchReferrals = async ({ userEmail, token, updateState }) => {
+const fetchReferrals = async ({ userEmail, token }) => {
     try {
         const url = `referexpert/myreferrals/${userEmail}`;
         const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` }});
-        const results = await response.json();
         
+        // Catch a failed response
+        checkForBadResponse({ status: response.status, functionName: 'fetchReferrals' });
+
         // Update referrals state
-        updateState(results);
+        return await response.json();
     } catch (err) {
         throw err;
     };
 };
 
 // Submit a availability response from doctor B to doctor A
-exports.submitAvailabilityResponse = async ({ appointmentId, dateAndTimeString, token }) => {
+const submitAvailabilityResponse = async ({ appointmentId, dateAndTimeString, token }) => {
     try {
         const url = 'referexpert/availabilityresponse';
         const body = { appointmentId, dateAndTimeString };
@@ -57,6 +65,10 @@ exports.submitAvailabilityResponse = async ({ appointmentId, dateAndTimeString, 
             },
             body: JSON.stringify(body)
         });
+
+        // Catch a failed response
+        checkForBadResponse({ status: response.status, functionName: 'submitAvailabilityResponse' });
+
         return await response.json();
     } catch (err) {
         throw err;
@@ -64,7 +76,7 @@ exports.submitAvailabilityResponse = async ({ appointmentId, dateAndTimeString, 
 };
 
 // Schedule appointment via api request
-exports.submitAppointment = async ({ appointmentFrom, appointmentTo, dateAndTimeString, subject, reason, token }) => {
+const submitAppointment = async ({ appointmentFrom, appointmentTo, dateAndTimeString, subject, reason, token }) => {
     try {
         const url = 'referexpert/requestappointment';
         const body = { appointmentFrom, appointmentTo, dateAndTimeString, subject, reason };
@@ -76,9 +88,12 @@ exports.submitAppointment = async ({ appointmentFrom, appointmentTo, dateAndTime
             },
             body: JSON.stringify(body)
         });
-        const results = await response.json();
+
+        // Catch a failed response
+        checkForBadResponse({ status: response.status, functionName: 'submitAppointment' });
 
         // Validate appointment was scheduled sucessfully
+        const results = await response.json();
         const successResponseText = 'Appointment Request Successful';
         if (!('message' in results)) throw results;
         if (results.message !== successResponseText) throw results.message;
@@ -88,7 +103,7 @@ exports.submitAppointment = async ({ appointmentFrom, appointmentTo, dateAndTime
 };
 
 // Finalize availability response api
-exports.submitFinalizeAvailabilityResponse = async ({ appointmentId, token }) => {
+const submitFinalizeAvailabilityResponse = async ({ appointmentId, token }) => {
     try {
         const url = 'referexpert/finalizeavailability';
         const body = { appointmentId };
@@ -100,9 +115,12 @@ exports.submitFinalizeAvailabilityResponse = async ({ appointmentId, token }) =>
             },
             body: JSON.stringify(body)
         });
-        const results = await response.json();
+
+        // Catch a failed response
+        checkForBadResponse({ status: response.status, functionName: 'submitFinalizeAvailabilityResponse' });
 
         // Validate availability response was finalized sucessfully
+        const results = await response.json();
         const successResponseText = 'Updated Successfully';
         if (!('message' in results)) throw results;
         if (results.message !== successResponseText) throw results.message;
@@ -112,7 +130,7 @@ exports.submitFinalizeAvailabilityResponse = async ({ appointmentId, token }) =>
 };
 
 // Reject availability response api
-exports.submitRejectAvailabilityResponse = async ({ appointmentId, token }) => {
+const submitRejectAvailabilityResponse = async ({ appointmentId, token }) => {
     try {
         const url = 'referexpert/rejectavailability';
         const body = { appointmentId };
@@ -124,13 +142,26 @@ exports.submitRejectAvailabilityResponse = async ({ appointmentId, token }) => {
             },
             body: JSON.stringify(body)
         });
-        const results = await response.json();
+
+        // Catch a failed response
+        checkForBadResponse({ status: response.status, functionName: 'submitRejectAvailabilityResponse' });
 
         // Validate availability response was rejected sucessfully
+        const results = await response.json();
         const successResponseText = 'Updated Successfully';
         if (!('message' in results)) throw results;
         if (results.message !== successResponseText) throw results.message;
     } catch (err) {
         throw err;
     };
+};
+
+export {
+    fetchAvailabilityResponses,
+    fetchPendingAvailabilityRequests,
+    fetchReferrals,
+    submitAvailabilityResponse,
+    submitAppointment,
+    submitFinalizeAvailabilityResponse,
+    submitRejectAvailabilityResponse
 };
