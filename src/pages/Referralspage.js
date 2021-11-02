@@ -21,6 +21,7 @@ import {
     submitFinalizeAvailabilityResponse,
     submitRejectAvailabilityResponse,
 } from '../api/referralsApi';
+import { useInterval } from '../api/polling';
 
 // Page navigation
 import { Link } from 'react-router-dom';
@@ -303,7 +304,6 @@ function Referralspage({ classes }) {
             const availabilityRequestsData = await fetchPendingAvailabilityRequests({ userEmail: state.userEmail, token: state.token });
             updateAvailabilityRequests(availabilityRequestsData);
         } catch (err) {
-            console.log('Caught thy error')
             updateAvailabilityRequests('error');
         };
 
@@ -311,7 +311,6 @@ function Referralspage({ classes }) {
             const availabilityResponsesData = await fetchAvailabilityResponses({ userEmail: state.userEmail, token: state.token });
             updateAvailabilityResponses(availabilityResponsesData);
         } catch (err) {
-            console.log('Caught thy error')
             updateAvailabilityResponses('error');
         };
 
@@ -319,10 +318,33 @@ function Referralspage({ classes }) {
             const referralsData = await fetchReferrals({ userEmail: state.userEmail, token: state.token });
             updateReferralsData(referralsData);
         } catch (err) {
-            console.log('Caught thy error')
             updateReferralsData('error');
         };
     }, []);
+
+    // Poll api endpoints every 15 seconds
+    useInterval(async () => {
+        try {
+            const availabilityRequestsData = await fetchPendingAvailabilityRequests({ userEmail: state.userEmail, token: state.token });
+            updateAvailabilityRequests(availabilityRequestsData);
+        } catch (err) {
+            updateAvailabilityRequests('error');
+        };
+
+        try {
+            const availabilityResponsesData = await fetchAvailabilityResponses({ userEmail: state.userEmail, token: state.token });
+            updateAvailabilityResponses(availabilityResponsesData);
+        } catch (err) {
+            updateAvailabilityResponses('error');
+        };
+
+        try {
+            const referralsData = await fetchReferrals({ userEmail: state.userEmail, token: state.token });
+            updateReferralsData(referralsData);
+        } catch (err) {
+            updateReferralsData('error');
+        };
+    }, [15000]);
 
     return (
         <section id='referralspage-body'>
