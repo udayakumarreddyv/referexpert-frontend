@@ -14,6 +14,8 @@ import NotificationMethodsDialog from '../components/NotificationMethodsDialog';
 // Apis
 import { refreshPendingTasks } from '../api/pendingTasksApi';
 import { fetchAppointments, updatePendingAppointment, completeAppointment } from '../api/appointmentsApi';
+import { fetchNotifications } from '../api/notificationsApi';
+import { useInterval } from '../api/polling';
 
 // Utils
 import { separateAppointments } from '../utils/appointmentsHelpers';
@@ -121,31 +123,19 @@ function Userpage({ classes }) {
         };
     };
 
-    // Fetch notification methods
-    // This will let us know if we need to popup a modal to the user for them to add them
-    const fetchNotifications = async () => {
+    // Handle the fetching of notification methods
+    // This lets us know if we need to pop up a modal to prompt user for them to add some
+    const handleFetchNoticationMethods = async () => {
         try {
-            const url = 'referexpert/notification';
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` } });
-            
-            // Catch errors
-            if (response.status !== 200) throw response;
-
-            const results = await response.json();
-
-            // User has not added there notification methods yet
-            // We know this by the empty object that is passed
-            const isEmptyObject = Object.keys(results).length === 0;
-            if (isEmptyObject) {
+            const { results, needToOpenModal } = await fetchNotifications({ token: state.token });
+            if (needToOpenModal) {
                 updateDialogNotificationMethodsOpen(true);
-                console.log('user needs to add notification methods');
                 return;
             };
-
             updateNotificationMethodsData(results);
         } catch (err) {
-            updateNotificationMethodsData('error');
             console.log(err);
+            updateNotificationMethodsData('error');
         };
     };
 
@@ -205,8 +195,13 @@ function Userpage({ classes }) {
     // Launch fetch appointments, referrals, and notifications on load
     useEffect(() => {
         handleFetchAppointments();
-        fetchNotifications();
+        handleFetchNoticationMethods();
     }, []);
+
+    // Poll api endpoints every 15 seconds
+    useInterval(async () => {
+        handleFetchAppointments();
+    }, [15000]);
 
     return (
         <section id='userpage-body'>
