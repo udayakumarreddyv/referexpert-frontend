@@ -1,6 +1,6 @@
 // Fetch notification methods
 // This will let us know if we need to popup a modal to the user for them to add them
-exports.fetchNotifications = async ({ token }) => {
+const fetchNotifications = async ({ token }) => {
     try {
         const url = 'referexpert/notification';
         const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -23,3 +23,7 @@ exports.fetchNotifications = async ({ token }) => {
         throw err;
     };
 };
+
+export {
+    fetchNotifications
+}

@@ -1,6 +1,6 @@
 // Get the pending tasks that the user needs to attend to
 // This is called on login
-exports.fetchPendingTasks = async (token) => {
+const fetchPendingTasks = async (token) => {
     try {
         const url = 'referexpert/pendingtasks';
         const response = await fetch(url, {
@@ -17,7 +17,7 @@ exports.fetchPendingTasks = async (token) => {
 
 // Get the NEW pending tasks that the user needs to attend to
 // This is used when we want to update the pendingTasks on the fly
-exports.refreshPendingTasks = async ({ token, dispatch }) => {
+const refreshPendingTasks = async ({ token, dispatch }) => {
     try {
         const url = 'referexpert/pendingtasks';
         const response = await fetch(url, {
@@ -34,3 +34,8 @@ exports.refreshPendingTasks = async ({ token, dispatch }) => {
         console.log(err);
     };
 };
+
+export {
+    fetchPendingTasks,
+    refreshPendingTasks
+}

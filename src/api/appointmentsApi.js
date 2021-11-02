@@ -1,5 +1,5 @@
 // Fetch all appointments for user: open, pending
-exports.fetchAppointments = async ({ userEmail, token }) => {
+const fetchAppointments = async ({ userEmail, token }) => {
     try {
         const url = `/referexpert/myappointments/${userEmail}`;
         const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` }});
@@ -11,7 +11,7 @@ exports.fetchAppointments = async ({ userEmail, token }) => {
 };
 
 // Update the pending appointment status to accept or reject
-exports.updatePendingAppointment = async ({ action, appointmentId, token }) => {
+const updatePendingAppointment = async ({ action, appointmentId, token }) => {
     try {
         // Url changes depending on accept or reject
         let url;
@@ -44,7 +44,7 @@ exports.updatePendingAppointment = async ({ action, appointmentId, token }) => {
 };
 
 // Update an appointment to completed status
-exports.completeAppointment = async ({ appointmentId, token }) => {
+const completeAppointment = async ({ appointmentId, token }) => {
     try {
         const url = `referexpert/finalizeappointment`;
         const response = await fetch(url, {
@@ -65,3 +65,9 @@ exports.completeAppointment = async ({ appointmentId, token }) => {
         throw err;
     };
 };
+
+export {
+    fetchAppointments,
+    updatePendingAppointment,
+    completeAppointment
+}

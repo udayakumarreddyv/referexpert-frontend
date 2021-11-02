@@ -1,4 +1,4 @@
-exports.loginUser = async ({ email, password }) => {
+const loginUser = async ({ email, password }) => {
     try {
         const url = '/referexpert/validateuser';
         const response = await fetch(url, {
@@ -26,7 +26,7 @@ exports.loginUser = async ({ email, password }) => {
 };
 
 // Get user info
-exports.getUserInfo = async ({ token }) => {
+const getUserInfo = async ({ token }) => {
     try {
         const url = `/referexpert/userdetails`;
         const response = await fetch(url, {
@@ -43,7 +43,7 @@ exports.getUserInfo = async ({ token }) => {
 };
 
 // Reset a user's password
-exports.resetPassword = async ({ email }) => {
+const resetPassword = async ({ email }) => {
     try {
         const url = '/referexpert/resetnotification';
         const response = await fetch(url, {
@@ -61,3 +61,9 @@ exports.resetPassword = async ({ email }) => {
         throw err;
     };
 };
+
+export {
+    loginUser,
+    getUserInfo,
+    resetPassword
+}
