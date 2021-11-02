@@ -36,6 +36,48 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+// Check if we should show badge on account button
+// This notifies the user that they have a pending task to attend to
+const checkPendingActions = ({ state }) => {
+    let hasPendingTask = false;
+    let pendingAppointment = false;
+    let currentAppointment = false;
+    let pendingAvailabilityRequest = false;
+    let pendingAvailabilityResponse = false;
+
+    // Check if pending appointment
+    if (state.pendingTasks.pendingAppointment === 'Y') {
+        hasPendingTask = true;
+        pendingAppointment = true;
+    };
+
+    // Check if current appointment
+    if (state.pendingTasks.currentAppointment === 'Y') {
+        hasPendingTask = true;
+        currentAppointment = true;
+    };
+
+    // Check if pending availabilityRequest
+    if (state.pendingTasks.pendingAvailabilityRequest === 'Y') {
+        hasPendingTask = true;
+        pendingAvailabilityRequest = true;
+    };
+
+    // Check if pending availability
+    if (state.pendingTasks.pendingAvailabilityResponse === 'Y') {
+        hasPendingTask = true;
+        pendingAvailabilityResponse = true;
+    };
+
+    return {
+        hasPendingTask,
+        pendingAppointment,
+        currentAppointment,
+        pendingAvailabilityRequest,
+        pendingAvailabilityResponse
+    };
+};
+
 function Header({ classes }) {
     const headerClasses = useStyles();
     const [state, dispatch] = useContext(Context);
@@ -88,36 +130,13 @@ function Header({ classes }) {
     // Check if we should show badge on account button
     // This notifies the user that they have a pending task to attend to
     useEffect(() => {
-        let hasPendingTask = false;
-        let pendingAppointment = false;
-        let currentAppointment = false;
-        let pendingAvailabilityRequest = false;
-        let pendingAvailabilityResponse = false;
-
-        // Check if pending appointment
-        if (state.pendingTasks.pendingAppointment === 'Y') {
-            hasPendingTask = true;
-            pendingAppointment = true;
-        };
-
-        // Check if current appointment
-        if (state.pendingTasks.currentAppointment === 'Y') {
-            hasPendingTask = true;
-            currentAppointment = true;
-        };
-
-        // Check if pending availabilityRequest
-        if (state.pendingTasks.pendingAvailabilityRequest === 'Y') {
-            hasPendingTask = true;
-            pendingAvailabilityRequest = true;
-        };
-
-        // Check if pending availability
-        if (state.pendingTasks.pendingAvailabilityResponse === 'Y') {
-            hasPendingTask = true;
-            pendingAvailabilityResponse = true;
-        };
-
+        const {
+            hasPendingTask,
+            pendingAppointment,
+            currentAppointment,
+            pendingAvailabilityRequest,
+            pendingAvailabilityResponse
+        } = checkPendingActions({ state });
         updatePendingTasksInfo({ hasPendingTask, pendingAppointment, currentAppointment, pendingAvailabilityRequest, pendingAvailabilityResponse });
     }, [state.pendingTasks]);
 
