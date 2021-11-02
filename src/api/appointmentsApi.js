@@ -3,6 +3,7 @@ exports.fetchAppointments = async ({ userEmail, token }) => {
     try {
         const url = `/referexpert/myappointments/${userEmail}`;
         const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` }});
+        if (response.status !== 200) throw new Error('Failed to fetch appointments data');
         return await response.json();
     } catch (err) {
         throw err;

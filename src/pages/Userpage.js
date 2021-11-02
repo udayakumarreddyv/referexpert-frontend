@@ -117,9 +117,11 @@ function Userpage({ classes }) {
             // Update appointments states
             updatePendingAppointments(pendingList);
             updateOpenAppointments(openList);
-            updateCompleteAppointments(completedList);      
+            updateCompleteAppointments(completedList);
         } catch (err) {
-            console.log(err);
+            updatePendingAppointments('error');
+            updateOpenAppointments('error');
+            updateCompleteAppointments('error');
         };
     };
 

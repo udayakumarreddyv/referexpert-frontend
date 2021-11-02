@@ -113,13 +113,28 @@ function PendingAppointments(props) {
         });
     };
 
-    // Appointments data has not loaded yet
+    // Create table rows based on state of data received
+    let tableRows;
     if (!appointmentsData) {
-        return <CircularProgress size={40} />;
+        tableRows = (
+            <TableRow key={0}>
+                <TableCell colSpan={numTableCols} >
+                    <CircularProgress size={40} />
+                </TableCell>
+            </TableRow>
+        );
+        
+    } else if (appointmentsData === 'error') {
+        tableRows = (
+            <TableRow key={0}>
+                <TableCell colSpan={numTableCols} >
+                    <div className='noResults errorMessage'>Sorry, this request failed. Please try again later.</div>
+                </TableCell>
+            </TableRow>
+        );
+    } else {
+        tableRows = createTableRows(appointmentsData);
     };
-
-    // Create pending appointment table rows
-    const tableRows = createTableRows(appointmentsData);
 
     return (
         <TableContainer component={Paper}>
@@ -145,7 +160,7 @@ function PendingAppointments(props) {
                         <TablePagination
                             rowsPerPageOptions={[10, 25, 50]}
                             colSpan={numTableCols}
-                            count={appointmentsData.length}
+                            count={appointmentsData && Array.isArray(appointmentsData) ? appointmentsData.length : 0}
                             rowsPerPage={rowsPerPage}
                             page={page}
                             onChangePage={handleChangePage}
