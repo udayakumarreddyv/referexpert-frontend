@@ -95,13 +95,20 @@ function AvailabilityTable ({
             // Determine what row type to create and then generate the row
             let tableRow;
             if (availabilityType === 'request') {
-                const availabilityResponseDateTimes = dateAndTimeString.split(',').map((dateTime) => moment(dateTime).format('MM/DD/YY hh:mm A'));
+                let availabilityResponseDateTimes;
+                if (dateAndTimeString === "") {
+                    availabilityResponseDateTimes = 'N/A';
+                } else {
+                    availabilityResponseDateTimes = dateAndTimeString.split(',').map((dateTime) => moment(dateTime).format('MM/DD/YY hh:mm A'));
+                    availabilityResponseDateTimes = availabilityResponseDateTimes.join(', ');
+                };
+
                 tableRow = (
                     <TableRow key={appointmentId}>
                         <TableCell>{ toFirstName } { toLastName }</TableCell>
                         <TableCell>{ reason }</TableCell>
                         <TableCell>{ subject }</TableCell>
-                        <TableCell>{ availabilityResponseDateTimes.join(', ') }</TableCell>
+                        <TableCell>{ availabilityResponseDateTimes }</TableCell>
                         <TableCell>
                             {
                                 isAccepted === 'Y'

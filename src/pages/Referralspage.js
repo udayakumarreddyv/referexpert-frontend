@@ -227,7 +227,8 @@ function Referralspage({ classes }) {
                 updateAlertDetails({ type: 'success', message: `Availability response has been sent!` });
                 updateAlertOpen(true);
                 handleCloseAvailabilityResponseDialog();
-                fetchAvailabilityResponses({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityResponses });
+                const availabilityResponsesData = await fetchAvailabilityResponses({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityResponses });
+                updateAvailabilityResponses(availabilityResponsesData);
                 refreshPendingTasks({ token: state.token, dispatch });
             } else {
                 throw results;
@@ -283,8 +284,10 @@ function Referralspage({ classes }) {
             // Refresh availability requests table to remove this completed request
             updateAlertOpen(true);
             handleCloseConfirmResponseDialog();
-            fetchPendingAvailabilityRequests({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityRequests });
-            fetchReferrals({ userEmail: state.userEmail, token: state.token, updateState: updateReferralsData });
+            const availabilityRequestsData = await fetchPendingAvailabilityRequests({ userEmail: state.userEmail, token: state.token, updateState: updateAvailabilityRequests });
+            const referralsData = await fetchReferrals({ userEmail: state.userEmail, token: state.token, updateState: updateReferralsData });
+            updateAvailabilityRequests(availabilityRequestsData);
+            updateReferralsData(referralsData);
             refreshPendingTasks({ token: state.token, dispatch });
             updateLoadingConfirmResponse(false);
         } catch (err) {
