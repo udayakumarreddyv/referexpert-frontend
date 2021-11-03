@@ -150,7 +150,7 @@ function Userpage({ classes }) {
 
             // Show success alert
             const actionText = action === 'accept' ? 'accepted' : 'rejected';
-            updateAlertDetails({ type: 'info', message: `Appointment has been ${actionText}` });
+            updateAlertDetails({ type: 'success', message: `Appointment has been ${actionText}` });
             updateAlertOpen(true);
 
             // Close dialog
@@ -176,7 +176,7 @@ function Userpage({ classes }) {
             await completeAppointment({ appointmentId, token: state.token });
     
             // Show success alert
-            updateAlertDetails({ type: 'info', message: `Appointment has been marked as completed!` });
+            updateAlertDetails({ type: 'success', message: `Appointment has been marked as completed!` });
             updateAlertOpen(true);
 
             // Refresh appointments list from api
