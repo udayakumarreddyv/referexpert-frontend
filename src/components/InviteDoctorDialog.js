@@ -88,6 +88,8 @@ function InviteDoctorDialog(props) {
                 // Close dialog, clear errors
                 handleInviteDoctorDialogClose();
                 updateInviteDoctorSubmitError({ hasError: false, errorMessage: '' });
+            } else if (results.message === 'User already referred or registered') {
+                updateInviteDoctorSubmitError({ hasError: true, errorMessage: 'This email address has already been referred by another user' });
             } else {
                 throw results.message;
             };
