@@ -41,11 +41,17 @@ function AvailabilityRequestDialog(props) {
         doctorDetails,
 
         // Input states
+        updatePatientName,
+        updatePatientEmail,
+        updatePatientPhone,
         updateSubjectLine,
         updateRequestedAppointmentTimes,
         handleScheduleAppointment,
 
         // Validation states
+        validatePatientName,
+        validatePatientEmail,
+        validatePatientPhone,
         validateSubjectLine,
         validateRequestedAppointmentTimes,
     } = props;
@@ -85,6 +91,54 @@ function AvailabilityRequestDialog(props) {
                         <Home classes={{ root: availabilityRequestDialogClasses.doctorDetailsIcon }} />
                         { doctorDetails.address }
                     </div>
+                </section>
+
+                {/* Patient details */}
+                <div className='pageSubTitle'>Patient details</div>
+                <section id='availabilityRequestDialog-appointmentDetailsContainer'>
+
+                    {/* Name */}
+                    <TextField
+                        name='patientName'
+                        label='Name'
+                        variant='outlined'
+                        classes={{ root: availabilityRequestDialogClasses.inputBottomMargin }}
+                        onChange={(event) => updatePatientName(event.target.value)}
+                        error={validatePatientName.hasError}
+                        fullWidth
+                    />
+
+                    {/* Contact section */}
+                    {/* <section> is used for display: flex */}
+                    <section
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between'
+                        }}
+                    >
+                        {/* Email */}
+                        <TextField
+                            name='patientEmail'
+                            label='Contact Email'
+                            variant='outlined'
+                            classes={{ root: availabilityRequestDialogClasses.inputBottomMargin }}
+                            onChange={(event) => updatePatientEmail(event.target.value)}
+                            error={validatePatientEmail.hasError}
+                            helperText={validatePatientEmail.errorMessage}
+                        />
+
+                        {/* Phone */}
+                        <TextField
+                            name='patientPhone'
+                            label='Phone number'
+                            variant='outlined'
+                            classes={{ root: availabilityRequestDialogClasses.inputBottomMargin }}
+                            onChange={(event) => updatePatientPhone(event.target.value)}
+                            error={validatePatientPhone.hasError}
+                            helperText={validatePatientPhone.errorMessage}
+                        />
+                    </section>
+
                 </section>
                 
                 {/* Appointment details */}

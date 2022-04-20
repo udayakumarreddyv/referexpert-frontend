@@ -4,12 +4,12 @@ import './styles/ReferPatientpage.css';
 // Global store
 import { Context } from '../store/GlobalStore';
 
-// Time parsing
-import * as moment from 'moment';
-
 // Components
 import DoctorsTable from "../components/DoctorsTable";
 import AvailabilityRequestDialog from '../components/AvailabilityRequestDialog';
+
+// Random packages
+import EmailValidator from 'email-validator'; // validate emails
 
 // Material UI
 import {
@@ -83,10 +83,16 @@ function ReferPatientpage({ classes }) {
     });
     
     // Input states
+    const [patientName, updatePatientName] = useState('');
+    const [patientEmail, updatePatientEmail] = useState('');
+    const [patientPhone, updatePatientPhone] = useState('');
     const [subjectLine, updateSubjectLine] = useState('');
     const [requestedAppointmentTimes, updateRequestedAppointmentTimes] = useState('');
     
     // Validate states
+    const [validatePatientName, updateValidatePatientName] = useState({ hasError: false, errorMessage: '' });
+    const [validatePatientEmail, updateValidatePatientEmail] = useState({ hasError: false, errorMessage: '' });
+    const [validatePatientPhone, updateValidatePatientPhone] = useState({ hasError: false, errorMessage: '' });
     const [validateSubjectLine, updateValidateSubjectLine] = useState({ hasError: false, errorMessage: '' });
     const [validateRequestedAppointmentTimes, updateValidateRequestedAppointmentTimes] = useState({ hasError: false, errorMessage: '' });
 
@@ -142,12 +148,15 @@ function ReferPatientpage({ classes }) {
     };
 
     // Submit appointment to api
-    const submitAppointmentApi = async (appointmentFrom, appointmentTo, subjectLine, requestedAppointmentTimes) => {        
+    const submitAppointmentApi = async (appointmentFrom, appointmentTo, patientName, patientEmail, patientPhone, subjectLine, requestedAppointmentTimes) => {        
         try {
             const url = 'referexpert/availabilityrequest'
             const body = {
                 appointmentFrom,
                 appointmentTo,
+                patientName,
+                patientEmail,
+                patientPhone,
                 subject: subjectLine,
                 reason: requestedAppointmentTimes,
             };
@@ -207,9 +216,34 @@ function ReferPatientpage({ classes }) {
     const handleScheduleAppointment = async () => {
 
         // Clear any previous validation errors
+        updateValidatePatientName({ hasError: false, errorMessage: '' });
+        updateValidatePatientEmail({ hasError: false, errorMessage: '' });
+        updateValidatePatientPhone({ hasError: false, errorMessage: '' });
         updateValidateSubjectLine({ hasError: false, errorMessage: '' });
         updateValidateRequestedAppointmentTimes({ hasError: false, errorMessage: '' });
         let validateError = false;
+
+        // Validate patient name
+        if (patientName.trim() === '') {
+            updateValidatePatientName({ hasError: true, errorMessage: '' });
+            validateError = true;
+        };
+
+        // Validate patient email
+        if (patientEmail.trim() === '') {
+            updateValidatePatientEmail({ hasError: true, errorMessage: '' });
+            validateError = true;
+        } else if (!EmailValidator.validate(patientEmail)) {
+            updateValidatePatientEmail({ hasError: true, errorMessage: 'Invalid format for email address' });
+        };
+
+        // Validate patient phone
+        if (patientPhone.trim() === '') {
+            updateValidatePatientPhone({ hasError: true, errorMessage: '' });
+            validateError = true;
+        } else if (patientPhone.length !== 11) {
+            updateValidatePatientPhone({ hasError: true, errorMessage: 'Please enter a valid phone number' });
+        };
 
         // Validate subject line input
         if (subjectLine.trim() === '') {
@@ -234,7 +268,15 @@ function ReferPatientpage({ classes }) {
             updateLoadingScheduleAppointment(true);
 
             // Send request to api
-            const results = await submitAppointmentApi(state.userEmail, doctorDetails.email, subjectLine, requestedAppointmentTimes);
+            const results = await submitAppointmentApi(
+                state.userEmail,
+                doctorDetails.email,
+                patientName,
+                patientEmail,
+                patientPhone,
+                subjectLine,
+                requestedAppointmentTimes
+            );
 
             // Caught an unexpected response
             if (!('message' in results)) {
@@ -290,11 +332,17 @@ function ReferPatientpage({ classes }) {
         });
         
         // Clear appointment input states
+        updatePatientName('');
+        updatePatientEmail('');
+        updatePatientPhone('');
         updateSubjectLine('');
         updateRequestedAppointmentTimes('');
 
         // Clear appointment input validation states
-        updateSubjectLine({ hasError: false, errorMessage: '' });
+        updateValidatePatientName({ hasError: false, errorMessage: '' });
+        updateValidatePatientEmail({ hasError: false, errorMessage: '' });
+        updateValidatePatientPhone({ hasError: false, errorMessage: '' });
+        updateValidateSubjectLine({ hasError: false, errorMessage: '' });
         updateValidateRequestedAppointmentTimes({ hasError: false, errorMessage: '' });
         
         // Hide dialog
@@ -421,11 +469,17 @@ function ReferPatientpage({ classes }) {
                 doctorDetails={doctorDetails}
 
                 // Input states
+                updatePatientName={updatePatientName}
+                updatePatientEmail={updatePatientEmail}
+                updatePatientPhone={updatePatientPhone}
                 updateSubjectLine={updateSubjectLine}
                 updateRequestedAppointmentTimes={updateRequestedAppointmentTimes}
                 handleScheduleAppointment={handleScheduleAppointment}
 
                 // Validation states
+                validatePatientName={validatePatientName}
+                validatePatientEmail={validatePatientEmail}
+                validatePatientPhone={validatePatientPhone}
                 validateSubjectLine={validateSubjectLine}
                 validateRequestedAppointmentTimes={validateRequestedAppointmentTimes}
             />
