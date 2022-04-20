@@ -52,6 +52,7 @@ function DoctorsTable(props) {
                 userId,
                 email,
                 phone,
+                officeName,
                 firstName,
                 lastName,
                 userType,
@@ -68,6 +69,7 @@ function DoctorsTable(props) {
             // Format 
             return (
                 <TableRow key={userId}>
+                    <TableCell>{ officeName }</TableCell>
                     <TableCell>{ firstName } { lastName }</TableCell>
                     <TableCell>{ userType }</TableCell>
                     <TableCell>{ userSpeciality }</TableCell>
@@ -134,6 +136,7 @@ function DoctorsTable(props) {
                 {/* Table header */}
                 <TableHead className='tableHeader'>
                     <TableRow>
+                        <TableCell>Office</TableCell>
                         <TableCell>Name</TableCell>
                         <TableCell>Type</TableCell>
                         <TableCell>Speciality</TableCell>
