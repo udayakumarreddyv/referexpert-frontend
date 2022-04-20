@@ -59,7 +59,7 @@ function ReferPatientpage({ classes }) {
     const [currentLocation, updateCurrentLocation] = useState({ latitude: null, longitude: null });
     const [currentLocationError, updateCurrentLocationError] = useState(null);
     const [distanceType, updateDistanceType] = useState('currentLocation');
-    const [distanceAmount, updateDistanceAmount] = useState('15');
+    const [distanceAmount, updateDistanceAmount] = useState('10');
     const [searchType, updateSearchType] = useState('speciality');
     const [searchValue, updateSearchValue] = useState('');
     const [searchValueError, updateSearchValueError] = useState({ hasError: false, errorMessage: '' });
@@ -366,10 +366,12 @@ function ReferPatientpage({ classes }) {
                         value={distanceAmount}
                         onChange={(event) => updateDistanceAmount(event.target.value)}
                     >
-                        <MenuItem value='15'>15</MenuItem>
-                        <MenuItem value='30'>30</MenuItem>
-                        <MenuItem value='45'>45</MenuItem>
-                        <MenuItem value='60'>60</MenuItem>
+                        <MenuItem value='10'>10</MenuItem>
+                        <MenuItem value='20'>20</MenuItem>
+                        <MenuItem value='50'>50</MenuItem>
+                        <MenuItem value='100'>100</MenuItem>
+                        <MenuItem value='150'>150</MenuItem>
+                        <MenuItem value='200'>200</MenuItem>
                     </Select>
                 </FormControl>
 
