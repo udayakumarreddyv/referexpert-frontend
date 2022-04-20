@@ -291,7 +291,7 @@ function Header({ classes }) {
         <section id='headerBody'>
             {/* Logo */}
             <div id='headerLogoContainer'>
-                <Link to={logoRoute} id='headerLogo'>ReferExpert</Link>
+                <Link to={logoRoute} id='headerLogo'>Cephalad</Link>
             </div>
             
             {/* Show view based on if user is logged in or not */}
