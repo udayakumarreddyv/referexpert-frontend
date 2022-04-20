@@ -270,10 +270,10 @@ function ReferPatientpage({ classes }) {
     };
 
     // Handle opening of scheduling dialog
-    const handleOpenScheduleDialog = (id, email, name, type, specialty, address) => {
+    const handleOpenScheduleDialog = (id, email, officeName, name, type, specialty, address) => {
         
         // Update doctor states, open dialog
-        updateDoctorDetails({ id, email, name, type, specialty, address });
+        updateDoctorDetails({ id, email, officeName, name, type, specialty, address });
         updateShowScheduleView(true);
     };
 
