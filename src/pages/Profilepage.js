@@ -79,6 +79,7 @@ function Profilepage({ classes }) {
 
     // Edit states
     const [showEdit, updateShowEdit] = useState(false);
+    const [officeName, updateOfficeName] = useState(state.userDetails.officeName);
     const [firstName, updateFirstName] = useState(state.userDetails.firstName);
     const [lastName, updateLastName] = useState(state.userDetails.lastName);
     const [address, updateAddress] = useState(state.userDetails.address);
@@ -139,6 +140,7 @@ function Profilepage({ classes }) {
             // Send request to api
             const url = '/referexpert/userprofile';
             const newUserDetails = {
+                officeName,
                 firstName,
                 lastName,
                 userType,
@@ -345,6 +347,29 @@ function Profilepage({ classes }) {
                             <Email className='primaryColor' />
                         </ListItemIcon>
                         <ListItemText>{state.userDetails.email}</ListItemText>
+                    </ListItem>
+
+                    {/* Office name */}
+                    <ListItem>
+                        <ListItemIcon>
+                            <AccountCircle className='primaryColor' />
+                        </ListItemIcon>
+                        <ListItemText>
+                            {
+                                showEdit
+                                ? <Fragment>
+                                    <TextField
+                                        name='officeName'
+                                        label='Office name'
+                                        variant='outlined'
+                                        value={officeName}
+                                        onChange={(event) => updateOfficeName(event.target.value)}
+                                        style={{ marginRight: '10px', marginBottom: '15px' }}
+                                    />
+                                </Fragment>
+                                : `${state.userDetails.officeName}`
+                            }
+                        </ListItemText>
                     </ListItem>
 
                     {/* Name */}
