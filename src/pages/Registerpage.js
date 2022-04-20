@@ -67,6 +67,7 @@ function Registerpage({ classes }) {
     const [userSpecialtiesOptions, updateUserSpecialtiesOptions] = useState([]);
 
     // Input states
+    const [officeName, updateOfficeName] = useState('');
     const [firstName, updateFirstName] = useState('');
     const [lastName, updateLastName] = useState('');
     const [email, updateEmail] = useState('');
@@ -85,6 +86,7 @@ function Registerpage({ classes }) {
     const [referralCode, updateReferralCode] = useState('');
 
     // Validate states
+    const [validateOfficeName, updateValidateOfficeName] = useState({ hasError: false, errorMessage: '' });
     const [validateFirstName, updateValidateFirstName] = useState({ hasError: false, errorMessage: '' });
     const [validateLastName, updateValidateLastName] = useState({ hasError: false, errorMessage: '' });
     const [validateEmail, updateValidateEmail] = useState({ hasError: false, errorMessage: '' });
@@ -129,6 +131,7 @@ function Registerpage({ classes }) {
 
     // Validate inputs
     const validateInputs = () => {
+        let tempOfficeName = { hasError: false, errorMessage: '' };
         let tempFirstName = { hasError: false, errorMessage: '' };
         let tempLastName = { hasError: false, errorMessage: '' };
         let tempEmail = { hasError: false, errorMessage: '' };
@@ -145,6 +148,11 @@ function Registerpage({ classes }) {
         let tempInsurance = { hasError: false, errorMessage: '' };
         let tempTerms = { hasError: false, errorMessage: '' };
         let tempReferralCode = { hasError: false, errorMessage: '' };
+
+        // Office name
+        if (officeName.trim() === '') {
+            tempOfficeName = { hasError: true, errorMessage: '' };
+        };
 
         // First name check
         if (firstName.trim() === '') {
@@ -254,7 +262,7 @@ function Registerpage({ classes }) {
         };
 
         return {
-            tempFirstName, tempLastName, tempEmail,
+            tempOfficeName, tempFirstName, tempLastName, tempEmail,
             tempPassword, tempAddress, tempCity, 
             tempLocationState, tempZipcode,
             tempPhone, tempFax,
@@ -265,13 +273,14 @@ function Registerpage({ classes }) {
 
     // Update error states
     const handleErrorStates = (
-        tempFirstName, tempLastName, tempEmail,
+        tempOfficeName, tempFirstName, tempLastName, tempEmail,
         tempPassword, tempAddress, tempCity,
         tempLocationState, tempZipcode,
         tempPhone, tempFax,
         tempType, tempSpecialty, tempService,
         tempInsurance, tempTerms, tempReferralCode
     ) => {
+        updateValidateOfficeName(tempOfficeName);
         updateValidateFirstName(tempFirstName);
         updateValidateLastName(tempLastName);
         updateValidateEmail(tempEmail);
@@ -301,7 +310,7 @@ function Registerpage({ classes }) {
 
             // Validate inputs
             const {
-                tempFirstName, tempLastName, tempEmail,
+                tempOfficeName, tempFirstName, tempLastName, tempEmail,
                 tempPassword, tempAddress, tempCity,
                 tempLocationState, tempZipcode,
                 tempPhone, tempFax,
@@ -311,7 +320,7 @@ function Registerpage({ classes }) {
 
             // Update error states
             handleErrorStates(
-                tempFirstName, tempLastName, tempEmail,
+                tempOfficeName, tempFirstName, tempLastName, tempEmail,
                 tempPassword, tempAddress, tempCity,
                 tempLocationState, tempZipcode,
                 tempPhone, tempFax,
@@ -321,7 +330,8 @@ function Registerpage({ classes }) {
 
             // Kill request if we found an error
             if (
-                tempFirstName.hasError
+                tempOfficeName.hasError
+                || tempFirstName.hasError
                 || tempLastName.hasError
                 || tempEmail.hasError
                 || tempPassword.hasError
@@ -351,6 +361,7 @@ function Registerpage({ classes }) {
             // Send request to api
             const url = `/referexpert/registeruser?referralid=${referralCode}`;
             const postBody = {
+                officeName,
                 firstName,
                 lastName,
                 email,
@@ -469,6 +480,18 @@ function Registerpage({ classes }) {
 
             <Card elevation={3} classes={{ root: registerpageClasses.signUpCard }}>
                 
+                {/* Office Name */}
+                <TextField
+                    id='officeName'
+                    label='Office name'
+                    variant='outlined'
+                    classes={{ root: classes.textfield }}
+                    onChange={(e) => updateOfficeName(e.target.value)}
+                    error={validateOfficeName.hasError}
+                    helperText={validateOfficeName.errorMessage}
+                    fullWidth
+                />
+
                 {/* First Name */}
                 <TextField
                     id='firstName'
