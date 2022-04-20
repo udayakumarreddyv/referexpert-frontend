@@ -17,7 +17,8 @@ import Adminpage from '../pages/Adminpage';
 import ProfilePage from '../pages/Profilepage';
 import ReferPatientpage from '../pages/ReferPatientpage';
 import ConfirmPage from '../pages/Confirmpage';
-import Referralspage from '../pages/Referralspage'
+import Referralspage from '../pages/Referralspage';
+import Contactpage from '../pages/Contactpage';
 
 // Components
 import Header from './Header';
@@ -74,6 +75,9 @@ function App() {
                             {/* Profile page */}
                             <PrivateRoute path='/profile' classes={classes} component={ProfilePage} />
                             
+                            {/* Contact page */}
+                            <PrivateRoute path='/contact' classes={classes} component={Contactpage} />
+
                             {/* Login page */}
                             <Route path='/signIn'>
                                 <Loginpage classes={classes} />

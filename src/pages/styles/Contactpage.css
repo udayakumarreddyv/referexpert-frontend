@@ -1,0 +1,13 @@
+#contactpage-body {
+    padding: 20px 10px 0 10px;
+}
+
+#contactpage-contactSection {
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+#contactpage-contactForm {
+    margin-top: 30px;
+    text-align: right;
+}
