@@ -73,10 +73,17 @@ function AvailabilityResponseDialog(props) {
                 {/* Doctor information */}
                 <div className='pageSubTitle'>Requestor details</div>
                 <section id='referpatientpage-doctorDetailsContainer'>
+                    
                     {/* Doctor name */}
                     <div className='availabilityResponseDialog-doctorDetail'>
                         <Person classes={{ root: availabilityResponseDialogClasses.doctorDetailsIcon }} />
                         { doctorDetails.fromName }
+                    </div>
+
+                    {/* Patient name */}
+                    <div className='availabilityResponseDialog-doctorDetail'>
+                        {/* <Person classes={{ root: availabilityResponseDialogClasses.doctorDetailsIcon }} /> */}
+                        Patient: { doctorDetails.patientName }
                     </div>
                     
                     {/* Subject */}

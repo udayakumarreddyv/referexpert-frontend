@@ -89,7 +89,8 @@ function AvailabilityTable ({
                 subject,
                 reason,
                 isAccepted,
-                isServed
+                isServed,
+                patientName
             } = referral;
 
             // Determine what row type to create and then generate the row
@@ -131,7 +132,7 @@ function AvailabilityTable ({
                         <TableCell>
                         <Button
                             classes={{ root: `${ classes.primaryButton } ${ availabilityTableClasses.actionButton }` }}
-                            onClick={() => handleOpenAvailabilityResponseDialog(appointmentId, `${fromFirstName} ${fromLastName}`, subject, reason)}
+                            onClick={() => handleOpenAvailabilityResponseDialog(appointmentId, `${fromFirstName} ${fromLastName}`, patientName, subject, reason)}
                         >
                             Respond
                         </Button>

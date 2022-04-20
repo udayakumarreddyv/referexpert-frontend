@@ -99,8 +99,8 @@ function Referralspage({ classes }) {
     const [validateSelectedAppointmentDate, updateValidateSelectedAppointmentDate] = useState({ hasError: false, errorMessage: '' });
 
     // Handle opening of availability response dialog
-    const handleOpenAvailabilityResponseDialog = (appointmentId, fromName, subject, reason) => {
-        updateDoctorDetails({ appointmentId, fromName, subject, reason });
+    const handleOpenAvailabilityResponseDialog = (appointmentId, fromName, patientName, subject, reason) => {
+        updateDoctorDetails({ appointmentId, fromName, patientName, subject, reason });
         updateShowAvailabilityResponseView(true);
     };
 
@@ -112,6 +112,7 @@ function Referralspage({ classes }) {
             appointmentId: null,
             fromName: '',
             subject: '',
+            patientName: '',
             reason: '',
         });
         
@@ -130,8 +131,8 @@ function Referralspage({ classes }) {
     };
 
     // Handle opening of confirm response dialog
-    const handleOpenConfirmResponseDialog = (appointmentId, appointmentTo, appointmentFrom, toName, subject, reason, dateAndTimeString) => {
-        updateConfirmResponseDetails({ appointmentId, appointmentTo, appointmentFrom, toName, subject, reason, dateAndTimeString });
+    const handleOpenConfirmResponseDialog = (appointmentId, appointmentTo, appointmentFrom, toName, patientName, subject, reason, dateAndTimeString) => {
+        updateConfirmResponseDetails({ appointmentId, appointmentTo, appointmentFrom, toName, patientName, subject, reason, dateAndTimeString });
         updateShowConfirmResponseView(true);
     };
 
@@ -142,6 +143,7 @@ function Referralspage({ classes }) {
             appointmentFrom: '',
             appointmentTo: '',
             toName: '',
+            patientName: '',
             subject: '',
             reason: '',
             dateAndTimeString: ''
