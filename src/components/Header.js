@@ -192,7 +192,7 @@ function Header({ classes }) {
 
                     {/* Logo */}
                     <ListItem classes={{ root: headerClasses.listItem }}>
-                        <div className='logoText'>ReferExpert</div>
+                        <div className='logoText'>Cephalad</div>
                     </ListItem>
 
                     {/* Home */}
