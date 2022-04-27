@@ -76,14 +76,34 @@ const submitAvailabilityResponse = async ({ appointmentId, dateAndTimeString, to
 };
 
 // Schedule appointment via api request
-const submitAppointment = async ({ appointmentFrom, appointmentTo, dateAndTimeString, subject, reason, token }) => {
+const submitAppointment = async ({
+    appointmentFrom,
+    appointmentTo,
+    dateAndTimeString,
+    subject,
+    reason,
+    patientName,
+    patientEmail,
+    patientPhone,
+    token
+}) => {
     try {
         const url = 'referexpert/requestappointment';
-        const body = { appointmentFrom, appointmentTo, dateAndTimeString, subject, reason };
+        const body = {
+            appointmentFrom,
+            appointmentTo,
+            dateAndTimeString,
+            subject,
+            reason,
+            patientName,
+            patientEmail,
+            patientPhone,
+            token
+        };
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                // 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)
@@ -110,7 +130,7 @@ const submitFinalizeAvailabilityResponse = async ({ appointmentId, token }) => {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                // 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)
@@ -137,7 +157,7 @@ const submitRejectAvailabilityResponse = async ({ appointmentId, token }) => {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                // 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)

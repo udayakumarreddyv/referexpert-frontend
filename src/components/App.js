@@ -19,6 +19,7 @@ import ReferPatientpage from '../pages/ReferPatientpage';
 import ConfirmPage from '../pages/Confirmpage';
 import Referralspage from '../pages/Referralspage';
 import Contactpage from '../pages/Contactpage';
+import PatientTimepage from '../pages/PatientTimepage';
 
 // Components
 import Header from './Header';
@@ -77,6 +78,11 @@ function App() {
                             
                             {/* Contact page */}
                             <PrivateRoute path='/contact' classes={classes} component={Contactpage} />
+
+                            {/* Patient time confirm page */}
+                            <Route path='/patientconfirmation'>
+                                <PatientTimepage classes={classes} />
+                            </Route>
 
                             {/* Login page */}
                             <Route path='/signIn'>
