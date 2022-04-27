@@ -105,10 +105,10 @@ function InviteDoctorDialog(props) {
             open={dialogInviteDoctorOpen}
             onClose={handleInviteDoctorDialogClose}
             aria-labelledby="invite-doctor"
-            aria-describedby="Invite a doctor to referexpert"
+            aria-describedby="Invite a doctor to Cephalad"
         >
             {/* Title */}
-            <DialogTitle id="alert-dialog-title">Send invites to doctors who may like ReferExpert</DialogTitle>
+            <DialogTitle id="alert-dialog-title">Send invites to doctors who may like Cephalad</DialogTitle>
             
             {/* Description */}
             <DialogContent>
