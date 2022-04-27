@@ -10,6 +10,18 @@ const fetchAppointments = async ({ userEmail, token }) => {
     };
 };
 
+// Fetch appointment by appointmentId
+const fetchAppointmentById = async ({ appointmentId }) => {
+    try {
+        const url = `/referexpert/appointment/${appointmentId}`;
+        const response = await fetch(url);
+        if (response.status !== 200) throw new Error('Failed to fetch appointment data by Id');
+        return await response.json();
+    } catch (err) {
+        throw err;
+    };
+};
+
 // Update the pending appointment status to accept or reject
 const updatePendingAppointment = async ({ action, appointmentId, token }) => {
     try {
@@ -68,6 +80,7 @@ const completeAppointment = async ({ appointmentId, token }) => {
 
 export {
     fetchAppointments,
+    fetchAppointmentById,
     updatePendingAppointment,
     completeAppointment
 }
