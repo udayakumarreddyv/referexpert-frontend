@@ -101,7 +101,7 @@ function AvailabilityResponseDialog(props) {
                 
                 {/* Appointment details */}
                 <div className='pageSubTitle'>Appointment details</div>
-                <div className='availabilityResponseDialog-explanationText'>Please recommend at least one appointment time to send back</div>
+                <div className='availabilityResponseDialog-explanationText'>Please recommend at least one appointment time to send to the patient</div>
                 <section id='availabilityResponseDialog-appointmentDetailsContainer'>
 
                     {/* Appointment time option 1 */}
