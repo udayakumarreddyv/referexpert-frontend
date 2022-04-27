@@ -367,7 +367,7 @@ function Referralspage({ classes }) {
                 </Button>
             </section>
 
-            {/* Pending Availability responses */}
+            {/* Pending responses */}
             <h1 className='pageTitle hasIcon'>
                 <Badge
                     badgeContent={" "}
@@ -376,7 +376,7 @@ function Referralspage({ classes }) {
                     invisible={ state.pendingTasks.pendingAvailabilityResponse === 'Y' ? false : true }
                 >
                     <Share classes={{ root: referralspageClasses.titleIcon }} />
-                    Pending availability responses
+                    Pending responses
                 </Badge>
             </h1>
             <section id='referralspage-referralsContainer'>
@@ -388,7 +388,7 @@ function Referralspage({ classes }) {
                 />
             </section>
 
-            {/* Pending Availability requests */}
+            {/* Pending requests */}
             <h1 className='pageTitle hasIcon'>
                 <Badge
                     badgeContent={" "}
@@ -397,7 +397,7 @@ function Referralspage({ classes }) {
                     invisible={ state.pendingTasks.pendingAvailabilityRequest === 'Y' ? false : true }
                 >
                     <Share classes={{ root: referralspageClasses.titleIcon }} />
-                    My pending availability requests
+                    Pending requests
                 </Badge>
             </h1>
             <section id='referralspage-referralsContainer'>

@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core';
 import { Person, Home, LocalHospital } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
+import MuiPhoneNumber from 'material-ui-phone-number';
 
 // Material UI styles
 const useStyles = makeStyles((theme) => ({
@@ -55,6 +56,10 @@ function AvailabilityRequestDialog(props) {
         validateSubjectLine,
         validateRequestedAppointmentTimes,
     } = props;
+
+    // Strips the formatting down to just the numbers
+    // We don't want any +()- or spaces when we send it off to the api
+    const cleanPhoneNumberValue = (phoneNumber) => phoneNumber.replace(/[^0-9]/g, '');
 
     return (
         <Dialog
@@ -116,6 +121,20 @@ function AvailabilityRequestDialog(props) {
                             justifyContent: 'space-between'
                         }}
                     >
+
+                        {/* Phone */}
+                        <MuiPhoneNumber
+                            defaultCountry={'us'}
+                            countryCodeEditable={false}
+                            // style={{ marginBottom: '10px', maxWidth: '175px' }}
+                            // value={patientPhone}
+                            onChange={(value) => updatePatientPhone(cleanPhoneNumberValue(value))}
+                            error={validatePatientPhone.hasError}
+                            helperText={validatePatientPhone.errorMessage ? validatePatientPhone.errorMessage : 'Patient phone number'}
+                            required
+                            disableDropdown
+                        />
+
                         {/* Email */}
                         <TextField
                             name='patientEmail'
@@ -125,17 +144,6 @@ function AvailabilityRequestDialog(props) {
                             onChange={(event) => updatePatientEmail(event.target.value)}
                             error={validatePatientEmail.hasError}
                             helperText={validatePatientEmail.errorMessage}
-                        />
-
-                        {/* Phone */}
-                        <TextField
-                            name='patientPhone'
-                            label='Phone number'
-                            variant='outlined'
-                            classes={{ root: availabilityRequestDialogClasses.inputBottomMargin }}
-                            onChange={(event) => updatePatientPhone(event.target.value)}
-                            error={validatePatientPhone.hasError}
-                            helperText={validatePatientPhone.errorMessage}
                         />
                     </section>
 
