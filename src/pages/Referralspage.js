@@ -390,7 +390,8 @@ function Referralspage({ classes }) {
 
             {/* Pending requests */}
             <h1 className='pageTitle hasIcon'>
-                <Badge
+                {/* Disabled since patient will handle the new flow */}
+                {/* <Badge
                     badgeContent={" "}
                     color='error'
                     anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
@@ -398,7 +399,10 @@ function Referralspage({ classes }) {
                 >
                     <Share classes={{ root: referralspageClasses.titleIcon }} />
                     Pending requests
-                </Badge>
+                </Badge> */}
+
+                <Share classes={{ root: referralspageClasses.titleIcon }} />
+                Pending requests
             </h1>
             <section id='referralspage-referralsContainer'>
                 <AvailabilityTable

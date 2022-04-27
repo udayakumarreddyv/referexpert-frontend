@@ -42,7 +42,7 @@ const checkPendingActions = ({ state }) => {
     let hasPendingTask = false;
     let pendingAppointment = false;
     let currentAppointment = false;
-    let pendingAvailabilityRequest = false;
+    // let pendingAvailabilityRequest = false;
     let pendingAvailabilityResponse = false;
 
     // Check if pending appointment
@@ -58,10 +58,10 @@ const checkPendingActions = ({ state }) => {
     };
 
     // Check if pending availabilityRequest
-    if (state.pendingTasks.pendingAvailabilityRequest === 'Y') {
-        hasPendingTask = true;
-        pendingAvailabilityRequest = true;
-    };
+    // if (state.pendingTasks.pendingAvailabilityRequest === 'Y') {
+    //     hasPendingTask = true;
+    //     pendingAvailabilityRequest = true;
+    // };
 
     // Check if pending availability
     if (state.pendingTasks.pendingAvailabilityResponse === 'Y') {
@@ -73,7 +73,7 @@ const checkPendingActions = ({ state }) => {
         hasPendingTask,
         pendingAppointment,
         currentAppointment,
-        pendingAvailabilityRequest,
+        // pendingAvailabilityRequest,
         pendingAvailabilityResponse
     };
 };
@@ -100,7 +100,7 @@ function Header({ classes }) {
         hasPendingTask: false,
         pendingAppointment: false,
         currentAppointment: false,
-        pendingAvailabilityRequest: false,
+        // pendingAvailabilityRequest: false,
         pendingAvailabilityResponse: false
     });
     
@@ -134,10 +134,16 @@ function Header({ classes }) {
             hasPendingTask,
             pendingAppointment,
             currentAppointment,
-            pendingAvailabilityRequest,
+            // pendingAvailabilityRequest,
             pendingAvailabilityResponse
         } = checkPendingActions({ state });
-        updatePendingTasksInfo({ hasPendingTask, pendingAppointment, currentAppointment, pendingAvailabilityRequest, pendingAvailabilityResponse });
+        updatePendingTasksInfo({
+            hasPendingTask,
+            pendingAppointment,
+            currentAppointment,
+            // pendingAvailabilityRequest,
+            pendingAvailabilityResponse
+        });
     }, [state.pendingTasks]);
 
     // View when user is not logged in
@@ -171,7 +177,10 @@ function Header({ classes }) {
             <Badge
                 badgeContent=" "
                 color='error'
-                invisible={ !pendingTasksInfo.pendingAvailabilityRequest && !pendingTasksInfo.pendingAvailabilityResponse }
+                invisible={
+                    // !pendingTasksInfo.pendingAvailabilityRequest &&
+                    !pendingTasksInfo.pendingAvailabilityResponse
+                }
             >
                 <Button
                     variant='outlined'
@@ -217,7 +226,10 @@ function Header({ classes }) {
                             <Badge
                                 variant='dot'
                                 color='error'
-                                invisible={ !pendingTasksInfo.pendingAvailabilityRequest && !pendingTasksInfo.pendingAvailabilityResponse }
+                                invisible={
+                                    // !pendingTasksInfo.pendingAvailabilityRequest &&
+                                    !pendingTasksInfo.pendingAvailabilityResponse
+                                }
                             >
                                 <Link
                                     to='/referrals'

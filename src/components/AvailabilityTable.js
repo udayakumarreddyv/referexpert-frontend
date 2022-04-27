@@ -64,7 +64,7 @@ function AvailabilityTable ({
     const convertAcceptedSymbol = (symbol) => {
         switch (symbol) {
             case 'Y':
-                return 'Accepted';
+                return 'Waiting on patient';
             case 'N':
                 return 'Rejected';
             case 'P':
@@ -111,14 +111,17 @@ function AvailabilityTable ({
                         <TableCell>{ subject }</TableCell>
                         <TableCell>{ availabilityResponseDateTimes }</TableCell>
                         <TableCell>
-                            {
+                            { convertAcceptedSymbol(isAccepted) }
+                            
+                            {/* Schedule appointment button, disabled for now */}
+                            {/* {
                                 isAccepted === 'Y'
                                 ? <Button
                                     classes={{ root: `${ classes.primaryButton } ${ availabilityTableClasses.actionButton }` }}
                                     onClick={() => handleOpenConfirmResponseDialog(appointmentId, appointmentTo, appointmentFrom, `${toFirstName} ${toLastName}`, subject, reason, dateAndTimeString)}
                                 >Schedule</Button>
                                 : convertAcceptedSymbol(isAccepted)
-                            }
+                            } */}
                         </TableCell>
                     </TableRow>
                 );
