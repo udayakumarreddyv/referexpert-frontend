@@ -1,0 +1,40 @@
+#patientTimePage-body {
+    max-width: 700px;
+    margin: 0 auto;
+    margin-bottom: 50px;
+    padding: 20px 10px 0 10px;
+    text-align: center;
+}
+
+#patientTimePage-doctorDetailsContainer {
+    margin-bottom: 20px;
+    border: 1px solid;
+    border-color: #d2d2d2;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.patientTimePage-doctorDetailInfo {
+    margin-bottom: 10px;
+    font-size: 17px;
+}
+
+#patientTimePage-timesContainer {
+    text-align: left;
+    max-width: 250px;
+    margin: 0 auto;
+}
+
+#patientTimePage-buttonContainer {
+    max-width: 170px;
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#patientTimePage-rejectText {
+    font-size: 12px;
+    color: #333333;
+}
