@@ -216,7 +216,7 @@ function Loginpage({ classes }) {
     // Show login card on default view
     return (
         <section id='loginpage-body'>
-            <h1 id='loginpage-headerText'>Sign in to <span className='logoText'>ReferExpert</span></h1>
+            <h1 id='loginpage-headerText'>Sign in to <span className='logoText'>Cephalad</span></h1>
 
             <Card elevation={3} classes={{ root: loginpageClasses.loginCard }} justify='space-between'>
                 

@@ -464,7 +464,7 @@ function Registerpage({ classes }) {
     if (signUpSuccessView) {
         return (
             <section id='registerpage-body'>
-            <h1 id='registerpage-headerText'>Join <span className='logoText'>ReferExpert</span></h1>
+            <h1 id='registerpage-headerText'>Join <span className='logoText'>Cephalad</span></h1>
 
             <Card elevation={3} classes={{ root: registerpageClasses.signUpCard }}>
                 <h1>Your account has been created!</h1>
@@ -476,7 +476,7 @@ function Registerpage({ classes }) {
 
     return (
         <section id='registerpage-body'>
-            <h1 id='registerpage-headerText'>Join <span className='logoText'>ReferExpert</span></h1>
+            <h1 id='registerpage-headerText'>Join <span className='logoText'>Cephalad</span></h1>
 
             <Card elevation={3} classes={{ root: registerpageClasses.signUpCard }}>
                 
