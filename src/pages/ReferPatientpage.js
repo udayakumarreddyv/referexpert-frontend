@@ -126,8 +126,6 @@ function ReferPatientpage({ classes }) {
 
             // Add distance amount, search type & search query to url
             url = `${url}/${distanceAmount}?${searchType}=${searchQuery}`;
-
-            console.log(url);
             searchType = searchType.toLowerCase();
             const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
             return await response.json();
