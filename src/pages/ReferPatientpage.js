@@ -126,6 +126,8 @@ function ReferPatientpage({ classes }) {
 
             // Add distance amount, search type & search query to url
             url = `${url}/${distanceAmount}?${searchType}=${searchQuery}`;
+
+            console.log(url);
             searchType = searchType.toLowerCase();
             const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
             return await response.json();
@@ -219,7 +221,7 @@ function ReferPatientpage({ classes }) {
             updateLoadingDoctorsData(true);
 
             // Send request to api
-            const results = await searchQueryApi({ distanceType, distanceAmount, searchType, searchQuery: searchValue });
+            const results = await searchQueryApi({ distanceType, distanceAmount, searchType, searchQuery: searchValue, customAddressToUse: customAddress });
 
             // Filter out current user and admin accounts
             const filteredResults = results.filter((user) => user.userType !== 'ADMIN' && user.email !== state.userEmail);
