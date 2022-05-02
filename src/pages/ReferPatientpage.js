@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
     inputMarginRight: {
         marginRight: '10px',
     },
+    inputMarginBottom: {
+        marginBottom: '10px',
+    },
     zipcodeInput: {
         width: '80px',
     },
@@ -63,6 +66,8 @@ function ReferPatientpage({ classes }) {
     const [searchType, updateSearchType] = useState('speciality');
     const [searchValue, updateSearchValue] = useState('');
     const [searchValueError, updateSearchValueError] = useState({ hasError: false, errorMessage: '' });
+    const [customAddress, updateCustomAddress] = useState('');
+    const [customAddressError, updateCustomAddressError] = useState({ hasError: false, errorMessage: '' });
 
     // Loading states
     const [loadingDoctorsData, updateLoadingDoctorsData] = useState(false);
@@ -100,21 +105,27 @@ function ReferPatientpage({ classes }) {
     const [showScheduleView, updateShowScheduleView] = useState(false);
 
     // Fetch search results from api
-    const searchQueryApi = async ({ distanceType, distanceAmount, searchType, searchQuery }) => {
+    const searchQueryApi = async ({ distanceType, distanceAmount, searchType, searchQuery, customAddressToUse }) => {
         try {
-            let url;
+            let url = 'referexpert/users';
             
             // User wants to use their current location
             if (distanceType === 'currentLocation') {
                 
                 // Error getting coordinates
                 if (currentLocationError) throw currentLocationError;    
-                
-                url = `referexpert/users/distance/${currentLocation.latitude}/${currentLocation.longitude}/${distanceAmount}?${searchType}=${searchQuery}`;
+                url = `${url}/distance/${currentLocation.latitude}/${currentLocation.longitude}`;
+            } else if (distanceType === 'customAddress') {
+                if (!customAddressToUse || customAddressToUse === undefined) {
+                    // TODO: HANDLE MISSING CUSTOM ADDRESS
+                };
+                url = `${url}/distance/${customAddressToUse}`;
             } else {
-                url = `referexpert/users/${distanceType}/${distanceAmount}?${searchType}=${searchQuery}`;
+                url = `${url}/${distanceType}`;
             };
 
+            // Add distance amount, search type & search query to url
+            url = `${url}/${distanceAmount}?${searchType}=${searchQuery}`;
             searchType = searchType.toLowerCase();
             const response = await fetch(url, { headers: { 'Authorization': `Bearer ${state.token}` }});
             return await response.json();
@@ -182,12 +193,23 @@ function ReferPatientpage({ classes }) {
         if (searchValue.trim() === '') {
             updateSearchValueError({ hasError: true, errorMessage: '' });
             searchError = true;
-        } else {
-            updateSearchValueError({ hasError: false, errorMessage: '' });
+        };
+        
+        // Validate custom address input
+        if (
+            distanceType === 'customAddress'
+            && (!customAddress || customAddress === undefined || customAddress.trim() === '')
+        ) {
+            updateCustomAddressError({ hasError: true, errorMessage: '' });
+            searchError = true;
         };
 
         // Kill request if search input error
         if (searchError) return;
+
+        // Clear validation states if they pass
+        updateSearchValueError({ hasError: false, errorMessage: '' });
+        updateCustomAddressError({ hasError: false, errorMessage: '' });
 
         // Current location is not supported or user rejected permission
         if (distanceType === 'currentLocation' && currentLocationError) return;
@@ -362,7 +384,7 @@ function ReferPatientpage({ classes }) {
             <section id='referpatientpage-searchContainer'>
                 
                 {/* Search types */}
-                <FormControl variant='outlined' classes={{ root: referpatientpageClasses.inputMarginRight }}>
+                <FormControl variant='outlined' classes={{ root: `${ referpatientpageClasses.inputMarginRight } ${ referpatientpageClasses.inputMarginBottom }` }}>
                     <InputLabel>Search by</InputLabel>
                     <Select
                         name='Type'
@@ -383,14 +405,14 @@ function ReferPatientpage({ classes }) {
                     name='search'
                     label='Search'
                     variant='outlined'
-                    classes={{ root: `${ referpatientpageClasses.searchInput } ${ referpatientpageClasses.inputMarginRight }` }}
+                    classes={{ root: `${ referpatientpageClasses.searchInput } ${ referpatientpageClasses.inputMarginRight } ${ referpatientpageClasses.inputMarginBottom }` }}
                     onChange={(event) => updateSearchValue(event.target.value)}
                     onKeyDown={(event) => event.key === 'Enter' ? handleDoctorSearch() : null }
                     error={searchValueError.hasError}
                 />
 
                 {/* Distance types */}
-                <FormControl variant='outlined' classes={{ root: referpatientpageClasses.inputMarginRight }}>
+                <FormControl variant='outlined' classes={{ root: `${ referpatientpageClasses.inputMarginRight } ${ referpatientpageClasses.inputMarginBottom }` }}>
                     <InputLabel>Distance by</InputLabel>
                     <Select
                         name='distanceType'
@@ -400,10 +422,26 @@ function ReferPatientpage({ classes }) {
                         error={distanceType === 'currentLocation' && currentLocationError ? true : false}
                     >
                         <MenuItem value='currentLocation'>Current Location</MenuItem>
+                        <MenuItem value='customAddress'>Custom address</MenuItem>
                         <MenuItem value='distance'>Your address</MenuItem>
-                        {/* <MenuItem value='address'>Address</MenuItem> */}
                     </Select>
                 </FormControl>
+
+                {/* Custom address input */}
+                {/* Only show if "distance by" is customAddress */}
+                {
+                    distanceType === 'customAddress'
+                    ? <TextField
+                        name='customAddress'
+                        label='Custom Address'
+                        variant='outlined'
+                        classes={{ root: `${ referpatientpageClasses.searchInput } ${ referpatientpageClasses.inputMarginBottom } ${ referpatientpageClasses.inputMarginRight }` }}
+                        onChange={(event) => updateCustomAddress(event.target.value)}
+                        onKeyDown={(event) => event.key === 'Enter' ? handleDoctorSearch() : null }
+                        error={customAddressError.hasError}
+                    />
+                    : null
+                }
 
                 {/* Distance amount */}
                 <FormControl variant='outlined' classes={{ root: referpatientpageClasses.inputMarginRight }}>

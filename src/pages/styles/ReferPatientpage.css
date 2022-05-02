@@ -8,6 +8,7 @@
     margin-bottom: 20px;
     display: flex;
     align-items: top;
+    flex-wrap: wrap;
 }
 
 /* Appointment scheduling dialog contents */
