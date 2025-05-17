@@ -1,4 +1,9 @@
 import { Fragment } from 'react';
+import { useFormValidation } from '../hooks/useFormValidation';
+import { useAuth } from '../hooks/useAuth';
+import { useAsync } from '../hooks/useAsync';
+import { useNotification } from '../hooks/useNotification';
+import { loginUser } from '../api/userApi';
 
 // Material UI
 import { Button, CircularProgress, TextField } from '@material-ui/core';
@@ -13,25 +18,54 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function LoginCard(props) {
-    const {
-        // Input values
-        updateEmail,
-        updatePassword,
-
-        // Forgot password
-        handleForgotPasswordViewChange,
-
-        // Validation and loading states
-        validateEmail,
-        validatePassword,
-        handleSubmit,
-        submitError,
-        loading,
-
-        classes
-    } = props;
+function LoginCard({ classes }) {
     const loginCardClasses = useStyles();
+    const { login } = useAuth();
+    const { showNotification, NotificationComponent } = useNotification();
+    
+    const {
+        values,
+        errors,
+        handleChange,
+        validateForm,
+        setErrors
+    } = useFormValidation({
+        email: '',
+        password: ''
+    });
+
+    const {
+        execute: executeLogin,
+        status,
+        error
+    } = useAsync(async () => {
+        if (!validateForm()) return;
+        
+        try {
+            const response = await loginUser({
+                email: values.email,
+                password: values.password
+            });
+            
+            await login(response);
+        } catch (err) {
+            setErrors({
+                submit: err.message || 'Login failed. Please try again.'
+            });
+            throw err;
+        }
+    });
+
+    const handleSubmit = async () => {
+        try {
+            await executeLogin();
+        } catch (err) {
+            showNotification({
+                message: err.message || 'Login failed. Please try again.',
+                severity: 'error'
+            });
+        }
+    };
 
     return (
         <Fragment>
@@ -41,9 +75,10 @@ function LoginCard(props) {
                 label='Email'
                 variant='outlined'
                 classes={{ root: classes.textfield }}
-                onChange={(e) => updateEmail(e.target.value)}
-                error={validateEmail.hasError}
-                helperText={validateEmail.errorMessage}
+                value={values.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                error={!!errors.email}
+                helperText={errors.email}
                 fullWidth
             />
 
@@ -54,10 +89,11 @@ function LoginCard(props) {
                 variant='outlined'
                 type='password'
                 classes={{ root: classes.textfield }}
-                onChange={(e) => updatePassword(e.target.value)}
-                onKeyDown={(event) => event.key === 'Enter' ? handleSubmit() : null }
-                error={validatePassword.hasError}
-                helperText={validatePassword.errorMessage}
+                value={values.password}
+                onChange={(e) => handleChange('password', e.target.value)}
+                onKeyDown={(event) => event.key === 'Enter' ? handleSubmit() : null}
+                error={!!errors.password}
+                helperText={errors.password}
                 fullWidth
             />
 
@@ -65,21 +101,25 @@ function LoginCard(props) {
             <span
                 id='loginpage-forgotPasswordLink'
                 className='link'
-                onClick={() => handleForgotPasswordViewChange(true)}
+                onClick={() => window.location.href = '/resetpass'}
             >
                 Forgot password?
             </span>
 
             {/* Submit error message */}
-            <div className='errorMessage'>{ submitError.errorMessage }</div>
+            {errors.submit && (
+                <div className='errorMessage'>{errors.submit}</div>
+            )}
 
             <Button
-                classes={{ root: `${ classes.primaryButton } ${ loginCardClasses.loginButton }` }}
+                classes={{ root: `${classes.primaryButton} ${loginCardClasses.loginButton}` }}
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={status === 'pending'}
             >
-                { loading ? <CircularProgress size={20} color='primary' /> : 'Sign in' }
+                {status === 'pending' ? <CircularProgress size={20} color='primary' /> : 'Sign in'}
             </Button>
+
+            <NotificationComponent />
         </Fragment>
     );
 };

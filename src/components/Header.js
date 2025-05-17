@@ -1,8 +1,9 @@
-import { useContext, useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import './styles/Header.css'
 
-// Global store
-import { Context } from '../store/GlobalStore';
+// Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { logoutUser } from '../store/slices/userSlice';
 
 // Utils
 import CookieHelper from '../utils/cookieHelper';
@@ -38,59 +39,39 @@ const useStyles = makeStyles((theme) => ({
 
 // Check if we should show badge on account button
 // This notifies the user that they have a pending task to attend to
-const checkPendingActions = ({ state }) => {
+const checkPendingActions = ({ pendingTasks }) => {
     let hasPendingTask = false;
     let pendingAppointment = false;
     let currentAppointment = false;
-    // let pendingAvailabilityRequest = false;
     let pendingAvailabilityResponse = false;
 
-    // Check if pending appointment
-    if (state.pendingTasks.pendingAppointment === 'Y') {
-        hasPendingTask = true;
-        pendingAppointment = true;
-    };
+    // Check if there are any pending tasks
+    if (pendingTasks) {
+        pendingAppointment = pendingTasks.pendingAppointment === 'Y';
+        currentAppointment = pendingTasks.currentAppointment === 'Y';
+        pendingAvailabilityResponse = pendingTasks.pendingAvailabilityResponse === 'Y';
 
-    // Check if current appointment
-    if (state.pendingTasks.currentAppointment === 'Y') {
-        hasPendingTask = true;
-        currentAppointment = true;
-    };
-
-    // Check if pending availabilityRequest
-    // if (state.pendingTasks.pendingAvailabilityRequest === 'Y') {
-    //     hasPendingTask = true;
-    //     pendingAvailabilityRequest = true;
-    // };
-
-    // Check if pending availability
-    if (state.pendingTasks.pendingAvailabilityResponse === 'Y') {
-        hasPendingTask = true;
-        pendingAvailabilityResponse = true;
+        // Update has pending task state
+        if (pendingAppointment || currentAppointment || pendingAvailabilityResponse) {
+            hasPendingTask = true;
+        };
     };
 
     return {
         hasPendingTask,
         pendingAppointment,
         currentAppointment,
-        // pendingAvailabilityRequest,
         pendingAvailabilityResponse
     };
 };
 
 function Header({ classes }) {
     const headerClasses = useStyles();
-    const [state, dispatch] = useContext(Context);
-
-    // Decide path of logo url
-    let logoRoute;
-    if (!state.loggedIn) {
-        logoRoute = '/';
-    } else if (state.userType === 'ADMIN') {
-        logoRoute = '/admin';
-    } else {
-        logoRoute = '/home';
-    };
+    const dispatch = useDispatch();
+    
+    // Get state from Redux
+    const user = useSelector(state => state.user);
+    const { loggedIn, userType } = user;
 
     // Menu states
     const [drawerOpen, updateDrawerOpen] = useState(false);
@@ -100,9 +81,14 @@ function Header({ classes }) {
         hasPendingTask: false,
         pendingAppointment: false,
         currentAppointment: false,
-        // pendingAvailabilityRequest: false,
         pendingAvailabilityResponse: false
     });
+
+    // Decide path of logo url
+    let logoRoute = '/';
+    if (loggedIn) {
+        logoRoute = userType === 'ADMIN' ? '/admin' : '/home';
+    }
     
     // Handle drawer open
     const handleDrawerOpen = () => {
@@ -117,41 +103,28 @@ function Header({ classes }) {
     // Handle logout click
     const handleLogout = () => {
         // close drawer
-        updateDrawerOpen(false);
+        handleDrawerClose();
 
         // Delete cookies
         CookieHelper.deleteCookie('accessCookie');
         CookieHelper.deleteCookie('refreshCookie');
-    
-        // Logout user in state
-        dispatch({ type: 'LOGOUT_USER', payload: null });
+
+        // Update global state
+        dispatch(logoutUser());
     };
 
-    // Check if we should show badge on account button
-    // This notifies the user that they have a pending task to attend to
+    // Update pending tasks info when pending tasks change
     useEffect(() => {
-        const {
-            hasPendingTask,
-            pendingAppointment,
-            currentAppointment,
-            // pendingAvailabilityRequest,
-            pendingAvailabilityResponse
-        } = checkPendingActions({ state });
-        updatePendingTasksInfo({
-            hasPendingTask,
-            pendingAppointment,
-            currentAppointment,
-            // pendingAvailabilityRequest,
-            pendingAvailabilityResponse
-        });
-    }, [state.pendingTasks]);
+        const pendingInfo = checkPendingActions(user);
+        updatePendingTasksInfo(pendingInfo);
+    }, [user.pendingTasks]);
 
     // View when user is not logged in
     const notLoggedInView = (
         <div id='headerLinksContainer'>
             <Link to='/signIn' className='headerLink'>
                 <Button
-                    variant='outlined'
+                    classes={{ root: classes.primaryButton }}
                     style={{ marginRight: '10px', fontSize: '12px', }}
                 >
                     Sign in
@@ -172,22 +145,17 @@ function Header({ classes }) {
     // View when user is logged in
     const loggedInView = (
         <div id='headerLinksContainer'>
-
-            {/* Header button */}
             <Badge
                 badgeContent=" "
                 color='error'
-                invisible={
-                    // !pendingTasksInfo.pendingAvailabilityRequest &&
-                    !pendingTasksInfo.pendingAvailabilityResponse
-                }
+                invisible={!pendingTasksInfo.pendingAvailabilityResponse}
             >
                 <Button
                     variant='outlined'
                     style={{ marginRight: '0px', fontSize: '12px', }}
                     onClick={handleDrawerOpen}
                 >
-                    {state.userDetails.firstName} <AccountCircle className='primaryColor' classes={{ root: headerClasses.accountIcon }} />
+                    {user.userDetails.firstName} <AccountCircle className='primaryColor' classes={{ root: headerClasses.accountIcon }} />
                 </Button>
             </Badge>
 
@@ -198,7 +166,6 @@ function Header({ classes }) {
                 classes={{ root: headerClasses.drawerContainer }}
             >
                 <List classes={{ root: headerClasses.listContainer }}>
-
                     {/* Logo */}
                     <ListItem classes={{ root: headerClasses.listItem }}>
                         <div className='logoText'>Cephalad</div>
@@ -212,7 +179,6 @@ function Header({ classes }) {
                             onClick={handleDrawerClose}
                         >
                             <Home />
-
                             <ListItemText classes={{ root: headerClasses.listItemText }}>
                                 <div className='drawerItemText'>Home</div>
                             </ListItemText>
@@ -220,16 +186,12 @@ function Header({ classes }) {
                     </ListItem>
 
                     {/* Referrals page */}
-                    {
-                        state.userType !== 'ADMIN'
-                        ? <ListItem classes={{ root: headerClasses.listItem }}>
+                    {userType !== 'ADMIN' && (
+                        <ListItem classes={{ root: headerClasses.listItem }}>
                             <Badge
                                 variant='dot'
                                 color='error'
-                                invisible={
-                                    // !pendingTasksInfo.pendingAvailabilityRequest &&
-                                    !pendingTasksInfo.pendingAvailabilityResponse
-                                }
+                                invisible={!pendingTasksInfo.pendingAvailabilityResponse}
                             >
                                 <Link
                                     to='/referrals'
@@ -237,34 +199,29 @@ function Header({ classes }) {
                                     onClick={handleDrawerClose}
                                 >
                                     <Share />
-
                                     <ListItemText classes={{ root: headerClasses.listItemText }}>
                                         <div className='drawerItemText'>Referrals</div>
                                     </ListItemText>
                                 </Link>
                             </Badge>
                         </ListItem>
-                        : null
-                    }
+                    )}
 
                     {/* Refer patient */}
-                    {
-                        state.userType !== 'ADMIN'
-                        ? <ListItem classes={{ root: headerClasses.listItem }}>
+                    {userType !== 'ADMIN' && (
+                        <ListItem classes={{ root: headerClasses.listItem }}>
                             <Link
                                 to='/refer'
                                 className='drawerItem headerLink primaryTextColor'
                                 onClick={handleDrawerClose}
                             >
                                 <Send />
-
                                 <ListItemText classes={{ root: headerClasses.listItemText }}>
                                     <div className='drawerItemText'>Refer patient</div>
                                 </ListItemText>
                             </Link>
                         </ListItem>
-                        : null
-                    }
+                    )}
 
                     {/* Profile */}
                     <ListItem classes={{ root: headerClasses.listItem }}>
@@ -274,7 +231,6 @@ function Header({ classes }) {
                             onClick={handleDrawerClose}
                         >
                             <AccountCircle />
-
                             <ListItemText classes={{ root: headerClasses.listItemText }}>
                                 <div className='drawerItemText'>Profile</div>
                             </ListItemText>
@@ -288,7 +244,6 @@ function Header({ classes }) {
                             onClick={handleLogout}
                         >
                             <ExitToApp />
-
                             <ListItemText classes={{ root: headerClasses.listItemText }}>
                                 <div className='drawerItemText'>Logout</div>
                             </ListItemText>
@@ -298,16 +253,18 @@ function Header({ classes }) {
             </Drawer>
         </div>
     );
-    
+
     return (
         <section id='headerBody'>
             {/* Logo */}
             <div id='headerLogoContainer'>
-                <Link to={logoRoute} id='headerLogo'>Cephalad</Link>
+                <Link to={logoRoute} className='headerLink'>
+                    <div className='logoText'>Cephalad</div>
+                </Link>
             </div>
-            
-            {/* Show view based on if user is logged in or not */}
-            { state.loggedIn ? loggedInView : notLoggedInView }
+
+            {/* Links */}
+            {loggedIn ? loggedInView : notLoggedInView}
         </section>
     );
 };

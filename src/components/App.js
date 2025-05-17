@@ -1,11 +1,7 @@
 import './styles/App.css';
-
-// Routing
-import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
-import PrivateRoute from '../components/PrivateRoute';
-
-// Global store
-import Store from '../store/GlobalStore';
+import { Switch, Route } from 'react-router-dom';
+import PrivateRoute from './PrivateRoute';
+import ErrorBoundary from './ErrorBoundary';
 
 // Pages
 import Homepage from '../pages/Homepage';
@@ -27,19 +23,18 @@ import Footer from './Footer';
 
 // Material UI
 import { makeStyles } from '@material-ui/core/styles';
-import { Home } from '@material-ui/icons';
 
 // Font family
 require('typeface-roboto');
 
 // Material UI styles
 const useStyles = makeStyles((theme) => ({
-    primaryButton : {
+    primaryButton: {
         color: '#ffffff',
-        backgroundColor: '#1261a0',
+        backgroundColor: theme.palette.primary.main,
         fontFamily: 'inherit',
         "&:hover": {
-            backgroundColor: '#0a4184',
+            backgroundColor: theme.palette.primary.dark,
         },
         "&:disabled": {
             backgroundColor: '#d2d2d2',
@@ -58,72 +53,69 @@ function App() {
 
     return (
         <div className="App">
-            <Store>
-                <Router>
-                    <div id='headerContainer'>
-                        <Header classes={classes} />
-                    </div>
+            <div id='headerContainer'>
+                <Header classes={classes} />
+            </div>
 
-                    <div id='bodyContainer'>
-                        <Switch>
+            <div id='bodyContainer'>
+                <ErrorBoundary>
+                    <Switch>
+                        {/* Refer patient page */}
+                        <PrivateRoute path='/refer' classes={classes} component={ReferPatientpage} />
 
-                            {/* Refer patient page */}
-                            <PrivateRoute path='/refer' classes={classes} component={ReferPatientpage} />
+                        {/* Referrals page */}
+                        <PrivateRoute path='/referrals' classes={classes} component={Referralspage} />
 
-                            {/* Referrals page */}
-                            <PrivateRoute path='/referrals' classes={classes} component={Referralspage} />
+                        {/* Profile page */}
+                        <PrivateRoute path='/profile' classes={classes} component={ProfilePage} />
+                        
+                        {/* Contact page */}
+                        <PrivateRoute path='/contact' classes={classes} component={Contactpage} />
 
-                            {/* Profile page */}
-                            <PrivateRoute path='/profile' classes={classes} component={ProfilePage} />
-                            
-                            {/* Contact page */}
-                            <PrivateRoute path='/contact' classes={classes} component={Contactpage} />
+                        {/* Patient time confirm page */}
+                        <Route path='/patientconfirmation'>
+                            <PatientTimepage classes={classes} />
+                        </Route>
 
-                            {/* Patient time confirm page */}
-                            <Route path='/patientconfirmation'>
-                                <PatientTimepage classes={classes} />
-                            </Route>
+                        {/* Login page */}
+                        <Route path='/signIn'>
+                            <Loginpage classes={classes} />
+                        </Route>
 
-                            {/* Login page */}
-                            <Route path='/signIn'>
-                                <Loginpage classes={classes} />
-                            </Route>
+                        {/* Reset password page */}
+                        <Route path='/resetpass'>
+                            <ResetPasswordPage classes={classes} />
+                        </Route>
 
-                            {/* Reset password page */}
-                            <Route path='/resetpass'>
-                                <ResetPasswordPage classes={classes} />
-                            </Route>
+                        {/* Confirm account page */}
+                        <Route path='/confirm'>
+                            <ConfirmPage classes={classes} />
+                        </Route>
+                        
+                        {/* Sign up page */}
+                        <Route path='/signUp'>
+                            <Registerpage classes={classes} />
+                        </Route>
 
-                            {/* Confirm account page */}
-                            <Route path='/confirm'>
-                                <ConfirmPage classes={classes} />
-                            </Route>
-                            
-                            {/* Sign up page */}
-                            <Route path='/signUp'>
-                                <Registerpage classes={classes} />
-                            </Route>
+                        {/* User page */}
+                        <PrivateRoute path='/home' classes={classes} component={Userpage} />
 
-                            {/* User page */}
-                            <PrivateRoute path='/home' classes={classes} component={Userpage} />
+                        {/* Admin page */}
+                        <PrivateRoute path='/admin' classes={classes} component={Adminpage} />
 
-                            {/* Admim page */}
-                            <PrivateRoute path='/admin' classes={classes} component={Adminpage} />
+                        {/* Homepage, not logged in */}
+                        <Route path='/'>
+                            <Homepage classes={classes} />
+                        </Route>
+                    </Switch>
+                </ErrorBoundary>
+            </div>
 
-                            {/* Homepage, not logged in */}
-                            <Route to='/'>
-                                <Homepage classes={classes} />
-                            </Route>
-                        </Switch>
-                    </div>
-
-                    <div id='footerContainer'>
-                        <Footer />
-                    </div>
-                </Router>
-            </Store>
+            <div id='footerContainer'>
+                <Footer />
+            </div>
         </div>
     );
-};
+}
 
 export default App;
