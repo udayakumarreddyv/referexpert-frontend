@@ -1,16 +1,19 @@
-import { useContext, useEffect, useState } from 'react';
+import { useState } from 'react';
 import './styles/Loginpage.css';
 
-// Global store
-import { Context } from '../store/GlobalStore';
-import { Redirect } from 'react-router-dom';
+// Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { loginUser } from '../store/slices/userSlice';
+
+// Routing
+import { Redirect, useLocation } from 'react-router-dom';
 
 // Components
 import LoginCard from '../components/LoginCard';
 import ForgotPasswordCard from '../components/ForgotPasswordCard';
 
 // Apis
-import { getUserInfo, loginUser, resetPassword } from '../api/userApi';
+import { getUserInfo, loginUser as loginUserApi, resetPassword } from '../api/userApi';
 import { fetchPendingTasks } from '../api/pendingTasksApi';
 
 // Utils
@@ -36,13 +39,14 @@ const useStyles = makeStyles((theme) => ({
 
 function Loginpage({ classes }) {
     const loginpageClasses = useStyles();
-    const [state, dispatch] = useContext(Context);
+    const dispatch = useDispatch();
+    const location = useLocation();
+    
+    // Get authentication state from Redux
+    const { loggedIn, userType } = useSelector(state => state.user);
 
+    // Loading states
     const [loading, updateLoading] = useState(false);
-
-    // Password reset states
-    const [showForgotPasswordCard, updateShowForgotPasswordCard] = useState(false);
-    const [passwordResetSuccess, updatePasswordResetSuccess] = useState(false);
 
     // Input states
     const [email, updateEmail] = useState('');
@@ -53,194 +57,132 @@ function Loginpage({ classes }) {
     const [validatePassword, updateValidatePassword] = useState({ hasError: false, errorMessage: '' });
     const [submitError, updateSubmitError] = useState({ hasError: false, errorMessage: '' });
 
-    // Handle login attempt
-    const handleLogin = async () => {
-    
-        // Clear submit error
+    // View states
+    const [showForgotPasswordView, updateShowForgotPasswordView] = useState(false);
+
+    // Validate the form fields
+    const validateFields = () => {
+        // Clear previous validation
         updateValidateEmail({ hasError: false, errorMessage: '' });
         updateValidatePassword({ hasError: false, errorMessage: '' });
         updateSubmitError({ hasError: false, errorMessage: '' });
-
-        // Validate inputs
+        
         let hasError = false;
-        if (email.trim() === '') {
+        if (!EmailValidator.validate(email)) {
+            updateValidateEmail({ hasError: true, errorMessage: 'Please enter a valid email' });
             hasError = true;
-            updateValidateEmail({ hasError: true, errorMessage: '' });
-        } else if (!EmailValidator.validate(email)) {
-            hasError = true;
-            updateValidateEmail({ hasError: true, errorMessage: 'Please enter a valid email account' });
         };
+        
         if (password.trim() === '') {
+            updateValidatePassword({ hasError: true, errorMessage: 'Please enter your password' });
             hasError = true;
-            updateValidatePassword({ hasError: true, errorMessage: '' });
         };
 
-        // Kill request if caught an validation errors
-        if (hasError) {
-            updateSubmitError({ hasError: true, errorMessage: 'Please fill out both fields' });
-            return;
-        };
+        return !hasError;
+    };
 
+    // Handle submit of login form
+    const handleSubmit = async () => {
         try {
-            // Show loading spinner, disable button
+            // Validate form
+            if (!validateFields()) return;
+
+            // Update loading state
             updateLoading(true);
+            
+            // Send login request
+            const results = await loginUserApi({ email, password });
+            
+            // Make sure results have keys we need
+            const requiredKeys = ['accessToken', 'refreshToken', 'tokenType'];
+            if (!requiredKeys.every((key) => Object.keys(results).includes(key))) {
+                throw new Error('Missing required keys in response');
+            };
 
-            // Make api call to try to validate user credentials
-            const results = await loginUser({ email, password });
+            // Get user info using new access token
+            const userInfo = await getUserInfo({ token: results.accessToken });
+            const pendingTasks = await fetchPendingTasks(results.accessToken);
+            
+            // Update cookies
+            const accessCookie = { token: results.accessToken };
+            const refreshCookie = { token: results.refreshToken };
+            CookieHelper.saveCookie('accessCookie', accessCookie);
+            CookieHelper.saveCookie('refreshCookie', refreshCookie);
+            
+            // Update global state with user info
+            dispatch(loginUser({
+                token: results.accessToken,
+                userEmail: userInfo.email,
+                userType: userInfo.userType,
+                userDetails: userInfo,
+                pendingTasks
+            }));
+        } catch (err) {
+            console.error(err);
+            updateSubmitError({ hasError: true, errorMessage: 'Invalid email or password' });
+            updateLoading(false);
+        };
+    };
 
-            // Invalid login credentials
-            if (results === 'Unauthorized') {
-                updateSubmitError({ hasError: true, errorMessage: 'Invalid username & password combination' });
-                updateLoading(false);
+    // Handle submit of reset password form
+    const handleResetPasswordSubmit = async () => {
+        try {
+            // Validate form
+            if (!EmailValidator.validate(email)) {
+                updateValidateEmail({ hasError: true, errorMessage: 'Please enter a valid email' });
                 return;
             };
 
-            // Make sure we got all creds we need
-            const requiredKeys = ['accessToken', 'refreshToken', 'tokenType'];
-            if (!requiredKeys.every((neededKey) => Object.keys(results).includes(neededKey))) {
-                throw 'Missing a required key in body login of response';
-            };
-
-            // Get user details
-            const { accessToken, refreshToken, tokenType } = results;
-            const userDetails = await getUserInfo({ token: accessToken});
-            const pendingTasks = await fetchPendingTasks(accessToken);
-            const payload = {
-                token: accessToken,
-                userEmail: userDetails.email,
-                userType: userDetails.userType,
-                userDetails,
-                pendingTasks
-            };
-
-            // Save cookie, update state to login user
-            CookieHelper.saveCookie('accessCookie', { token: accessToken });
-            CookieHelper.saveCookie('refreshCookie', { token: refreshToken });
-            dispatch({ type: 'LOGIN_USER', payload });
-
-        } catch (err) {
-            console.log(err);
-            updateLoading(false);
-            updateSubmitError({ hasError: true, errorMessage: 'There was an error while logging in with our server, please try again in a moment' });
-        };
-    };
-
-    // Handle password reset request
-    const handlePasswordReset = async () => {
-
-        // Clear errors
-        updateValidateEmail({ hasError: false, errorMessage: '' });
-        updateSubmitError({ hasError: false, errorMessage: '' });
-
-        // Catch validation errors
-        if (email.trim() === '') {
-            updateValidateEmail({ hasError: true, errorMessage: 'Please fill out field' });
-            updateSubmitError({ hasError: true, errorMessage: '' });
-            return;
-        } else if (!EmailValidator.validate(email)) {
-            updateValidateEmail({ hasError: true, errorMessage: 'Please enter a valid email account' });
-            updateSubmitError({ hasError: true, errorMessage: '' });
-            return;
-        };
-
-        try {
-            // Show loading spinner, disable button
+            // Update loading state
             updateLoading(true);
-
-            // Send api request
+            
+            // Send reset password request
             await resetPassword({ email });
-
-            // TODO: Handle successful password reset
-            updatePasswordResetSuccess(true);
-            updateLoading(false);
+            
+            // Update view state
+            updateShowForgotPasswordView(true);
         } catch (err) {
-            console.log(err);
-            updateSubmitError({ hasError: true, errorMessage: 'There was an error while trying to reset your password, please wait a moment and try again later' });
+            console.error(err);
+            updateSubmitError({ hasError: true, errorMessage: 'Failed to reset password' });
             updateLoading(false);
         };
     };
 
-    // Handle forgot password card view change
-    const handleForgotPasswordViewChange = (view) => {
-        
-        // Clear input and validation states
-        updateEmail('');
-        updatePassword('');
-        updateValidateEmail({ hasError: false, errorMessage: '' });
-        updateValidatePassword({ hasError: false, errorMessage: '' });
-        updateSubmitError({ hasError: false, errorMessage: '' });
-
-        // Show/hide forgot password card
-        updateShowForgotPasswordCard(view);
-    };
-    
-    // Show forgot password card if user clicked forgot password link
-    if (showForgotPasswordCard) {
-        return (
-            <section id='loginpage-body'>
-                <h1 id='loginpage-headerText'>Reset your password</h1>
-
-                <Card elevation={3} classes={{ root: loginpageClasses.loginCard }} justify='space-between'>
-                    
-                    {/* Forgot password card */}
-                    <ForgotPasswordCard
-                        classes={classes}
-
-                        // Input states
-                        updateEmail={updateEmail}
-
-                        // Forgot password view
-                        passwordResetSuccess={passwordResetSuccess}
-                        handleForgotPasswordViewChange={handleForgotPasswordViewChange}
-
-                        // Validation & loading states
-                        validateEmail={validateEmail}
-                        handleSubmit={handlePasswordReset}
-                        submitError={submitError}
-                        loading={loading}
-                    />
-                </Card>
-            </section>
-        );
+    // Redirect if user is already logged in
+    if (loggedIn) {
+        const { from } = location.state || { from: { pathname: userType === 'ADMIN' ? '/admin' : '/home' } };
+        return <Redirect to={from} />;
     };
 
-    // Check if user is logged in, redirect to appropriate page
-    if (state.loggedIn) {
-        if (state.userType === 'ADMIN') {
-            return <Redirect to='/admin' />
-        } else {
-            return <Redirect to='/home' />
-        };
-    };
-
-    // Show login card on default view
     return (
         <section id='loginpage-body'>
-            <h1 id='loginpage-headerText'>Sign in to <span className='logoText'>Cephalad</span></h1>
-
-            <Card elevation={3} classes={{ root: loginpageClasses.loginCard }} justify='space-between'>
-                
-                {/* Login card */}
-                <LoginCard
-                    classes={classes}
-
-                    // Input states
-                    updateEmail={updateEmail}
-                    updatePassword={updatePassword}
-
-                    // Forgot password
-                    handleForgotPasswordViewChange={handleForgotPasswordViewChange}
-
-                    // Validation & loading states
-                    validateEmail={validateEmail}
-                    validatePassword={validatePassword}
-                    handleSubmit={handleLogin}
-                    submitError={submitError}
-                    loading={loading}
-                />
+            <Card classes={{ root: loginpageClasses.loginCard }}>
+                {
+                    showForgotPasswordView
+                    ? <ForgotPasswordCard
+                        updateEmail={updateEmail}
+                        handleForgotPasswordViewChange={updateShowForgotPasswordView}
+                        validateEmail={validateEmail}
+                        handleSubmit={handleResetPasswordSubmit}
+                        submitError={submitError}
+                        loading={loading}
+                        classes={classes}
+                    />
+                    : <LoginCard
+                        updateEmail={updateEmail}
+                        updatePassword={updatePassword}
+                        handleForgotPasswordViewChange={updateShowForgotPasswordView}
+                        validateEmail={validateEmail}
+                        validatePassword={validatePassword}
+                        handleSubmit={handleSubmit}
+                        submitError={submitError}
+                        loading={loading}
+                        classes={classes}
+                    />
+                }
             </Card>
         </section>
     );
-};
+}
 
 export default Loginpage;
